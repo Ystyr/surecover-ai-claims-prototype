@@ -1,0 +1,182 @@
+{
+  "parser": "docling",
+  "parser_version": "2.138.0",
+  "source_file": "delay-letter.pdf",
+  "text_source": "embedded",
+  "pages": [
+    {
+      "page_number": 1,
+      "text": "Fictional demonstration data. Not a SureCover policy document.\n\n## Airline delay notice\n\nPassenger: Jamie Lee Flight SC202 from NRT to SIN on 7 August 2026 was delayed because of a late inbound aircraft. Delay duration: 8 hours."
+    }
+  ],
+  "items": [
+    {
+      "text": "Fictional demonstration data. Not a SureCover policy document.",
+      "label": "text",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.02362,
+        "t": 782.3281,
+        "r": 312.12861999999996,
+        "b": 774.0030999999999,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Airline delay notice",
+      "label": "section_header",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.02362,
+        "t": 760.3541,
+        "r": 203.74362000000002,
+        "b": 745.5541,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Passenger: Jamie Lee Flight SC202 from NRT to SIN on 7 August 2026 was delayed because of a late inbound aircraft. Delay duration: 8 hours.",
+      "label": "text",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.02362,
+        "t": 729.7641,
+        "r": 527.1966199999998,
+        "b": 677.5890999999999,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    }
+  ],
+  "document": {
+    "schema_name": "DoclingDocument",
+    "version": "1.10.0",
+    "name": "delay-letter",
+    "origin": {
+      "mimetype": "application/pdf",
+      "binary_hash": 2008001010080966751,
+      "filename": "delay-letter.pdf"
+    },
+    "furniture": {
+      "self_ref": "#/furniture",
+      "children": [],
+      "content_layer": "furniture",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "body": {
+      "self_ref": "#/body",
+      "children": [
+        {
+          "$ref": "#/texts/0"
+        },
+        {
+          "$ref": "#/texts/1"
+        },
+        {
+          "$ref": "#/texts/2"
+        }
+      ],
+      "content_layer": "body",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "groups": [],
+    "texts": [
+      {
+        "self_ref": "#/texts/0",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 782.3281,
+              "r": 312.12861999999996,
+              "b": 774.0030999999999,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              62
+            ]
+          }
+        ],
+        "orig": "Fictional demonstration data. Not a SureCover policy document.",
+        "text": "Fictional demonstration data. Not a SureCover policy document."
+      },
+      {
+        "self_ref": "#/texts/1",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "section_header",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 760.3541,
+              "r": 203.74362000000002,
+              "b": 745.5541,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              20
+            ]
+          }
+        ],
+        "orig": "Airline delay notice",
+        "text": "Airline delay notice",
+        "level": 1
+      },
+      {
+        "self_ref": "#/texts/2",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 729.7641,
+              "r": 527.1966199999998,
+              "b": 677.5890999999999,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              139
+            ]
+          }
+        ],
+        "orig": "Passenger: Jamie Lee Flight SC202 from NRT to SIN on 7 August 2026 was delayed because of a late inbound aircraft. Delay duration: 8 hours.",
+        "text": "Passenger: Jamie Lee Flight SC202 from NRT to SIN on 7 August 2026 was delayed because of a late inbound aircraft. Delay duration: 8 hours."
+      }
+    ],
+    "pictures": [],
+    "tables": [],
+    "key_value_items": [],
+    "form_items": [],
+    "pages": {
+      "1": {
+        "size": {
+          "width": 595.2756,
+          "height": 841.8898
+        },
+        "page_no": 1
+      }
+    }
+  }
+}

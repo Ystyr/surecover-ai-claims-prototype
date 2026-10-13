@@ -1,0 +1,897 @@
+{
+  "parser": "docling",
+  "parser_version": "2.138.0",
+  "source_file": "claim-form.pdf",
+  "text_source": "embedded",
+  "pages": [
+    {
+      "page_number": 1,
+      "text": "Fictional demonstration data. Not a SureCover policy document.\n\n## Flight-delay claim form\n\nClaimant: Jamie Lee Policy reference: SC-DEMO-1001 Claim type: Flight delay Return to Singapore: Friday 7 August 2026\n\n## Affected flights\n\n| Flight   | Date          | From   | To   |\n|----------|---------------|--------|------|\n| SC101    | 1 August 2026 | SIN    | NRT  |\n| SC202    | 7 August 2026 | NRT    | SIN  |"
+    }
+  ],
+  "items": [
+    {
+      "text": "Fictional demonstration data. Not a SureCover policy document.",
+      "label": "text",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.02362,
+        "t": 782.3281,
+        "r": 312.12861999999996,
+        "b": 774.0030999999999,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Flight-delay claim form",
+      "label": "section_header",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.02362,
+        "t": 760.3541,
+        "r": 232.17561999999998,
+        "b": 745.5541,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Claimant: Jamie Lee Policy reference: SC-DEMO-1001 Claim type: Flight delay Return to Singapore: Friday 7 August 2026",
+      "label": "text",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.02362,
+        "t": 729.7641,
+        "r": 266.1336200000001,
+        "b": 656.5890999999999,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Affected flights",
+      "label": "section_header",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.02362,
+        "t": 634.4256,
+        "r": 129.17262,
+        "b": 624.2506,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Flight",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 105.2126,
+        "t": 232.4642,
+        "r": 135.1546,
+        "b": 242.63920000000007,
+        "coord_origin": "TOPLEFT"
+      }
+    },
+    {
+      "text": "Date",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 204.4252,
+        "t": 232.4642,
+        "r": 228.2622,
+        "b": 242.63920000000007,
+        "coord_origin": "TOPLEFT"
+      }
+    },
+    {
+      "text": "From",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 331.9843,
+        "t": 232.4642,
+        "r": 359.4843,
+        "b": 242.63920000000007,
+        "coord_origin": "TOPLEFT"
+      }
+    },
+    {
+      "text": "To",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 417.0236,
+        "t": 232.4642,
+        "r": 430.4656,
+        "b": 242.63920000000007,
+        "coord_origin": "TOPLEFT"
+      }
+    },
+    {
+      "text": "SC101",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 105.2126,
+        "t": 252.4642,
+        "r": 138.8396,
+        "b": 262.6392000000001,
+        "coord_origin": "TOPLEFT"
+      }
+    },
+    {
+      "text": "1 August 2026",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 204.4252,
+        "t": 252.4642,
+        "r": 275.36420000000004,
+        "b": 262.6392000000001,
+        "coord_origin": "TOPLEFT"
+      }
+    },
+    {
+      "text": "SIN",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 331.9843,
+        "t": 252.4642,
+        "r": 350.3213,
+        "b": 262.6392000000001,
+        "coord_origin": "TOPLEFT"
+      }
+    },
+    {
+      "text": "NRT",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 417.0236,
+        "t": 252.4642,
+        "r": 439.6286,
+        "b": 262.6392000000001,
+        "coord_origin": "TOPLEFT"
+      }
+    },
+    {
+      "text": "SC202",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 105.2126,
+        "t": 272.4642,
+        "r": 138.8396,
+        "b": 282.6392000000001,
+        "coord_origin": "TOPLEFT"
+      }
+    },
+    {
+      "text": "7 August 2026",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 204.4252,
+        "t": 272.4642,
+        "r": 275.36420000000004,
+        "b": 282.6392000000001,
+        "coord_origin": "TOPLEFT"
+      }
+    },
+    {
+      "text": "NRT",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 331.9843,
+        "t": 272.4642,
+        "r": 354.58930000000004,
+        "b": 282.6392000000001,
+        "coord_origin": "TOPLEFT"
+      }
+    },
+    {
+      "text": "SIN",
+      "label": "table_cell",
+      "page_number": 1,
+      "bbox": {
+        "l": 417.0236,
+        "t": 272.4642,
+        "r": 435.3606,
+        "b": 282.6392000000001,
+        "coord_origin": "TOPLEFT"
+      }
+    }
+  ],
+  "document": {
+    "schema_name": "DoclingDocument",
+    "version": "1.10.0",
+    "name": "claim-form",
+    "origin": {
+      "mimetype": "application/pdf",
+      "binary_hash": 8529272665253779840,
+      "filename": "claim-form.pdf"
+    },
+    "furniture": {
+      "self_ref": "#/furniture",
+      "children": [],
+      "content_layer": "furniture",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "body": {
+      "self_ref": "#/body",
+      "children": [
+        {
+          "$ref": "#/texts/0"
+        },
+        {
+          "$ref": "#/texts/1"
+        },
+        {
+          "$ref": "#/texts/2"
+        },
+        {
+          "$ref": "#/texts/3"
+        },
+        {
+          "$ref": "#/tables/0"
+        }
+      ],
+      "content_layer": "body",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "groups": [],
+    "texts": [
+      {
+        "self_ref": "#/texts/0",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 782.3281,
+              "r": 312.12861999999996,
+              "b": 774.0030999999999,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              62
+            ]
+          }
+        ],
+        "orig": "Fictional demonstration data. Not a SureCover policy document.",
+        "text": "Fictional demonstration data. Not a SureCover policy document."
+      },
+      {
+        "self_ref": "#/texts/1",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "section_header",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 760.3541,
+              "r": 232.17561999999998,
+              "b": 745.5541,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              23
+            ]
+          }
+        ],
+        "orig": "Flight-delay claim form",
+        "text": "Flight-delay claim form",
+        "level": 1
+      },
+      {
+        "self_ref": "#/texts/2",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 729.7641,
+              "r": 266.1336200000001,
+              "b": 656.5890999999999,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              117
+            ]
+          }
+        ],
+        "orig": "Claimant: Jamie Lee Policy reference: SC-DEMO-1001 Claim type: Flight delay Return to Singapore: Friday 7 August 2026",
+        "text": "Claimant: Jamie Lee Policy reference: SC-DEMO-1001 Claim type: Flight delay Return to Singapore: Friday 7 August 2026"
+      },
+      {
+        "self_ref": "#/texts/3",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "section_header",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 634.4256,
+              "r": 129.17262,
+              "b": 624.2506,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              16
+            ]
+          }
+        ],
+        "orig": "Affected flights",
+        "text": "Affected flights",
+        "level": 1
+      }
+    ],
+    "pictures": [],
+    "tables": [
+      {
+        "self_ref": "#/tables/0",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "table",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 98.57111023264123,
+              "t": 616.8522246561698,
+              "r": 496.5240376703864,
+              "b": 556.108268447905,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              0
+            ]
+          }
+        ],
+        "captions": [],
+        "references": [],
+        "footnotes": [],
+        "data": {
+          "table_cells": [
+            {
+              "bbox": {
+                "l": 105.2126,
+                "t": 232.4642,
+                "r": 135.1546,
+                "b": 242.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "Flight",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 204.4252,
+                "t": 232.4642,
+                "r": 228.2622,
+                "b": 242.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "Date",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 331.9843,
+                "t": 232.4642,
+                "r": 359.4843,
+                "b": 242.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "From",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 417.0236,
+                "t": 232.4642,
+                "r": 430.4656,
+                "b": 242.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "To",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 105.2126,
+                "t": 252.4642,
+                "r": 138.8396,
+                "b": 262.6392000000001,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "SC101",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 204.4252,
+                "t": 252.4642,
+                "r": 275.36420000000004,
+                "b": 262.6392000000001,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "1 August 2026",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 331.9843,
+                "t": 252.4642,
+                "r": 350.3213,
+                "b": 262.6392000000001,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "SIN",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 417.0236,
+                "t": 252.4642,
+                "r": 439.6286,
+                "b": 262.6392000000001,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "NRT",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 105.2126,
+                "t": 272.4642,
+                "r": 138.8396,
+                "b": 282.6392000000001,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "SC202",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 204.4252,
+                "t": 272.4642,
+                "r": 275.36420000000004,
+                "b": 282.6392000000001,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "7 August 2026",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 331.9843,
+                "t": 272.4642,
+                "r": 354.58930000000004,
+                "b": 282.6392000000001,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "NRT",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 417.0236,
+                "t": 272.4642,
+                "r": 435.3606,
+                "b": 282.6392000000001,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "SIN",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            }
+          ],
+          "num_rows": 3,
+          "num_cols": 4,
+          "orientation": "rot_0",
+          "grid": [
+            [
+              {
+                "bbox": {
+                  "l": 105.2126,
+                  "t": 232.4642,
+                  "r": 135.1546,
+                  "b": 242.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 0,
+                "end_row_offset_idx": 1,
+                "start_col_offset_idx": 0,
+                "end_col_offset_idx": 1,
+                "text": "Flight",
+                "column_header": true,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 204.4252,
+                  "t": 232.4642,
+                  "r": 228.2622,
+                  "b": 242.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 0,
+                "end_row_offset_idx": 1,
+                "start_col_offset_idx": 1,
+                "end_col_offset_idx": 2,
+                "text": "Date",
+                "column_header": true,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 331.9843,
+                  "t": 232.4642,
+                  "r": 359.4843,
+                  "b": 242.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 0,
+                "end_row_offset_idx": 1,
+                "start_col_offset_idx": 2,
+                "end_col_offset_idx": 3,
+                "text": "From",
+                "column_header": true,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 417.0236,
+                  "t": 232.4642,
+                  "r": 430.4656,
+                  "b": 242.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 0,
+                "end_row_offset_idx": 1,
+                "start_col_offset_idx": 3,
+                "end_col_offset_idx": 4,
+                "text": "To",
+                "column_header": true,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              }
+            ],
+            [
+              {
+                "bbox": {
+                  "l": 105.2126,
+                  "t": 252.4642,
+                  "r": 138.8396,
+                  "b": 262.6392000000001,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 1,
+                "end_row_offset_idx": 2,
+                "start_col_offset_idx": 0,
+                "end_col_offset_idx": 1,
+                "text": "SC101",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 204.4252,
+                  "t": 252.4642,
+                  "r": 275.36420000000004,
+                  "b": 262.6392000000001,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 1,
+                "end_row_offset_idx": 2,
+                "start_col_offset_idx": 1,
+                "end_col_offset_idx": 2,
+                "text": "1 August 2026",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 331.9843,
+                  "t": 252.4642,
+                  "r": 350.3213,
+                  "b": 262.6392000000001,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 1,
+                "end_row_offset_idx": 2,
+                "start_col_offset_idx": 2,
+                "end_col_offset_idx": 3,
+                "text": "SIN",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 417.0236,
+                  "t": 252.4642,
+                  "r": 439.6286,
+                  "b": 262.6392000000001,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 1,
+                "end_row_offset_idx": 2,
+                "start_col_offset_idx": 3,
+                "end_col_offset_idx": 4,
+                "text": "NRT",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              }
+            ],
+            [
+              {
+                "bbox": {
+                  "l": 105.2126,
+                  "t": 272.4642,
+                  "r": 138.8396,
+                  "b": 282.6392000000001,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 2,
+                "end_row_offset_idx": 3,
+                "start_col_offset_idx": 0,
+                "end_col_offset_idx": 1,
+                "text": "SC202",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 204.4252,
+                  "t": 272.4642,
+                  "r": 275.36420000000004,
+                  "b": 282.6392000000001,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 2,
+                "end_row_offset_idx": 3,
+                "start_col_offset_idx": 1,
+                "end_col_offset_idx": 2,
+                "text": "7 August 2026",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 331.9843,
+                  "t": 272.4642,
+                  "r": 354.58930000000004,
+                  "b": 282.6392000000001,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 2,
+                "end_row_offset_idx": 3,
+                "start_col_offset_idx": 2,
+                "end_col_offset_idx": 3,
+                "text": "NRT",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 417.0236,
+                  "t": 272.4642,
+                  "r": 435.3606,
+                  "b": 282.6392000000001,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 2,
+                "end_row_offset_idx": 3,
+                "start_col_offset_idx": 3,
+                "end_col_offset_idx": 4,
+                "text": "SIN",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              }
+            ]
+          ]
+        },
+        "annotations": []
+      }
+    ],
+    "key_value_items": [],
+    "form_items": [],
+    "pages": {
+      "1": {
+        "size": {
+          "width": 595.2756,
+          "height": 841.8898
+        },
+        "page_no": 1
+      }
+    }
+  }
+}

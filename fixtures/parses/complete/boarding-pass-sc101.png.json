@@ -1,0 +1,97 @@
+{
+  "parser": "docling",
+  "parser_version": "2.138.0",
+  "source_file": "boarding-pass-sc101.png",
+  "text_source": "ocr",
+  "pages": [
+    {
+      "page_number": 1,
+      "text": "BOARDING PASS Passenger Jamie Lee Flight SC101 Date 1 August 2026 From SIN To NRT"
+    }
+  ],
+  "items": [
+    {
+      "text": "BOARDING PASS Passenger Jamie Lee Flight SC101 Date 1 August 2026 From SIN To NRT",
+      "label": "text",
+      "page_number": 1,
+      "bbox": {
+        "l": 108.92856852213542,
+        "t": 1640.3225911458333,
+        "r": 826.7857259114584,
+        "b": 861.8951822916666,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    }
+  ],
+  "document": {
+    "schema_name": "DoclingDocument",
+    "version": "1.10.0",
+    "name": "boarding-pass-sc101",
+    "origin": {
+      "mimetype": "application/pdf",
+      "binary_hash": 10956563749074323192,
+      "filename": "boarding-pass-sc101.png"
+    },
+    "furniture": {
+      "self_ref": "#/furniture",
+      "children": [],
+      "content_layer": "furniture",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "body": {
+      "self_ref": "#/body",
+      "children": [
+        {
+          "$ref": "#/texts/0"
+        }
+      ],
+      "content_layer": "body",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "groups": [],
+    "texts": [
+      {
+        "self_ref": "#/texts/0",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 108.92856852213542,
+              "t": 1640.3225911458333,
+              "r": 826.7857259114584,
+              "b": 861.8951822916666,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              81
+            ]
+          }
+        ],
+        "orig": "BOARDING PASS Passenger Jamie Lee Flight SC101 Date 1 August 2026 From SIN To NRT",
+        "text": "BOARDING PASS Passenger Jamie Lee Flight SC101 Date 1 August 2026 From SIN To NRT"
+      }
+    ],
+    "pictures": [],
+    "tables": [],
+    "key_value_items": [],
+    "form_items": [],
+    "pages": {
+      "1": {
+        "size": {
+          "width": 1400.0,
+          "height": 1800.0
+        },
+        "page_no": 1
+      }
+    }
+  }
+}

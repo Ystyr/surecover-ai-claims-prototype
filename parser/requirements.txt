@@ -1,0 +1,4 @@
+# Python 3.11 or newer. Installed with Python 3.13.
+docling==2.138.0
+reportlab==5.0.1
+pillow==12.3.0

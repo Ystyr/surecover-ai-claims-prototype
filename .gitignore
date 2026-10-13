@@ -1,0 +1,9 @@
+/Documents/Development/
+
+parser/.venv/
+parser/.cache/
+__pycache__/
+*.py[cod]
+.EasyOCR/
+
+

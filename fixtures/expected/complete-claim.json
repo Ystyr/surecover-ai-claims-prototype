@@ -1,0 +1,149 @@
+{
+  "policy_version": "demo-2026.1",
+  "label": "Fictional demonstration data",
+  "stage": 1,
+  "claim": {
+    "claim_type": "flight_delay",
+    "claimant_name": "Jamie Lee",
+    "policy_reference": "SC-DEMO-1001",
+    "traveler_email": "jamie.lee@example.com",
+    "return_date": "2026-08-07",
+    "return_date_display": "Friday 7 August 2026",
+    "received_at": "2026-08-12T09:00:00+08:00",
+    "received_date": "2026-08-12",
+    "affected_flights_source": "claim_form",
+    "affected_flights": [
+      {
+        "flight_number": "SC101",
+        "departure_date": "2026-08-01",
+        "departure_date_display": "1 August 2026",
+        "origin": "SIN",
+        "destination": "NRT"
+      },
+      {
+        "flight_number": "SC202",
+        "departure_date": "2026-08-07",
+        "departure_date_display": "7 August 2026",
+        "origin": "NRT",
+        "destination": "SIN"
+      }
+    ]
+  },
+  "sources": {
+    "affected_flights": "claim_form",
+    "return_date": "claim_form",
+    "scheduled_itinerary": "planned_trip",
+    "revised_itinerary": "changed_trip",
+    "delay_reason": "airline_letter",
+    "delay_duration": "airline_letter",
+    "conflict_rule": "Keep both values and mark the check unknown. Do not pick a winner."
+  },
+  "matching": {
+    "boarding_pass_key": ["flight_number", "local_departure_date"],
+    "normalization": "Uppercase flight numbers and IATA codes with spaces removed.",
+    "route_mismatch_on_matching_pass": "unknown",
+    "completeness_fail": "No document is established as the required type. Name the missing flight.",
+    "unclassified_file_or_dropped_span": "unknown",
+    "coverage_period": {
+      "start": "2026-07-20",
+      "end": "2026-08-31",
+      "compared_date": "affected_leg_departure_date",
+      "any_leg_outside": "fail",
+      "unreadable_with_no_leg_outside": "unknown"
+    },
+    "return_to_singapore": "form_return_date",
+    "singapore_arrival_disagrees_with_form": "deadline_unknown"
+  },
+  "delay": {
+    "minimum_hours": 6,
+    "minimum_label": "Fictional demo assumption",
+    "complete_claim_hours": 8,
+    "complete_claim_reason": "late inbound aircraft",
+    "parsed_at_or_above_minimum": "pass",
+    "parsed_below_minimum": "fail",
+    "under_minimum_test_hours": 3,
+    "unparseable": "unknown",
+    "noul_at_or_below_0_25": "unknown",
+    "any_stated_reason_satisfies_assignment": true
+  },
+  "claim_type": {
+    "mailbox": "flight_delay",
+    "pass": "A document is classified as a delay letter.",
+    "unknown": "The delay letter is missing, labeled other, or below the 0.60 gate.",
+    "fail": "A readable field names a different claim type."
+  },
+  "filing": {
+    "calendar": "Asia/Singapore",
+    "return_date_is_day_zero": true,
+    "holiday_source": "https://www.mom.gov.sg/newsroom/press-releases/2025/0616-public-holidays-for-2026",
+    "holiday_note": "National Day is Sunday 9 August 2026. Monday 10 August 2026 is the gazetted public holiday in lieu.",
+    "public_holidays_2026": [
+      {"date": "2026-01-01", "name": "New Year's Day"},
+      {"date": "2026-02-17", "name": "Chinese New Year"},
+      {"date": "2026-02-18", "name": "Chinese New Year"},
+      {"date": "2026-03-21", "name": "Hari Raya Puasa", "note": "Subject to confirmation in the 16 June 2025 MOM list."},
+      {"date": "2026-04-03", "name": "Good Friday"},
+      {"date": "2026-05-01", "name": "Labour Day"},
+      {"date": "2026-05-27", "name": "Hari Raya Haji", "note": "Subject to confirmation in the 16 June 2025 MOM list."},
+      {"date": "2026-05-31", "name": "Vesak Day"},
+      {"date": "2026-06-01", "name": "Vesak Day observed"},
+      {"date": "2026-08-09", "name": "National Day"},
+      {"date": "2026-08-10", "name": "National Day observed"},
+      {"date": "2026-11-08", "name": "Deepavali"},
+      {"date": "2026-11-09", "name": "Deepavali observed"},
+      {"date": "2026-12-25", "name": "Christmas Day"}
+    ],
+    "complete_claim_working_day_1": "2026-08-11",
+    "complete_claim_working_day_2": "2026-08-12",
+    "working_day_30": "2026-09-21",
+    "late_sample_date": "2026-09-22"
+  },
+  "bundles": {
+    "talk": [
+      "complete two-flight claim",
+      "missing 7 August 2026 NRT-SIN boarding pass",
+      "conflict: form return date disagrees with the Singapore arrival"
+    ],
+    "automated_tests": [
+      "image-only unreadable input",
+      "late filing on 2026-09-22",
+      "parsed delay of 3 hours",
+      "unparseable duration",
+      "departure outside the seeded coverage period",
+      "missing policy record"
+    ],
+    "live_jev_calls_use_synthetic_files_only": true
+  },
+  "sample_documents": [
+    {
+      "file": "claim-form.pdf",
+      "text_source": "embedded",
+      "contains": ["Jamie Lee", "SC-DEMO-1001", "Flight delay", "7 August 2026", "SC101", "SC202", "SIN", "NRT"]
+    },
+    {
+      "file": "scheduled-itinerary.pdf",
+      "text_source": "embedded",
+      "contains": ["Scheduled itinerary", "SC101", "1 August 2026", "SIN", "NRT", "SC202", "7 August 2026"]
+    },
+    {
+      "file": "revised-itinerary.pdf",
+      "text_source": "embedded",
+      "contains": ["Revised itinerary", "SC101", "1 August 2026", "SIN", "NRT", "SC202", "7 August 2026"]
+    },
+    {
+      "file": "boarding-pass-sc101.pdf",
+      "text_source": "embedded",
+      "contains": ["Jamie Lee", "SC101", "1 August 2026", "SIN", "NRT"]
+    },
+    {
+      "file": "delay-letter.pdf",
+      "text_source": "embedded",
+      "contains": ["Jamie Lee", "SC202", "7 August 2026", "NRT", "SIN", "late inbound aircraft", "8 hours"]
+    },
+    {
+      "file": "boarding-pass-sc101.png",
+      "text_source": "ocr",
+      "contains": ["Jamie Lee", "SC101", "1 August 2026", "SIN", "NRT"]
+    }
+  ]
+}

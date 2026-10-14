@@ -58,7 +58,7 @@ async function main() {
     .from("claim_documents")
     .select("id, source_file, storage_path, text_source, media_type")
   if (documents.error) throw documents.error
-  require(documents.data.length === 6, `officer A saw ${documents.data.length} documents`)
+  require(documents.data.length === 7, `officer A saw ${documents.data.length} documents`)
 
   const pages = await officerA.from("document_pages").select("text_source, text")
   if (pages.error) throw pages.error
@@ -106,7 +106,7 @@ async function main() {
   if (policy.error) throw policy.error
   require(policy.data.length === 1, "the shared policy row was not readable")
 
-  console.log("officer A can read CLM-DEMO-1001 and all six files match the fixtures")
+  console.log("officer A can read CLM-DEMO-1001 and all seven files match the fixtures")
   console.log("officer B receives no claim rows and no file bytes")
 }
 

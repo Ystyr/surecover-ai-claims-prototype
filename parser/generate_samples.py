@@ -119,7 +119,13 @@ def write_itinerary(path: Path, title: str) -> None:
     )
 
 
-def write_boarding_pass(path: Path) -> None:
+def write_boarding_pass(
+    path: Path,
+    flight: str = "SC101",
+    date: str = "1 August 2026",
+    origin: str = "SIN",
+    destination: str = "NRT",
+) -> None:
     style = styles()
     write_pdf(
         path,
@@ -127,10 +133,10 @@ def write_boarding_pass(path: Path) -> None:
             Paragraph(BANNER, style["banner"]),
             Paragraph("Boarding pass", style["title"]),
             Paragraph("Passenger: Jamie Lee", style["body"]),
-            Paragraph("Flight: SC101", style["body"]),
-            Paragraph("Date: 1 August 2026", style["body"]),
-            Paragraph("From: SIN", style["body"]),
-            Paragraph("To: NRT", style["body"]),
+            Paragraph(f"Flight: {flight}", style["body"]),
+            Paragraph(f"Date: {date}", style["body"]),
+            Paragraph(f"From: {origin}", style["body"]),
+            Paragraph(f"To: {destination}", style["body"]),
         ],
     )
 
@@ -215,6 +221,13 @@ def main() -> None:
     write_itinerary(OUT / "scheduled-itinerary.pdf", "Scheduled itinerary")
     write_itinerary(OUT / "revised-itinerary.pdf", "Revised itinerary")
     write_boarding_pass(OUT / "boarding-pass-sc101.pdf")
+    write_boarding_pass(
+        OUT / "boarding-pass-sc202.pdf",
+        flight="SC202",
+        date="7 August 2026",
+        origin="NRT",
+        destination="SIN",
+    )
     write_delay_letter(OUT / "delay-letter.pdf")
     boarding_pass_png = OUT / "boarding-pass-sc101.png"
     # photograph_evidence.py replaces this file with a ComfyUI photo. Do not clobber it.

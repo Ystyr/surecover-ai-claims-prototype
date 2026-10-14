@@ -1,0 +1,232 @@
+{
+  "parser": "docling",
+  "parser_version": "2.138.0",
+  "source_file": "boarding-pass-sc202.pdf",
+  "media_type": "application/pdf",
+  "text_source": "embedded",
+  "pages": [
+    {
+      "page_number": 1,
+      "text": "Fictional demonstration data. Not a SureCover policy document.\nBoarding pass\nPassenger: Jamie Lee\nFlight: SC202\nDate: 7 August 2026\nFrom: NRT\nTo: SIN",
+      "text_source": "embedded"
+    }
+  ],
+  "items": [
+    {
+      "text": "Fictional demonstration data. Not a SureCover policy document.",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.761619567871094,
+        "t": 782.4180908203125,
+        "r": 311.3455810546875,
+        "b": 773.985107421875,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Boarding pass",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 58.191619873046875,
+        "t": 760.3220825195312,
+        "r": 167.3916015625,
+        "b": 745.5220947265625,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Passenger: Jamie Lee",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.87062072753906,
+        "t": 729.7420654296875,
+        "r": 166.01161193847656,
+        "b": 719.5670776367188,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Flight: SC202",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.925621032714844,
+        "t": 708.8740844726562,
+        "r": 123.07862091064453,
+        "b": 698.5670776367188,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Date: 7 August 2026",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.87062072753906,
+        "t": 687.7750854492188,
+        "r": 156.8046112060547,
+        "b": 677.5670776367188,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "From: NRT",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.925621032714844,
+        "t": 666.7420654296875,
+        "r": 111.1876220703125,
+        "b": 658.7451171875,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "To: SIN",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.27661895751953,
+        "t": 645.8740844726562,
+        "r": 93.41162109375,
+        "b": 637.7451171875,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    }
+  ],
+  "document": {
+    "schema_name": "DoclingDocument",
+    "version": "1.10.0",
+    "name": "boarding-pass-sc202",
+    "origin": {
+      "mimetype": "application/pdf",
+      "binary_hash": "3969359662083858813",
+      "filename": "boarding-pass-sc202.pdf"
+    },
+    "furniture": {
+      "self_ref": "#/furniture",
+      "children": [],
+      "content_layer": "furniture",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "body": {
+      "self_ref": "#/body",
+      "children": [
+        {
+          "$ref": "#/texts/0"
+        },
+        {
+          "$ref": "#/texts/1"
+        },
+        {
+          "$ref": "#/texts/2"
+        }
+      ],
+      "content_layer": "body",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "groups": [],
+    "texts": [
+      {
+        "self_ref": "#/texts/0",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 782.3281,
+              "r": 312.12861999999996,
+              "b": 774.0030999999999,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              62
+            ]
+          }
+        ],
+        "orig": "Fictional demonstration data. Not a SureCover policy document.",
+        "text": "Fictional demonstration data. Not a SureCover policy document."
+      },
+      {
+        "self_ref": "#/texts/1",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "section_header",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 760.3541,
+              "r": 168.15962,
+              "b": 745.5541,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              13
+            ]
+          }
+        ],
+        "orig": "Boarding pass",
+        "text": "Boarding pass",
+        "level": 1
+      },
+      {
+        "self_ref": "#/texts/2",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 729.7641,
+              "r": 166.46262000000002,
+              "b": 635.5890999999999,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              72
+            ]
+          }
+        ],
+        "orig": "Passenger: Jamie Lee Flight: SC202 Date: 7 August 2026 From: NRT To: SIN",
+        "text": "Passenger: Jamie Lee Flight: SC202 Date: 7 August 2026 From: NRT To: SIN"
+      }
+    ],
+    "pictures": [],
+    "tables": [],
+    "key_value_items": [],
+    "form_items": [],
+    "pages": {
+      "1": {
+        "size": {
+          "width": 595.2756,
+          "height": 841.8898
+        },
+        "page_no": 1
+      }
+    }
+  }
+}

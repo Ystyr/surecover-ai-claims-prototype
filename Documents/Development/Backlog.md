@@ -10,8 +10,8 @@ A one-week, risk-first backlog for the interview prototype. Reorder as implement
 - [ ] Implement Resend inbound email/webhook processing for the PDF claim form and supporting documents, plus deterministic outbound acknowledgments, status updates, and information-request replies. Persist provider ids/status and audit events; retain a simulation adapter for local use.
 - [ ] Evaluate priority model Jev on labeled synthetic examples for document classification, semantic support questions, and evidence-span selection; record correctness, abstentions, grounding, and usage. Keep the fixture adapter for deterministic rehearsal.
 - [ ] Classify document types and extract structured facts; preserve provenance and represent missing/ambiguous values explicitly.
-- [ ] Implement deterministic completeness, deadline, coverage-period, claim-type, and consistency checks with `pass` / `fail` / `unknown` outcomes.
-- [ ] Build the officer-centered queue and review workbench with actionable, evidence-linked findings and next actions.
+- [x] Implement deterministic completeness, deadline, coverage-period, claim-type, consistency, and delay checks with `pass` / `fail` / `unknown` outcomes. `npm run test:checks` covers the locked cases. `npm run assess:claim` stores the passing assessment for `CLM-DEMO-1001`, and `npm run verify:checks` shows it to officer A only.
+- [ ] Build the officer-centered queue and review workbench with actionable, evidence-linked findings and next actions. This is the next build. It reads the latest stored assessment for `CLM-DEMO-1001`. Resend, a live Jev call, fact correction, and recording approve, reject, or request stay later.
 - [ ] Allow an authorized officer to correct an extracted fact, preserve the original output and provenance, record the correction, and recompute affected checks.
 - [ ] Support operator decisions: approve, reject, or request more information; record decision notes and timestamp.
 - [ ] Prepare the complete, missing-document, and conflict/unreadable demo cases.

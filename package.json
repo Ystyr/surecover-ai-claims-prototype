@@ -3,8 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:checks": "node --test checks/assess.test.mjs",
     "seed:claim": "node supabase/seed/seed-claim.mjs",
-    "verify:access": "node supabase/seed/verify-access.mjs"
+    "assess:claim": "node supabase/seed/assess-claim.mjs",
+    "verify:access": "node supabase/seed/verify-access.mjs",
+    "verify:checks": "node supabase/seed/verify-checks.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3"

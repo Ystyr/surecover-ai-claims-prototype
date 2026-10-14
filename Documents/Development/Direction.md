@@ -57,6 +57,8 @@ The same policy version freezes the filing convention. Dates are Asia/Singapore 
 
 Received time, return date, flight dates, and the holiday list are scenario values stored with the claim and the policy version. Deadline, coverage, and delay checks are a function of those stored values. Opening the same claim on another calendar day leaves the result unchanged.
 
+`checks/assess.mjs` is that function. Seeded document roles come from the filename and are recorded as adapter `fixture`. Quotes are items on `quotable_pages`. `npm run assess:claim` inserts an `assessments` row and six `policy_checks` rows, and a later run keeps the previous assessment. The stored complete claim passes all six. Its filing detail is the 7 August 2026 return, working day 2, and deadline 21 September 2026. The `delay` check holds the parsed duration. Eight hours passes the fictional 6-hour rule. Three hours fails that check. An unparseable duration is `unknown`. Completeness stays the document check. A missing required document fails completeness even when a flight date on the form cannot be read. Consistency is `unknown` when two readable values disagree. A revised itinerary with no Singapore arrival leaves the filing check on the form return date. `npm run verify:checks` reads those rows with the assigned officer's JWT. The other officer receives none.
+
 ## Context and evidence
 
 Persist structured workflow state as the source of truth rather than relying on a long prompt history. Keep separate references for:

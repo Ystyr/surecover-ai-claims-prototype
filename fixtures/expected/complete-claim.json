@@ -140,6 +140,12 @@
       "whole_items": ["Passenger: Jamie Lee", "Flight: SC101", "Date: 1 August 2026", "From: SIN", "To: NRT"]
     },
     {
+      "file": "boarding-pass-sc202.pdf",
+      "text_source": "embedded",
+      "contains": ["Jamie Lee", "SC202", "7 August 2026", "NRT", "SIN"],
+      "whole_items": ["Passenger: Jamie Lee", "Flight: SC202", "Date: 7 August 2026", "From: NRT", "To: SIN"]
+    },
+    {
       "file": "delay-letter.pdf",
       "text_source": "embedded",
       "contains": ["Jamie Lee", "SC202", "7 August 2026", "NRT", "SIN", "late inbound aircraft", "8 hours"],

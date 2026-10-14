@@ -2,23 +2,168 @@
   "parser": "docling",
   "parser_version": "2.138.0",
   "source_file": "boarding-pass-sc101.png",
+  "media_type": "image/png",
   "text_source": "ocr",
   "pages": [
     {
       "page_number": 1,
-      "text": "BOARDING PASS Passenger Jamie Lee Flight SC101 Date 1 August 2026 From SIN To NRT"
+      "text": "SC AIR\nBOARDING PASS\nPASSENGER\nJamie Lee\nFLIGHT\nDATE\nSC101\n1 August 2026\nFROM\nTO\nSIN\nNRT\nFictional demonstration data. Not a SureCover policy document."
     }
   ],
   "items": [
     {
-      "text": "BOARDING PASS Passenger Jamie Lee Flight SC101 Date 1 August 2026 From SIN To NRT",
-      "label": "text",
+      "text": "SC AIR",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 108.92856852213542,
-        "t": 1640.3225911458333,
-        "r": 826.7857259114584,
-        "b": 861.8951822916666,
+        "l": 168.0,
+        "t": 1652.0,
+        "r": 438.0,
+        "b": 1562.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "BOARDING PASS",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 170.0,
+        "t": 1560.0,
+        "r": 591.0,
+        "b": 1489.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "PASSENGER",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 166.0,
+        "t": 1371.0,
+        "r": 373.0,
+        "b": 1325.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Jamie Lee",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 156.0,
+        "t": 1321.0,
+        "r": 507.0,
+        "b": 1233.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "FLIGHT",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 155.0,
+        "t": 1141.0,
+        "r": 284.0,
+        "b": 1097.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "DATE",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 702.0,
+        "t": 1120.0,
+        "r": 801.0,
+        "b": 1074.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "SC101",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 148.0,
+        "t": 1094.0,
+        "r": 371.0,
+        "b": 1008.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "1 August 2026",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 694.0,
+        "t": 1071.0,
+        "r": 1183.0,
+        "b": 964.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "FROM",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 142.0,
+        "t": 885.0,
+        "r": 254.0,
+        "b": 837.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "TO",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 693.0,
+        "t": 858.0,
+        "r": 748.0,
+        "b": 818.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "SIN",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 135.0,
+        "t": 835.0,
+        "r": 272.0,
+        "b": 750.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "NRT",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 684.0,
+        "t": 810.0,
+        "r": 847.0,
+        "b": 728.0,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Fictional demonstration data. Not a SureCover policy document.",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 121.0,
+        "t": 343.0,
+        "r": 858.0,
+        "b": 276.0,
         "coord_origin": "BOTTOMLEFT"
       }
     }
@@ -29,7 +174,7 @@
     "name": "boarding-pass-sc101",
     "origin": {
       "mimetype": "application/pdf",
-      "binary_hash": 10956563749074323192,
+      "binary_hash": "3609575709524282878",
       "filename": "boarding-pass-sc101.png"
     },
     "furniture": {
@@ -44,16 +189,95 @@
       "children": [
         {
           "$ref": "#/texts/0"
+        },
+        {
+          "$ref": "#/texts/1"
+        },
+        {
+          "$ref": "#/texts/2"
+        },
+        {
+          "$ref": "#/groups/0"
+        },
+        {
+          "$ref": "#/texts/5"
+        },
+        {
+          "$ref": "#/texts/6"
+        },
+        {
+          "$ref": "#/texts/7"
+        },
+        {
+          "$ref": "#/texts/8"
+        },
+        {
+          "$ref": "#/texts/9"
+        },
+        {
+          "$ref": "#/texts/10"
+        },
+        {
+          "$ref": "#/pictures/0"
+        },
+        {
+          "$ref": "#/texts/11"
         }
       ],
       "content_layer": "body",
       "name": "_root_",
       "label": "unspecified"
     },
-    "groups": [],
+    "groups": [
+      {
+        "self_ref": "#/groups/0",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [
+          {
+            "$ref": "#/texts/3"
+          },
+          {
+            "$ref": "#/texts/4"
+          }
+        ],
+        "content_layer": "body",
+        "name": "group",
+        "label": "key_value_area"
+      }
+    ],
     "texts": [
       {
         "self_ref": "#/texts/0",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "section_header",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 168.75,
+              "t": 1653.9314575195312,
+              "r": 588.3928629557291,
+              "b": 1488.8104858398438,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              20
+            ]
+          }
+        ],
+        "orig": "SC AIR BOARDING PASS",
+        "text": "SC AIR BOARDING PASS",
+        "level": 1
+      },
+      {
+        "self_ref": "#/texts/1",
         "parent": {
           "$ref": "#/body"
         },
@@ -64,23 +288,324 @@
           {
             "page_no": 1,
             "bbox": {
-              "l": 108.92856852213542,
-              "t": 1640.3225911458333,
-              "r": 826.7857259114584,
-              "b": 861.8951822916666,
+              "l": 166.0714314778646,
+              "t": 1370.866943359375,
+              "r": 372.3214518229167,
+              "b": 1324.5968017578125,
               "coord_origin": "BOTTOMLEFT"
             },
             "charspan": [
               0,
-              81
+              9
             ]
           }
         ],
-        "orig": "BOARDING PASS Passenger Jamie Lee Flight SC101 Date 1 August 2026 From SIN To NRT",
-        "text": "BOARDING PASS Passenger Jamie Lee Flight SC101 Date 1 August 2026 From SIN To NRT"
+        "orig": "PASSENGER",
+        "text": "PASSENGER"
+      },
+      {
+        "self_ref": "#/texts/2",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "section_header",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 160.71428426106772,
+              "t": 1320.0605061848958,
+              "r": 503.5714518229167,
+              "b": 1232.0564778645835,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              9
+            ]
+          }
+        ],
+        "orig": "Jamie Lee",
+        "text": "Jamie Lee",
+        "level": 1
+      },
+      {
+        "self_ref": "#/texts/3",
+        "parent": {
+          "$ref": "#/groups/0"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 157.14286295572916,
+              "t": 1140.4234212239585,
+              "r": 281.25,
+              "b": 1099.5967610677085,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              6
+            ]
+          }
+        ],
+        "orig": "FLIGHT",
+        "text": "FLIGHT"
+      },
+      {
+        "self_ref": "#/texts/4",
+        "parent": {
+          "$ref": "#/groups/0"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 151.78571573893228,
+              "t": 1091.4314778645835,
+              "r": 366.9642740885417,
+              "b": 1010.685546875,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              5
+            ]
+          }
+        ],
+        "orig": "SC101",
+        "text": "SC101"
+      },
+      {
+        "self_ref": "#/texts/5",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 144.64286295572916,
+              "t": 880.9475911458334,
+              "r": 250.89286295572916,
+              "b": 840.1210123697916,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              4
+            ]
+          }
+        ],
+        "orig": "FROM",
+        "text": "FROM"
+      },
+      {
+        "self_ref": "#/texts/6",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 139.28571573893228,
+              "t": 832.8629557291666,
+              "r": 267.8571370442708,
+              "b": 751.209716796875,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              3
+            ]
+          }
+        ],
+        "orig": "SIN",
+        "text": "SIN"
+      },
+      {
+        "self_ref": "#/texts/7",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 704.4642740885416,
+              "t": 1117.741943359375,
+              "r": 799.107177734375,
+              "b": 1076.9153645833335,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              4
+            ]
+          }
+        ],
+        "orig": "DATE",
+        "text": "DATE"
+      },
+      {
+        "self_ref": "#/texts/8",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 699.107177734375,
+              "t": 1070.5645345052085,
+              "r": 1180.357177734375,
+              "b": 962.600830078125,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              13
+            ]
+          }
+        ],
+        "orig": "1 August 2026",
+        "text": "1 August 2026"
+      },
+      {
+        "self_ref": "#/texts/9",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 692.857177734375,
+              "t": 857.35888671875,
+              "r": 748.2142740885416,
+              "b": 818.3468424479166,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              2
+            ]
+          }
+        ],
+        "orig": "TO",
+        "text": "TO"
+      },
+      {
+        "self_ref": "#/texts/10",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 686.607177734375,
+              "t": 809.2742513020834,
+              "r": 844.6429036458334,
+              "b": 728.5282389322917,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              3
+            ]
+          }
+        ],
+        "orig": "NRT",
+        "text": "NRT"
+      },
+      {
+        "self_ref": "#/texts/11",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 123.2142842610677,
+              "t": 341.12906901041674,
+              "r": 855.357177734375,
+              "b": 278.5283203125,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              62
+            ]
+          }
+        ],
+        "orig": "Fictional demonstration data. Not a SureCover policy document.",
+        "text": "Fictional demonstration data. Not a SureCover policy document."
       }
     ],
-    "pictures": [],
+    "pictures": [
+      {
+        "self_ref": "#/pictures/0",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "picture",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 128.40660095214844,
+              "t": 583.7802734375,
+              "r": 1237.393310546875,
+              "b": 370.0291748046875,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              0
+            ]
+          }
+        ],
+        "captions": [],
+        "references": [],
+        "footnotes": [],
+        "annotations": []
+      }
+    ],
     "tables": [],
     "key_value_items": [],
     "form_items": [],

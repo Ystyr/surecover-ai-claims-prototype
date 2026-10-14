@@ -2,204 +2,241 @@
   "parser": "docling",
   "parser_version": "2.138.0",
   "source_file": "claim-form.pdf",
+  "media_type": "application/pdf",
   "text_source": "embedded",
   "pages": [
     {
       "page_number": 1,
-      "text": "Fictional demonstration data. Not a SureCover policy document.\n\n## Flight-delay claim form\n\nClaimant: Jamie Lee Policy reference: SC-DEMO-1001 Claim type: Flight delay Return to Singapore: Friday 7 August 2026\n\n## Affected flights\n\n| Flight   | Date          | From   | To   |\n|----------|---------------|--------|------|\n| SC101    | 1 August 2026 | SIN    | NRT  |\n| SC202    | 7 August 2026 | NRT    | SIN  |"
+      "text": "Fictional demonstration data. Not a SureCover policy document.\nFlight-delay claim form\nClaimant: Jamie Lee\nPolicy reference: SC-DEMO-1001\nClaim type: Flight delay\nReturn to Singapore: Friday 7 August 2026\nAffected flights\nFlight\nDate\nFrom\nTo\nSC101\n1 August 2026\nSIN\nNRT\nSC202\n7 August 2026\nNRT\nSIN"
     }
   ],
   "items": [
     {
       "text": "Fictional demonstration data. Not a SureCover policy document.",
-      "label": "text",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 57.02362,
-        "t": 782.3281,
-        "r": 312.12861999999996,
-        "b": 774.0030999999999,
+        "l": 57.761619567871094,
+        "t": 782.4180908203125,
+        "r": 311.3455810546875,
+        "b": 773.985107421875,
         "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "Flight-delay claim form",
-      "label": "section_header",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 57.02362,
-        "t": 760.3541,
-        "r": 232.17561999999998,
-        "b": 745.5541,
+        "l": 58.207618713378906,
+        "t": 760.5140991210938,
+        "r": 231.13560485839844,
+        "b": 745.5220947265625,
         "coord_origin": "BOTTOMLEFT"
       }
     },
     {
-      "text": "Claimant: Jamie Lee Policy reference: SC-DEMO-1001 Claim type: Flight delay Return to Singapore: Friday 7 August 2026",
-      "label": "text",
+      "text": "Claimant: Jamie Lee",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 57.02362,
-        "t": 729.7641,
-        "r": 266.1336200000001,
-        "b": 656.5890999999999,
+        "l": 57.5736198425293,
+        "t": 729.8740844726562,
+        "r": 156.8266143798828,
+        "b": 721.7451171875,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Policy reference: SC-DEMO-1001",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.87062072753906,
+        "t": 708.8850708007812,
+        "r": 220.05459594726562,
+        "b": 698.5670776367188,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Claim type: Flight delay",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.5736198425293,
+        "t": 687.8740844726562,
+        "r": 171.23660278320312,
+        "b": 677.5670776367188,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Return to Singapore: Friday 7 August 2026",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.89262008666992,
+        "t": 666.8740844726562,
+        "r": 265.6275939941406,
+        "b": 656.5670776367188,
         "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "Affected flights",
-      "label": "section_header",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 57.02362,
-        "t": 634.4256,
-        "r": 129.17262,
-        "b": 624.2506,
+        "l": 57.02362060546875,
+        "t": 634.5355834960938,
+        "r": 128.74362182617188,
+        "b": 624.2285766601562,
         "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "Flight",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 105.2126,
-        "t": 232.4642,
-        "r": 135.1546,
-        "b": 242.63920000000007,
-        "coord_origin": "TOPLEFT"
+        "l": 106.02660369873047,
+        "t": 609.403564453125,
+        "r": 135.02259826660156,
+        "b": 599.2285766601562,
+        "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "Date",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 204.4252,
-        "t": 232.4642,
-        "r": 228.2622,
-        "b": 242.63920000000007,
-        "coord_origin": "TOPLEFT"
+        "l": 205.2172088623047,
+        "t": 609.403564453125,
+        "r": 227.85519409179688,
+        "b": 601.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "From",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 331.9843,
-        "t": 232.4642,
-        "r": 359.4843,
-        "b": 242.63920000000007,
-        "coord_origin": "TOPLEFT"
+        "l": 332.7983093261719,
+        "t": 609.403564453125,
+        "r": 358.7693176269531,
+        "b": 601.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "To",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 417.0236,
-        "t": 232.4642,
-        "r": 430.4656,
-        "b": 242.63920000000007,
-        "coord_origin": "TOPLEFT"
+        "l": 417.2546081542969,
+        "t": 609.403564453125,
+        "r": 430.0696105957031,
+        "b": 601.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "SC101",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 105.2126,
-        "t": 252.4642,
-        "r": 138.8396,
-        "b": 262.6392000000001,
-        "coord_origin": "TOPLEFT"
+        "l": 105.70760345458984,
+        "t": 589.5355834960938,
+        "r": 136.82659912109375,
+        "b": 581.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "1 August 2026",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 204.4252,
-        "t": 252.4642,
-        "r": 275.36420000000004,
-        "b": 262.6392000000001,
-        "coord_origin": "TOPLEFT"
+        "l": 205.62420654296875,
+        "t": 589.4365844726562,
+        "r": 274.85821533203125,
+        "b": 579.2285766601562,
+        "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "SIN",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 331.9843,
-        "t": 252.4642,
-        "r": 350.3213,
-        "b": 262.6392000000001,
-        "coord_origin": "TOPLEFT"
+        "l": 332.47930908203125,
+        "t": 589.5355834960938,
+        "r": 349.4193115234375,
+        "b": 581.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "NRT",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 417.0236,
-        "t": 252.4642,
-        "r": 439.6286,
-        "b": 262.6392000000001,
-        "coord_origin": "TOPLEFT"
+        "l": 417.859619140625,
+        "t": 589.403564453125,
+        "r": 439.40863037109375,
+        "b": 581.527587890625,
+        "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "SC202",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 105.2126,
-        "t": 272.4642,
-        "r": 138.8396,
-        "b": 282.6392000000001,
-        "coord_origin": "TOPLEFT"
+        "l": 105.70760345458984,
+        "t": 569.5355834960938,
+        "r": 138.25660705566406,
+        "b": 561.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "7 August 2026",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 204.4252,
-        "t": 272.4642,
-        "r": 275.36420000000004,
-        "b": 282.6392000000001,
-        "coord_origin": "TOPLEFT"
+        "l": 204.94219970703125,
+        "t": 569.4365844726562,
+        "r": 274.85821533203125,
+        "b": 559.2285766601562,
+        "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "NRT",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 331.9843,
-        "t": 272.4642,
-        "r": 354.58930000000004,
-        "b": 282.6392000000001,
-        "coord_origin": "TOPLEFT"
+        "l": 332.8203125,
+        "t": 569.403564453125,
+        "r": 354.36932373046875,
+        "b": 561.527587890625,
+        "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "SIN",
-      "label": "table_cell",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 417.0236,
-        "t": 272.4642,
-        "r": 435.3606,
-        "b": 282.6392000000001,
-        "coord_origin": "TOPLEFT"
+        "l": 417.51861572265625,
+        "t": 569.5355834960938,
+        "r": 434.4586181640625,
+        "b": 561.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
       }
     }
   ],
@@ -209,7 +246,7 @@
     "name": "claim-form",
     "origin": {
       "mimetype": "application/pdf",
-      "binary_hash": 8529272665253779840,
+      "binary_hash": "8088933738498409080",
       "filename": "claim-form.pdf"
     },
     "furniture": {

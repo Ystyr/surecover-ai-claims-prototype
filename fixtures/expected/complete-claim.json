@@ -118,32 +118,38 @@
     {
       "file": "claim-form.pdf",
       "text_source": "embedded",
-      "contains": ["Jamie Lee", "SC-DEMO-1001", "Flight delay", "7 August 2026", "SC101", "SC202", "SIN", "NRT"]
+      "contains": ["Jamie Lee", "SC-DEMO-1001", "Flight delay", "7 August 2026", "SC101", "SC202", "SIN", "NRT"],
+      "whole_items": ["Claimant: Jamie Lee", "Policy reference: SC-DEMO-1001", "Claim type: Flight delay", "Return to Singapore: Friday 7 August 2026", "SC101", "1 August 2026", "SC202", "7 August 2026"]
     },
     {
       "file": "scheduled-itinerary.pdf",
       "text_source": "embedded",
-      "contains": ["Scheduled itinerary", "SC101", "1 August 2026", "SIN", "NRT", "SC202", "7 August 2026"]
+      "contains": ["Scheduled itinerary", "SC101", "1 August 2026", "SIN", "NRT", "SC202", "7 August 2026"],
+      "whole_items": ["Scheduled itinerary", "SC101", "1 August 2026", "SC202", "7 August 2026"]
     },
     {
       "file": "revised-itinerary.pdf",
       "text_source": "embedded",
-      "contains": ["Revised itinerary", "SC101", "1 August 2026", "SIN", "NRT", "SC202", "7 August 2026"]
+      "contains": ["Revised itinerary", "SC101", "1 August 2026", "SIN", "NRT", "SC202", "7 August 2026"],
+      "whole_items": ["Revised itinerary", "SC101", "1 August 2026", "SC202", "7 August 2026"]
     },
     {
       "file": "boarding-pass-sc101.pdf",
       "text_source": "embedded",
-      "contains": ["Jamie Lee", "SC101", "1 August 2026", "SIN", "NRT"]
+      "contains": ["Jamie Lee", "SC101", "1 August 2026", "SIN", "NRT"],
+      "whole_items": ["Passenger: Jamie Lee", "Flight: SC101", "Date: 1 August 2026", "From: SIN", "To: NRT"]
     },
     {
       "file": "delay-letter.pdf",
       "text_source": "embedded",
-      "contains": ["Jamie Lee", "SC202", "7 August 2026", "NRT", "SIN", "late inbound aircraft", "8 hours"]
+      "contains": ["Jamie Lee", "SC202", "7 August 2026", "NRT", "SIN", "late inbound aircraft", "8 hours"],
+      "whole_items": ["Passenger: Jamie Lee", "Delay duration: 8 hours."]
     },
     {
       "file": "boarding-pass-sc101.png",
       "text_source": "ocr",
-      "contains": ["Jamie Lee", "SC101", "1 August 2026", "SIN", "NRT"]
+      "contains": ["Jamie Lee", "SC101", "1 August 2026", "SIN", "NRT"],
+      "whole_items": ["Jamie Lee", "SC101", "1 August 2026", "SIN", "NRT"]
     }
   ]
 }

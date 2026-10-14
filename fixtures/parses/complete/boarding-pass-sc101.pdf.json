@@ -2,47 +2,96 @@
   "parser": "docling",
   "parser_version": "2.138.0",
   "source_file": "boarding-pass-sc101.pdf",
+  "media_type": "application/pdf",
   "text_source": "embedded",
   "pages": [
     {
       "page_number": 1,
-      "text": "Fictional demonstration data. Not a SureCover policy document.\n\n## Boarding pass\n\nPassenger: Jamie Lee Flight: SC101 Date: 1 August 2026 From: SIN To: NRT"
+      "text": "Fictional demonstration data. Not a SureCover policy document.\nBoarding pass\nPassenger: Jamie Lee\nFlight: SC101\nDate: 1 August 2026\nFrom: SIN\nTo: NRT"
     }
   ],
   "items": [
     {
       "text": "Fictional demonstration data. Not a SureCover policy document.",
-      "label": "text",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 57.02362,
-        "t": 782.3281,
-        "r": 312.12861999999996,
-        "b": 774.0030999999999,
+        "l": 57.761619567871094,
+        "t": 782.4180908203125,
+        "r": 311.3455810546875,
+        "b": 773.985107421875,
         "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "Boarding pass",
-      "label": "section_header",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 57.02362,
-        "t": 760.3541,
-        "r": 168.15962,
-        "b": 745.5541,
+        "l": 58.191619873046875,
+        "t": 760.3220825195312,
+        "r": 167.3916015625,
+        "b": 745.5220947265625,
         "coord_origin": "BOTTOMLEFT"
       }
     },
     {
-      "text": "Passenger: Jamie Lee Flight: SC101 Date: 1 August 2026 From: SIN To: NRT",
-      "label": "text",
+      "text": "Passenger: Jamie Lee",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 57.02362,
-        "t": 729.7641,
-        "r": 166.46262000000002,
-        "b": 635.5890999999999,
+        "l": 57.87062072753906,
+        "t": 729.7420654296875,
+        "r": 166.01161193847656,
+        "b": 719.5670776367188,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Flight: SC101",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.925621032714844,
+        "t": 708.8740844726562,
+        "r": 121.64862060546875,
+        "b": 698.5670776367188,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Date: 1 August 2026",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.87062072753906,
+        "t": 687.7750854492188,
+        "r": 156.8046112060547,
+        "b": 677.5670776367188,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "From: SIN",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.925621032714844,
+        "t": 666.8740844726562,
+        "r": 106.23762512207031,
+        "b": 658.7451171875,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "To: NRT",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.27661895751953,
+        "t": 645.7420654296875,
+        "r": 98.36161804199219,
+        "b": 637.7451171875,
         "coord_origin": "BOTTOMLEFT"
       }
     }
@@ -53,7 +102,7 @@
     "name": "boarding-pass-sc101",
     "origin": {
       "mimetype": "application/pdf",
-      "binary_hash": 18427294251895069928,
+      "binary_hash": "8865081066421750661",
       "filename": "boarding-pass-sc101.pdf"
     },
     "furniture": {

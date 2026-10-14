@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -151,35 +152,62 @@ def write_delay_letter(path: Path) -> None:
     )
 
 
-def load_font(size: int) -> ImageFont.FreeTypeFont:
-    for candidate in (
-        Path(r"C:\Windows\Fonts\arial.ttf"),
-        Path(r"C:\Windows\Fonts\calibri.ttf"),
-        Path(r"C:\Windows\Fonts\segoeui.ttf"),
-    ):
-        if candidate.exists():
-            return ImageFont.truetype(str(candidate), size=size)
-    raise FileNotFoundError("No TrueType font found for the boarding-pass PNG")
+def load_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
+    name = "NotoSans-Bold.ttf" if bold else "NotoSans-Regular.ttf"
+    font_path = Path(__file__).resolve().parent / "fonts" / name
+    if not font_path.is_file():
+        raise FileNotFoundError(f"Missing bundled font: {font_path}")
+    return ImageFont.truetype(str(font_path), size=size)
+
+
+def draw_barcode(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int]) -> None:
+    left, top, right, bottom = box
+    cursor = left
+    picker = random.Random(101)
+    while cursor < right:
+        bar = picker.choice((2, 3, 4, 5))
+        gap = picker.choice((2, 3, 4))
+        draw.rectangle((cursor, top, min(cursor + bar, right), bottom), fill="#1A1A1A")
+        cursor += bar + gap
+
+
+def render_boarding_pass_card() -> Image.Image:
+    """Sharp fictional pass. The claim phrases stay large and high contrast for OCR."""
+    width, height = 1240, 1600
+    card = Image.new("RGB", (width, height), "#F3EFE4")
+    draw = ImageDraw.Draw(card)
+    draw.rectangle((0, 0, width, 250), fill="#14315C")
+    draw.rectangle((0, 250, width, 264), fill="#C4A35A")
+    draw.text((72, 48), "SC AIR", fill="white", font=load_font(72, bold=True))
+    draw.text((72, 140), "BOARDING PASS", fill="#E7EEF8", font=load_font(48, bold=True))
+
+    label = load_font(32)
+    value = load_font(68, bold=True)
+    ink = "#1A1A1A"
+    mute = "#5C6770"
+
+    def field(caption: str, text: str, x: int, y: int) -> None:
+        draw.text((x, y), caption, fill=mute, font=label)
+        draw.text((x, y + 48), text, fill=ink, font=value)
+
+    field("PASSENGER", "Jamie Lee", 72, 330)
+    field("FLIGHT", "SC101", 72, 560)
+    field("DATE", "1 August 2026", 620, 560)
+    field("FROM", "SIN", 72, 820)
+    field("TO", "NRT", 620, 820)
+    draw_barcode(draw, (72, 1120, width - 72, 1280))
+    draw.text(
+        (72, 1360),
+        "Fictional demonstration data. Not a SureCover policy document.",
+        fill=mute,
+        font=load_font(26),
+    )
+    return card
 
 
 def write_boarding_pass_png(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    image = Image.new("RGB", (1400, 1800), "white")
-    draw = ImageDraw.Draw(image)
-    font = load_font(72)
-    lines = [
-        "BOARDING PASS",
-        "Passenger Jamie Lee",
-        "Flight SC101",
-        "Date 1 August 2026",
-        "From SIN",
-        "To NRT",
-    ]
-    y = 160
-    for line in lines:
-        draw.text((120, y), line, fill="black", font=font)
-        y += 140
-    image.save(path, format="PNG")
+    render_boarding_pass_card().save(path, format="PNG")
 
 
 def main() -> None:
@@ -188,7 +216,10 @@ def main() -> None:
     write_itinerary(OUT / "revised-itinerary.pdf", "Revised itinerary")
     write_boarding_pass(OUT / "boarding-pass-sc101.pdf")
     write_delay_letter(OUT / "delay-letter.pdf")
-    write_boarding_pass_png(OUT / "boarding-pass-sc101.png")
+    boarding_pass_png = OUT / "boarding-pass-sc101.png"
+    # photograph_evidence.py replaces this file with a ComfyUI photo. Do not clobber it.
+    if not boarding_pass_png.exists():
+        write_boarding_pass_png(boarding_pass_png)
     for path in sorted(OUT.iterdir()):
         print(path.relative_to(ROOT))
 

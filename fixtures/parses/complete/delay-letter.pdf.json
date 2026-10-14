@@ -2,47 +2,72 @@
   "parser": "docling",
   "parser_version": "2.138.0",
   "source_file": "delay-letter.pdf",
+  "media_type": "application/pdf",
   "text_source": "embedded",
   "pages": [
     {
       "page_number": 1,
-      "text": "Fictional demonstration data. Not a SureCover policy document.\n\n## Airline delay notice\n\nPassenger: Jamie Lee Flight SC202 from NRT to SIN on 7 August 2026 was delayed because of a late inbound aircraft. Delay duration: 8 hours."
+      "text": "Fictional demonstration data. Not a SureCover policy document.\nAirline delay notice\nPassenger: Jamie Lee\nFlight SC202 from NRT to SIN on 7 August 2026 was delayed because of a late inbound aircraft.\nDelay duration: 8 hours."
     }
   ],
   "items": [
     {
       "text": "Fictional demonstration data. Not a SureCover policy document.",
-      "label": "text",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 57.02362,
-        "t": 782.3281,
-        "r": 312.12861999999996,
-        "b": 774.0030999999999,
+        "l": 57.761619567871094,
+        "t": 782.4180908203125,
+        "r": 311.3455810546875,
+        "b": 773.985107421875,
         "coord_origin": "BOTTOMLEFT"
       }
     },
     {
       "text": "Airline delay notice",
-      "label": "section_header",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 57.02362,
-        "t": 760.3541,
-        "r": 203.74362000000002,
-        "b": 745.5541,
+        "l": 57.02362060546875,
+        "t": 760.3220825195312,
+        "r": 203.151611328125,
+        "b": 745.5220947265625,
         "coord_origin": "BOTTOMLEFT"
       }
     },
     {
-      "text": "Passenger: Jamie Lee Flight SC202 from NRT to SIN on 7 August 2026 was delayed because of a late inbound aircraft. Delay duration: 8 hours.",
-      "label": "text",
+      "text": "Passenger: Jamie Lee",
+      "label": "text_line",
       "page_number": 1,
       "bbox": {
-        "l": 57.02362,
-        "t": 729.7641,
-        "r": 527.1966199999998,
-        "b": 677.5890999999999,
+        "l": 57.87062072753906,
+        "t": 729.7420654296875,
+        "r": 166.01161193847656,
+        "b": 719.5670776367188,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Flight SC202 from NRT to SIN on 7 August 2026 was delayed because of a late inbound aircraft.",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.925621032714844,
+        "t": 708.8740844726562,
+        "r": 526.2396240234375,
+        "b": 698.5670776367188,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Delay duration: 8 hours.",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.87062072753906,
+        "t": 687.7750854492188,
+        "r": 172.8426055908203,
+        "b": 677.5670776367188,
         "coord_origin": "BOTTOMLEFT"
       }
     }
@@ -53,7 +78,7 @@
     "name": "delay-letter",
     "origin": {
       "mimetype": "application/pdf",
-      "binary_hash": 2008001010080966751,
+      "binary_hash": "17448864633423824301",
       "filename": "delay-letter.pdf"
     },
     "furniture": {

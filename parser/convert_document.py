@@ -1,7 +1,8 @@
 """Convert one PDF or image into the stage-1 page-text contract.
 
-Docling's standard pipeline reads the file. This script does not classify
-documents or apply policy. Full-page OCR is enabled only for images.
+Docling still reads the file for its raw document. Provenance items come from
+the embedded text layer, one line or table cell at a time, or from OCR line
+boxes when that layer is missing. Every box is stored in BOTTOMLEFT coordinates.
 """
 
 from __future__ import annotations
@@ -16,8 +17,20 @@ from typing import Any
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}
 PDF_SUFFIXES = {".pdf"}
 ALLOWED_SUFFIXES = IMAGE_SUFFIXES | PDF_SUFFIXES
+MEDIA_TYPES = {
+    ".pdf": "application/pdf",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".tif": "image/tiff",
+    ".tiff": "image/tiff",
+    ".bmp": "image/bmp",
+    ".webp": "image/webp",
+}
+MAX_SAFE_INTEGER = 2**53 - 1
 
 _converters: dict[bool, Any] = {}
+_ocr_engine: Any = None
 
 
 def pipeline_options(force_ocr: bool) -> Any:
@@ -70,168 +83,180 @@ def converter_for(force_ocr: bool) -> Any:
     return converter
 
 
-def pdf_has_embedded_text(path: Path) -> bool:
-    import pypdfium2 as pdfium
+def ocr_engine() -> Any:
+    global _ocr_engine
+    if _ocr_engine is None:
+        from rapidocr import EngineType, RapidOCR
 
-    document = pdfium.PdfDocument(str(path))
-    try:
-        for index in range(len(document)):
-            text_page = document[index].get_textpage()
-            text = text_page.get_text_bounded() or ""
-            if text.strip():
-                return True
-    finally:
-        document.close()
-    return False
+        _ocr_engine = RapidOCR(
+            params={
+                "Det.engine_type": EngineType.TORCH,
+                "Cls.engine_type": EngineType.TORCH,
+                "Rec.engine_type": EngineType.TORCH,
+            }
+        )
+    return _ocr_engine
 
 
 def json_safe(value: Any) -> Any:
+    if isinstance(value, bool) or value is None or isinstance(value, (str, float)):
+        return value
+    if isinstance(value, int):
+        if abs(value) > MAX_SAFE_INTEGER:
+            return str(value)
+        return value
     if isinstance(value, dict):
         return {str(key): json_safe(item) for key, item in value.items()}
     if isinstance(value, (list, tuple)):
         return [json_safe(item) for item in value]
-    if isinstance(value, (str, int, float, bool)) or value is None:
-        return value
     if isinstance(value, Path):
         return str(value)
     nested = getattr(value, "value", None)
     if isinstance(nested, (str, int, float, bool)):
-        return nested
+        return json_safe(nested)
     return str(value)
 
 
-def bbox_dict(bbox: Any) -> dict[str, Any] | None:
-    if bbox is None:
-        return None
-    if hasattr(bbox, "model_dump"):
-        dumped = bbox.model_dump()
-    elif all(hasattr(bbox, name) for name in ("l", "t", "r", "b")):
-        dumped = {"l": bbox.l, "t": bbox.t, "r": bbox.r, "b": bbox.b}
-        origin = getattr(bbox, "coord_origin", None)
-        if origin is not None:
-            dumped["coord_origin"] = getattr(origin, "value", str(origin))
-    else:
-        return None
-    kept = {
-        key: json_safe(dumped[key])
-        for key in ("l", "t", "r", "b", "coord_origin")
-        if key in dumped and dumped[key] is not None
+def bottom_left_box(left: float, top: float, right: float, bottom: float) -> dict[str, Any]:
+    return {
+        "l": left,
+        "t": top,
+        "r": right,
+        "b": bottom,
+        "coord_origin": "BOTTOMLEFT",
     }
-    return kept or None
 
 
-def item_label(item: Any) -> str:
-    label = getattr(item, "label", None)
-    if label is None:
-        return type(item).__name__
-    return str(getattr(label, "value", label))
+def line_item(text: str, page_number: int, box: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "text": text,
+        "label": "text_line",
+        "page_number": page_number,
+        "bbox": box,
+    }
 
 
-def first_page(item: Any) -> int | None:
-    provenance = getattr(item, "prov", None) or []
-    if not provenance:
-        return None
-    return int(provenance[0].page_no)
+def quad_to_bottom_left(box: Any, page_height: float, scale: float) -> dict[str, Any]:
+    points = box.tolist() if hasattr(box, "tolist") else box
+    xs = [float(point[0]) / scale for point in points]
+    ys = [float(point[1]) / scale for point in points]
+    left, right = min(xs), max(xs)
+    top_from_top, bottom_from_top = min(ys), max(ys)
+    return bottom_left_box(left, page_height - top_from_top, right, page_height - bottom_from_top)
 
 
-def first_bbox(item: Any) -> dict[str, Any] | None:
-    provenance = getattr(item, "prov", None) or []
-    if not provenance:
-        return None
-    return bbox_dict(getattr(provenance[0], "bbox", None))
-
-
-def table_cells(item: Any) -> list[Any]:
-    data = getattr(item, "data", None)
-    if data is None:
+def ocr_image(image: Any, page_number: int, page_height: float, scale: float) -> list[dict[str, Any]]:
+    result = ocr_engine()(image)
+    texts = getattr(result, "txts", None) or []
+    boxes = getattr(result, "boxes", None)
+    if boxes is None or len(texts) == 0:
         return []
-    return list(getattr(data, "table_cells", []) or [])
-
-
-def is_table(item: Any) -> bool:
-    if table_cells(item):
-        return True
-    return item_label(item) == "table"
-
-
-def page_numbers(doc: Any) -> list[int]:
-    numbers: list[int] = []
-    pages = getattr(doc, "pages", {}) or {}
-    for key, page in pages.items():
-        page_no = getattr(page, "page_no", None)
-        if page_no is None:
-            try:
-                page_no = int(key)
-            except (TypeError, ValueError):
-                continue
-        numbers.append(int(page_no))
-    return sorted(set(numbers)) or [1]
-
-
-def markdown_for_page(doc: Any, page_number: int, only_page: bool) -> str:
-    try:
-        text = doc.export_to_markdown(page_no=page_number) or ""
-    except TypeError:
-        text = doc.export_to_markdown() or "" if only_page else ""
-    return str(text).strip()
-
-
-def items_from_document(doc: Any, fallback_page: int | None) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
-    for item, _level in doc.iterate_items():
-        page_number = first_page(item)
-        if page_number is None:
-            page_number = fallback_page
-        if is_table(item):
-            for cell in table_cells(item):
-                text = str(getattr(cell, "text", "") or "").strip()
-                if not text:
-                    continue
-                record: dict[str, Any] = {
-                    "text": text,
-                    "label": "table_cell",
-                    "page_number": page_number,
-                }
-                cell_bbox = bbox_dict(getattr(cell, "bbox", None)) or first_bbox(item)
-                if cell_bbox is not None:
-                    record["bbox"] = cell_bbox
-                items.append(record)
+    for text, box in zip(texts, boxes):
+        cleaned = " ".join(str(text).split())
+        if not cleaned:
             continue
-        text = str(getattr(item, "text", "") or "").strip()
-        if not text:
-            continue
-        record = {
-            "text": text,
-            "label": item_label(item),
-            "page_number": page_number,
-        }
-        item_bbox = first_bbox(item)
-        if item_bbox is not None:
-            record["bbox"] = item_bbox
-        items.append(record)
+        items.append(line_item(cleaned, page_number, quad_to_bottom_left(box, page_height, scale)))
     return items
 
 
-def pages_from_document(doc: Any) -> list[dict[str, Any]]:
-    numbers = page_numbers(doc)
-    pages = [
-        {"page_number": number, "text": markdown_for_page(doc, number, len(numbers) == 1)}
-        for number in numbers
-    ]
-    if len(pages) == 1 and not pages[0]["text"]:
-        pages[0]["text"] = str(doc.export_to_markdown() or "").strip()
+def embedded_pdf_lines(path: Path) -> tuple[list[dict[str, Any]], int]:
+    import pypdfium2 as pdfium
+
+    document = pdfium.PdfDocument(str(path))
+    items: list[dict[str, Any]] = []
+    try:
+        page_count = len(document)
+        for index in range(page_count):
+            text_page = document[index].get_textpage()
+            for rect_index in range(text_page.count_rects()):
+                left, bottom, right, top = text_page.get_rect(rect_index)
+                text = " ".join(text_page.get_text_bounded(left, bottom, right, top).split())
+                if not text:
+                    continue
+                items.append(
+                    line_item(text, index + 1, bottom_left_box(left, top, right, bottom))
+                )
+    finally:
+        document.close()
+    return items, page_count
+
+
+def ocr_pdf_pages(path: Path) -> tuple[list[dict[str, Any]], int]:
+    import pypdfium2 as pdfium
+
+    document = pdfium.PdfDocument(str(path))
+    items: list[dict[str, Any]] = []
+    scale = 2.0
+    try:
+        page_count = len(document)
+        for index in range(page_count):
+            page = document[index]
+            _width, height = page.get_size()
+            bitmap = page.render(scale=scale)
+            try:
+                image = bitmap.to_pil()
+            finally:
+                close = getattr(bitmap, "close", None)
+                if close is not None:
+                    close()
+            items.extend(ocr_image(image, index + 1, height, scale))
+    finally:
+        document.close()
+    return items, page_count
+
+
+def image_size(path: Path) -> tuple[int, int]:
+    from PIL import Image
+
+    with Image.open(path) as image:
+        return image.size
+
+
+def sort_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_page: dict[int, list[dict[str, Any]]] = {}
+    for item in items:
+        by_page.setdefault(item["page_number"], []).append(item)
+    ordered: list[dict[str, Any]] = []
+    for page_number in sorted(by_page):
+        rows: list[list[dict[str, Any]]] = []
+        for item in sorted(by_page[page_number], key=lambda entry: -entry["bbox"]["t"]):
+            placed = False
+            for row in rows:
+                if abs(row[0]["bbox"]["t"] - item["bbox"]["t"]) <= 2.0:
+                    row.append(item)
+                    placed = True
+                    break
+            if not placed:
+                rows.append([item])
+        for row in rows:
+            ordered.extend(sorted(row, key=lambda entry: entry["bbox"]["l"]))
+    return ordered
+
+
+def pages_from_items(items: list[dict[str, Any]], page_count: int) -> list[dict[str, Any]]:
+    pages = []
+    for number in range(1, max(page_count, 1) + 1):
+        text = "\n".join(item["text"] for item in items if item["page_number"] == number)
+        pages.append({"page_number": number, "text": text})
     return pages
 
 
-def text_source_for(path: Path, pages: list[dict[str, Any]]) -> str:
-    joined = "\n".join(page["text"] for page in pages).strip()
-    if not joined:
-        return "empty"
-    if path.suffix.lower() in IMAGE_SUFFIXES:
-        return "ocr"
-    if pdf_has_embedded_text(path):
-        return "embedded"
-    return "ocr"
+def provenance_for(path: Path) -> tuple[str, list[dict[str, Any]], list[dict[str, Any]]]:
+    suffix = path.suffix.lower()
+    if suffix in IMAGE_SUFFIXES:
+        _width, height = image_size(path)
+        items = sort_items(ocr_image(path, 1, float(height), 1.0))
+        source = "ocr" if items else "empty"
+        return source, items, pages_from_items(items, 1)
+
+    items, page_count = embedded_pdf_lines(path)
+    source = "embedded"
+    if not items:
+        items, page_count = ocr_pdf_pages(path)
+        source = "ocr" if items else "empty"
+    items = sort_items(items)
+    return source, items, pages_from_items(items, page_count)
 
 
 def convert_path(path: Path) -> dict[str, Any]:
@@ -242,24 +267,29 @@ def convert_path(path: Path) -> dict[str, Any]:
     if not source.is_file():
         raise FileNotFoundError(source)
 
-    force_ocr = suffix in IMAGE_SUFFIXES
+    text_source, items, pages = provenance_for(source)
+    if text_source == "empty":
+        items = []
+        for page in pages:
+            page["text"] = ""
+
+    force_ocr = suffix in IMAGE_SUFFIXES or text_source == "ocr"
     result = converter_for(force_ocr).convert(str(source))
     status = getattr(getattr(result, "status", ""), "value", str(getattr(result, "status", "")))
     if "fail" in str(status).lower() or "error" in str(status).lower():
-        raise RuntimeError(f"Docling conversion failed for {source.name}: {status} {getattr(result, 'errors', '')}")
+        raise RuntimeError(
+            f"Docling conversion failed for {source.name}: {status} {getattr(result, 'errors', '')}"
+        )
 
-    document = result.document
-    pages = pages_from_document(document)
-    fallback_page = pages[0]["page_number"] if len(pages) == 1 else None
-    items = items_from_document(document, fallback_page)
     return {
         "parser": "docling",
         "parser_version": version("docling"),
         "source_file": source.name,
-        "text_source": text_source_for(source, pages),
+        "media_type": MEDIA_TYPES[suffix],
+        "text_source": text_source,
         "pages": pages,
         "items": items,
-        "document": json_safe(document.export_to_dict()),
+        "document": json_safe(result.document.export_to_dict()),
     }
 
 

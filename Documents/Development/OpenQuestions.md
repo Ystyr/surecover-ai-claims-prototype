@@ -135,11 +135,11 @@ Working assumption: live external Jev calls use synthetic data only. Real custom
 
 Working status list: submitted, processing, needs review, information requested, approved, rejected. Working policy binding: every claim uses `demo-2026.1` unless a test omits the policy record on purpose.
 
-Stage 2 stores officers, one policy row, claims, documents, pages, and items in the hosted Supabase project SureCover Claims. The schema is `supabase/migrations/20261014065300_system_of_record.sql`. Reads use the assignment row and `auth.uid()`. The seeded claim `CLM-DEMO-1001` is assigned to `officer-a@example.com`. `officer-b@example.com` receives no claim rows and no file bytes. Facts, checks, and messages are not in this schema yet.
+Stage 2 stores officers, one policy row, claims, documents, pages, and items in the hosted Supabase project SureCover Claims. The schema is `supabase/migrations/20261014083345_system_of_record.sql`. `quotable_pages` in `supabase/migrations/20261014085334_quotable_pages.sql` is what later code quotes: pages whose `text_source` is `embedded` or `ocr`. Reads use the assignment row and `auth.uid()`. The seeded claim `CLM-DEMO-1001` is assigned to `officer-a@example.com`. `npm run verify:access` confirms officer A can read the claim and that the six stored files match the fixtures, and that `officer-b@example.com` receives no claim rows and no file bytes. Facts, checks, and messages are not in this schema yet.
 
-- What is the minimal schema and relationship model for claims, operators/assignments, documents/storage objects, flights, facts, assessments, checks, events, and notifications?
-- Will claim and file reads run using the authenticated operator JWT and RLS/storage policies, or through a server endpoint? If a privileged service-role path is used, where is the explicit assignment check enforced and how is it verified?
-- How will the two operator identities and claim assignments be seeded locally, and what exact denial result should the unauthorized operator see?
+- Stage 2 records officers, policies, claims, documents, pages, items, and the private `claim-files` bucket. Flights, facts, assessments, checks, events, and notifications are not in this schema yet.
+- Claim and file reads use the officer's JWT and row-level security. `npm run verify:access` uses the publishable key only. `npm run seed:claim` uses the secret key in `.env` to create users and load rows. That key is not a client.
+- `npm run seed:claim` creates `officer-a@example.com` and `officer-b@example.com` through the Auth admin API and assigns `CLM-DEMO-1001` to officer A. Officer B's reads return no rows and no file bytes.
 - Which actions create workflow events, and what event fields are mandatory (actor, time, channel, assessment/policy version, notes)?
 - Which transitions trigger an automatic acknowledgment/status message, and what transitions are allowed? Use deterministic templates and record provider message id, delivery status, and failure. Identify the public webhook URL, signing-secret verification, idempotency key, and retry behavior.
 - How are Resend inbound emails and attachments mapped to a claim? Verify webhook signatures, deduplicate provider retries, validate attachment type/size, and apply a write/access policy separate from operator reads.
@@ -158,10 +158,10 @@ Working assumption for the core path: the operator may approve, reject, or reque
 
 ### 10. Local development and dependencies
 
-- What Node.js and Supabase CLI/runtime versions will be used, and can local Supabase be started reliably on the development machine? Node 24 and Supabase CLI 2.120 are installed. Local `supabase start` needs Docker, and this machine's firmware has virtualization disabled. The prototype uses the hosted project SureCover Claims (`xrsqiqcyvhkfvyipcqhf`) instead.
+- Node 24 and Supabase CLI 2.120 are installed. Local `supabase start` needs Docker, and this machine's firmware has virtualization disabled. The prototype uses the hosted project SureCover Claims (`xrsqiqcyvhkfvyipcqhf`).
 - The local PDF and image parser is Docling. See the resolved document-parser note. An empty page means no ink. An unreadable page is an unknown gap and is not sent as text.
 - If section 9 requires rendering the original file, which viewer is used?
-- What are the setup steps and environment variables for a fresh clone, and how will secrets be excluded from Git?
+- `.env.example` names `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and `OFFICER_PASSWORD`. `.env` is gitignored. A fresh clone copies that example and fills the three secrets from the SureCover Claims project.
 - If local Supabase setup threatens the stop line, what is the fallback persistence and auth approach that still demonstrates claim isolation? Local Docker could not start because firmware virtualization is off. The prototype uses hosted project SureCover Claims. Claim isolation is the assignment row and row-level security, checked by `npm run verify:access`.
 
 ## Resolve before live integration and rehearsal

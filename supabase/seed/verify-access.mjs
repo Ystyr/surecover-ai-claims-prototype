@@ -6,14 +6,13 @@ import { createClient } from "@supabase/supabase-js"
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const CLAIM_REFERENCE = "CLM-DEMO-1001"
-const PASSWORD = "local-officer-demo"
 
 function projectEnv() {
   let raw
   try {
     raw = readFileSync(path.join(root, ".env"), "utf8")
   } catch {
-    throw new Error("Missing .env with SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY")
+    throw new Error("Missing .env")
   }
   const env = {}
   for (const line of raw.split(/\r?\n/)) {
@@ -25,28 +24,29 @@ function projectEnv() {
   }
   const url = env.SUPABASE_URL
   const anonKey = env.SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY
-  if (!url || !anonKey) {
-    throw new Error(".env must set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY")
+  const password = env.OFFICER_PASSWORD
+  if (!url || !anonKey || !password) {
+    throw new Error(".env must set SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, and OFFICER_PASSWORD")
   }
-  return { url, anonKey }
+  return { url, anonKey, password }
 }
 
 function require(condition, message) {
   if (!condition) throw new Error(message)
 }
 
-async function signIn(url, anonKey, email) {
+async function signIn(url, anonKey, email, password) {
   const client = createClient(url, anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   })
-  const signedIn = await client.auth.signInWithPassword({ email, password: PASSWORD })
+  const signedIn = await client.auth.signInWithPassword({ email, password })
   if (signedIn.error) throw signedIn.error
   return client
 }
 
 async function main() {
-  const { url, anonKey } = projectEnv()
-  const officerA = await signIn(url, anonKey, "officer-a@example.com")
+  const { url, anonKey, password } = projectEnv()
+  const officerA = await signIn(url, anonKey, "officer-a@example.com", password)
   const claims = await officerA.from("claims").select("reference, claimant_name, status, assigned_officer_id")
   if (claims.error) throw claims.error
   require(claims.data.length === 1, `officer A saw ${claims.data.length} claims`)
@@ -65,25 +65,34 @@ async function main() {
   require(pages.data.some((page) => page.text_source === "embedded" && page.text.includes("Jamie Lee")), "officer A has no embedded page text")
   require(pages.data.some((page) => page.text_source === "ocr"), "officer A has no OCR page")
 
+  const quotable = await officerA.from("quotable_pages").select("text_source, text")
+  if (quotable.error) throw quotable.error
+  const expectedQuotable = pages.data.filter((page) => page.text_source === "embedded" || page.text_source === "ocr")
+  require(quotable.data.length === expectedQuotable.length, `quotable pages are ${quotable.data.length}, expected ${expectedQuotable.length}`)
+  require(quotable.data.every((page) => page.text_source === "embedded" || page.text_source === "ocr"), "quotable view returned a page that must not be quoted")
+
   const items = await officerA.from("document_items").select("text, confidence, review, label")
   if (items.error) throw items.error
   require(items.data.some((item) => item.text === "Claimant: Jamie Lee" && item.confidence === null), "embedded item is missing or has an OCR score")
   require(items.data.some((item) => item.text === "Jamie Lee" && typeof item.confidence === "number" && typeof item.review === "boolean"), "OCR item is missing its review signal")
 
-  const pass = documents.data.find((document) => document.source_file === "boarding-pass-sc101.png")
-  const downloaded = await officerA.storage.from("claim-files").download(pass.storage_path)
-  if (downloaded.error) throw downloaded.error
-  const bytes = Buffer.from(await downloaded.data.arrayBuffer())
-  require(bytes.length > 1000, "officer A downloaded an empty boarding pass")
-
-  const officerB = await signIn(url, anonKey, "officer-b@example.com")
-  for (const table of ["claims", "claim_documents", "document_pages", "document_items"]) {
+  const officerB = await signIn(url, anonKey, "officer-b@example.com", password)
+  for (const table of ["claims", "claim_documents", "document_pages", "document_items", "quotable_pages"]) {
     const result = await officerB.from(table).select("*")
     if (result.error) throw result.error
     require(result.data.length === 0, `officer B saw ${result.data.length} ${table} rows`)
   }
-  const deniedFile = await officerB.storage.from("claim-files").download(pass.storage_path)
-  require(deniedFile.error || !deniedFile.data, "officer B downloaded the boarding pass")
+
+  for (const document of documents.data) {
+    const local = readFileSync(path.join(root, "fixtures/samples/complete", document.source_file))
+    const downloaded = await officerA.storage.from("claim-files").download(document.storage_path)
+    if (downloaded.error) throw downloaded.error
+    const bytes = Buffer.from(await downloaded.data.arrayBuffer())
+    require(bytes.equals(local), `${document.source_file} does not match the fixture bytes`)
+
+    const denied = await officerB.storage.from("claim-files").download(document.storage_path)
+    require(denied.error || !denied.data, `officer B downloaded ${document.source_file}`)
+  }
 
   const ownProfile = await officerA.from("officers").select("email")
   if (ownProfile.error) throw ownProfile.error
@@ -97,7 +106,7 @@ async function main() {
   if (policy.error) throw policy.error
   require(policy.data.length === 1, "the shared policy row was not readable")
 
-  console.log("officer A can read CLM-DEMO-1001 and its files")
+  console.log("officer A can read CLM-DEMO-1001 and all six files match the fixtures")
   console.log("officer B receives no claim rows and no file bytes")
 }
 

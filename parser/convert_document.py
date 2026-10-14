@@ -2,7 +2,8 @@
 
 Docling still reads the file for its raw document. Provenance items come from
 the embedded text layer, one line or table cell at a time, or from OCR line
-boxes when that layer is missing. Every box is stored in BOTTOMLEFT coordinates.
+boxes when that layer is missing. A blank page is empty. A page with ink but
+no extracted text is unreadable. Every box is stored in BOTTOMLEFT coordinates.
 """
 
 from __future__ import annotations
@@ -17,6 +18,11 @@ from typing import Any
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}
 PDF_SUFFIXES = {".pdf"}
 ALLOWED_SUFFIXES = IMAGE_SUFFIXES | PDF_SUFFIXES
+MAX_FILE_BYTES = 25 * 1024 * 1024
+MAX_IMAGE_PIXELS = 20_000_000
+# RapidOCR already omits lines below 0.5. Lines kept above that, but below this
+# cutoff, stay in the parse and are marked for operator review.
+OCR_REVIEW_BELOW = 0.80
 MEDIA_TYPES = {
     ".pdf": "application/pdf",
     ".png": "image/png",
@@ -127,13 +133,28 @@ def bottom_left_box(left: float, top: float, right: float, bottom: float) -> dic
     }
 
 
-def line_item(text: str, page_number: int, box: dict[str, Any]) -> dict[str, Any]:
-    return {
+def line_item(
+    text: str,
+    page_number: int,
+    box: dict[str, Any],
+    confidence: float | None = None,
+    from_ocr: bool = False,
+) -> dict[str, Any]:
+    item = {
         "text": text,
         "label": "text_line",
         "page_number": page_number,
         "bbox": box,
     }
+    if from_ocr:
+        if confidence is None:
+            item["confidence"] = None
+            item["review"] = True
+        else:
+            score = float(confidence)
+            item["confidence"] = round(score, 4)
+            item["review"] = score < OCR_REVIEW_BELOW
+    return item
 
 
 def quad_to_bottom_left(box: Any, page_height: float, scale: float) -> dict[str, Any]:
@@ -151,59 +172,75 @@ def ocr_image(image: Any, page_number: int, page_height: float, scale: float) ->
     boxes = getattr(result, "boxes", None)
     if boxes is None or len(texts) == 0:
         return []
+    scores = getattr(result, "scores", None)
+    if scores is None:
+        scores = [None] * len(texts)
     items: list[dict[str, Any]] = []
-    for text, box in zip(texts, boxes):
+    for text, box, score in zip(texts, boxes, scores):
         cleaned = " ".join(str(text).split())
         if not cleaned:
             continue
-        items.append(line_item(cleaned, page_number, quad_to_bottom_left(box, page_height, scale)))
+        confidence = None if score is None else float(score)
+        items.append(
+            line_item(
+                cleaned,
+                page_number,
+                quad_to_bottom_left(box, page_height, scale),
+                confidence,
+                from_ocr=True,
+            )
+        )
     return items
 
 
-def embedded_pdf_lines(path: Path) -> tuple[list[dict[str, Any]], int]:
-    import pypdfium2 as pdfium
-
-    document = pdfium.PdfDocument(str(path))
+def embedded_page_lines(text_page: Any, page_number: int) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
-    try:
-        page_count = len(document)
-        for index in range(page_count):
-            text_page = document[index].get_textpage()
-            for rect_index in range(text_page.count_rects()):
-                left, bottom, right, top = text_page.get_rect(rect_index)
-                text = " ".join(text_page.get_text_bounded(left, bottom, right, top).split())
-                if not text:
-                    continue
-                items.append(
-                    line_item(text, index + 1, bottom_left_box(left, top, right, bottom))
-                )
-    finally:
-        document.close()
-    return items, page_count
+    for rect_index in range(text_page.count_rects()):
+        left, bottom, right, top = text_page.get_rect(rect_index)
+        text = " ".join(text_page.get_text_bounded(left, bottom, right, top).split())
+        if not text:
+            continue
+        items.append(line_item(text, page_number, bottom_left_box(left, top, right, bottom)))
+    return items
 
 
-def ocr_pdf_pages(path: Path) -> tuple[list[dict[str, Any]], int]:
-    import pypdfium2 as pdfium
+def image_has_ink(image: Any) -> bool:
+    from PIL import Image
 
-    document = pdfium.PdfDocument(str(path))
-    items: list[dict[str, Any]] = []
+    if not isinstance(image, Image.Image):
+        with Image.open(image) as opened:
+            return image_has_ink(opened)
+    gray = image.convert("L")
+    width, height = gray.size
+    longest = max(width, height, 1)
+    if longest > 512:
+        scale = 512 / longest
+        gray = gray.resize((max(1, int(width * scale)), max(1, int(height * scale))))
+    pixels = list(gray.getdata())
+    tile_width, tile_height = gray.size
+    tile = 16
+    for top in range(0, tile_height, tile):
+        for left in range(0, tile_width, tile):
+            block: list[int] = []
+            for y in range(top, min(top + tile, tile_height)):
+                start = y * tile_width + left
+                block.extend(pixels[start : start + min(tile, tile_width - left)])
+            if block and max(block) - min(block) >= 8:
+                return True
+    return False
+
+
+def ocr_pdf_page(page: Any, page_number: int) -> tuple[list[dict[str, Any]], bool]:
     scale = 2.0
+    _width, height = page.get_size()
+    bitmap = page.render(scale=scale)
     try:
-        page_count = len(document)
-        for index in range(page_count):
-            page = document[index]
-            _width, height = page.get_size()
-            bitmap = page.render(scale=scale)
-            try:
-                image = bitmap.to_pil()
-            finally:
-                close = getattr(bitmap, "close", None)
-                if close is not None:
-                    close()
-            items.extend(ocr_image(image, index + 1, height, scale))
+        image = bitmap.to_pil()
     finally:
-        document.close()
-    return items, page_count
+        close = getattr(bitmap, "close", None)
+        if close is not None:
+            close()
+    return ocr_image(image, page_number, height, scale), image_has_ink(image)
 
 
 def image_size(path: Path) -> tuple[int, int]:
@@ -211,6 +248,15 @@ def image_size(path: Path) -> tuple[int, int]:
 
     with Image.open(path) as image:
         return image.size
+
+
+def reject_oversized(path: Path, suffix: str) -> None:
+    if path.stat().st_size > MAX_FILE_BYTES:
+        raise ValueError(f"File is too large to parse: {path.name}")
+    if suffix in IMAGE_SUFFIXES:
+        width, height = image_size(path)
+        if width * height > MAX_IMAGE_PIXELS:
+            raise ValueError(f"Image is too large to parse: {path.name}")
 
 
 def sort_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -234,12 +280,29 @@ def sort_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return ordered
 
 
-def pages_from_items(items: list[dict[str, Any]], page_count: int) -> list[dict[str, Any]]:
-    pages = []
-    for number in range(1, max(page_count, 1) + 1):
-        text = "\n".join(item["text"] for item in items if item["page_number"] == number)
-        pages.append({"page_number": number, "text": text})
-    return pages
+def page_record(page_number: int, items: list[dict[str, Any]], text_source: str) -> dict[str, Any]:
+    return {
+        "page_number": page_number,
+        "text": "\n".join(item["text"] for item in items),
+        "text_source": text_source,
+    }
+
+
+def text_source_without_items(has_ink: bool) -> str:
+    return "unreadable" if has_ink else "empty"
+
+
+def file_text_source(page_sources: list[str]) -> str:
+    if not page_sources or all(source == "empty" for source in page_sources):
+        return "empty"
+    produced = [source for source in page_sources if source in {"embedded", "ocr"}]
+    if any(source == "unreadable" for source in page_sources) and produced:
+        return "partial"
+    if not produced:
+        return "unreadable"
+    if any(source == "ocr" for source in page_sources):
+        return "ocr"
+    return "embedded"
 
 
 def provenance_for(path: Path) -> tuple[str, list[dict[str, Any]], list[dict[str, Any]]]:
@@ -247,16 +310,34 @@ def provenance_for(path: Path) -> tuple[str, list[dict[str, Any]], list[dict[str
     if suffix in IMAGE_SUFFIXES:
         _width, height = image_size(path)
         items = sort_items(ocr_image(path, 1, float(height), 1.0))
-        source = "ocr" if items else "empty"
-        return source, items, pages_from_items(items, 1)
+        source = "ocr" if items else text_source_without_items(image_has_ink(path))
+        return source, items, [page_record(1, items, source)]
 
-    items, page_count = embedded_pdf_lines(path)
-    source = "embedded"
-    if not items:
-        items, page_count = ocr_pdf_pages(path)
-        source = "ocr" if items else "empty"
-    items = sort_items(items)
-    return source, items, pages_from_items(items, page_count)
+    import pypdfium2 as pdfium
+
+    try:
+        document = pdfium.PdfDocument(str(path))
+    except Exception as exc:
+        raise RuntimeError(f"Could not read PDF {path.name}: {exc}") from exc
+    items: list[dict[str, Any]] = []
+    pages: list[dict[str, Any]] = []
+    try:
+        if len(document) == 0:
+            raise RuntimeError(f"PDF has no pages: {path.name}")
+        for index in range(len(document)):
+            page_number = index + 1
+            page_items = sort_items(embedded_page_lines(document[index].get_textpage(), page_number))
+            if page_items:
+                page_source = "embedded"
+            else:
+                page_items, has_ink = ocr_pdf_page(document[index], page_number)
+                page_items = sort_items(page_items)
+                page_source = "ocr" if page_items else text_source_without_items(has_ink)
+            items.extend(page_items)
+            pages.append(page_record(page_number, page_items, page_source))
+    finally:
+        document.close()
+    return file_text_source([page["text_source"] for page in pages]), items, pages
 
 
 def convert_path(path: Path) -> dict[str, Any]:
@@ -266,14 +347,21 @@ def convert_path(path: Path) -> dict[str, Any]:
         raise ValueError(f"Unsupported file type: {source.name}")
     if not source.is_file():
         raise FileNotFoundError(source)
+    reject_oversized(source, suffix)
 
     text_source, items, pages = provenance_for(source)
     if text_source == "empty":
         items = []
         for page in pages:
             page["text"] = ""
+            page["text_source"] = "empty"
+    elif text_source == "unreadable":
+        items = []
+        for page in pages:
+            if page.get("text_source") == "unreadable":
+                page["text"] = ""
 
-    force_ocr = suffix in IMAGE_SUFFIXES or text_source == "ocr"
+    force_ocr = any(page.get("text_source") != "embedded" for page in pages)
     result = converter_for(force_ocr).convert(str(source))
     status = getattr(getattr(result, "status", ""), "value", str(getattr(result, "status", "")))
     if "fail" in str(status).lower() or "error" in str(status).lower():

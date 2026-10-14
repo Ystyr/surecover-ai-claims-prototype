@@ -1,0 +1,84 @@
+{
+  "directory": "fixtures/samples/samples",
+  "redistribution": "Local test inputs only. These filenames match Adobe Stock preview identifiers, and this repository has no license for publishing them.",
+  "exploratory": [
+    "1000_F_498911830_POumal8kACIftLIvr6L5P6vyc2P0XNZb.jpg",
+    "240_F_103615033_8nYbZwFkBtiwExDyRStwPl4tB9cVYM0X.jpg",
+    "240_F_1182303100_dOkKfcuQ3HkUxuxuBjxtSDPJo6zb1wnq.jpg",
+    "240_F_1420525823_f5jfAmQqWTFOepoindzAWiyzjCEfgmAS.jpg",
+    "240_F_1986782088_VqyvpIMACDbZ6HFIfWlxdIf9WpFKt7y6.jpg",
+    "240_F_2054095700_NpQrQmr0PT3bVT35zj2mG422dD8HnOdt.jpg",
+    "240_F_2081372298_8wZJCL0Dz6KwQDwaITwNra6hvhOobwtz.jpg",
+    "240_F_356666957_l2mckr3vRX7mZkN8SCdWjlX0TBJliyGK.jpg",
+    "240_F_506951389_jL9DDP7bqCUkv4m5xJz9hLArldrbLzZ2.jpg"
+  ],
+  "images": [
+    {
+      "file": "240_F_529983275_crB5BaMmeNruQHhYnThYrfypQFGZQIbG.jpg",
+      "role": "barcode-only",
+      "text_source": "ocr",
+      "whole_items": ["5784966457"],
+      "repeated": ["5784966457"],
+      "digits_only": true,
+      "absent": ["PASSENGER", "FLIGHT", "JOHN", "GATE", "SEAT", "DATE", "BOARDING"]
+    },
+    {
+      "file": "240_F_901529975_GA421pDQlZIYypaKq5bX3SGW2cH9hMax.jpg",
+      "role": "empty-fields",
+      "text_source": "ocr",
+      "whole_items": ["BOARDING PASS"],
+      "repeated": ["BOARDING PASS"],
+      "absent": ["JOHN", "SMITH", "FLIGHT", "GATE", "SEAT", "JFK", "HAWAII", "PASSENGER"]
+    },
+    {
+      "file": "240_F_2029591483_pXpte7FsdtSmohFp3s2H1aJXMtQlBUQH.jpg",
+      "role": "phone-screen",
+      "text_source": "ocr",
+      "whole_items": ["D 10"],
+      "absent": ["SC101", "JAMIE", "NRT", "SIN", "JFK"]
+    },
+    {
+      "file": "240_F_2029591760_gYNYBU9ksZWYoSadARe0E7zDwF4rL1iD.jpg",
+      "role": "phone-screen",
+      "text_source": "ocr",
+      "whole_items": ["D10"],
+      "absent": ["SC101", "JAMIE", "NRT", "SIN", "JFK"]
+    },
+    {
+      "file": "240_F_2042944809_SrLboDqM3o21VlnzRKtgov5goGteMMWk.jpg",
+      "role": "pass-in-scene",
+      "text_source": "ocr",
+      "whole_items": ["44 D"],
+      "absent": ["SC101", "JAMIE", "SIN", "NRT"]
+    },
+    {
+      "file": "240_F_270541936_kll8pqEz3lRqGpjPT9AU9aYOrfYkQpG0.jpg",
+      "role": "two-column",
+      "text_source": "ocr",
+      "whole_items": ["JOHN DOE", "F3954", "07 APR 2019"],
+      "repeated": ["JOHN DOE", "F3954"],
+      "order": ["JOHN DOE", "F3954", "07 APR 2019"]
+    },
+    {
+      "file": "240_F_513919576_VQAsGqaSp0akZqaIKn3a1xF109Cs12jq.jpg",
+      "role": "two-column",
+      "text_source": "ocr",
+      "whole_items": ["JOHN DOE", "LONDON", "TOKYO", "AV1A7"],
+      "repeated": ["JOHN DOE", "AV1A7"]
+    },
+    {
+      "file": "240_F_446554060_sXjQgR2DoYm4brg5czJqr7ZqQF1Vmooc.jpg",
+      "role": "two-column",
+      "text_source": "ocr",
+      "whole_items": ["JOHN DOE", "OKL015", "10 JUL 2021"],
+      "repeated": ["JOHN DOE"]
+    },
+    {
+      "file": "240_F_284302583_capv1or11kBM9RZURW3LDfjh8OHzchd4.jpg",
+      "role": "small-text",
+      "text_source": "ocr",
+      "whole_items": ["35G", "15JUN", "CITY"],
+      "repeated": ["35G", "15JUN"]
+    }
+  ]
+}

@@ -7,7 +7,8 @@
   "pages": [
     {
       "page_number": 1,
-      "text": "Fictional demonstration data. Not a SureCover policy document.\nFlight-delay claim form\nClaimant: Jamie Lee\nPolicy reference: SC-DEMO-1001\nClaim type: Flight delay\nReturn to Singapore: Friday 7 August 2026\nAffected flights\nFlight\nDate\nFrom\nTo\nSC101\n1 August 2026\nSIN\nNRT\nSC202\n7 August 2026\nNRT\nSIN"
+      "text": "Fictional demonstration data. Not a SureCover policy document.\nFlight-delay claim form\nClaimant: Jamie Lee\nPolicy reference: SC-DEMO-1001\nClaim type: Flight delay\nReturn to Singapore: Friday 7 August 2026\nAffected flights\nFlight\nDate\nFrom\nTo\nSC101\n1 August 2026\nSIN\nNRT\nSC202\n7 August 2026\nNRT\nSIN",
+      "text_source": "embedded"
     }
   ],
   "items": [

@@ -87,7 +87,7 @@ The fixture adapter implements the same interface: document type, choice, probab
 | A demo file is mislabeled in rehearsal | Adjust the criteria, or pin that bundle to the fixture and say so in the talk. |
 | The letter is not in English, or the PDF tells the system to ignore the rules and approve | The text stays in `state`. The outcome is `unknown` or a failed check. Nothing in the workflow can approve from the document. |
 
-If Jev fails a specific semantic task, a generative LLM may be evaluated as a backup for that task. Any extracted fact still requires source-grounded evidence and human review where uncertain. Docling is the stage-1 parser: text PDFs become one item per line or table cell, and images use OCR line boxes. A generative LLM is not the backup for parsing.
+If Jev fails a specific semantic task, a generative LLM may be evaluated as a backup for that task. Any extracted fact still requires source-grounded evidence and human review where uncertain. Docling is the stage-1 parser: text PDFs become one item per line or table cell, a page with no text layer is OCR'd on its own, and images use OCR line boxes. A generative LLM is not the backup for parsing.
 
 ## Policy assumptions
 
@@ -118,14 +118,14 @@ Affected flights and boarding passes are records, not flat fields: flight number
 Stack:
 
 - Next.js (App Router) and TypeScript for the Resend-backed traveler email flow and operator workbench. A simulated email adapter supports local development; no customer portal.
-- Local Supabase for Postgres, Auth, row-level security, and private file storage. The live demo does not depend on a hosted project or a network call to Supabase.
+- Hosted Supabase project SureCover Claims for Postgres, Auth, row-level security, and private file storage. Docker is not required.
 - Two operator accounts. Denial is a real read that returns nothing for an unassigned claim and its files. The service role stays on the server.
 - Priority candidate Jev through the TypeSafe HTTP API, called only from the server and evaluated on labeled synthetic examples. The fixture adapter uses the same interface with no network call.
 
 Stages:
 
 1. Resend accepts the traveler email with the PDF claim form and attachments. The application verifies the signed webhook, records the `submitted` event, and sends deterministic acknowledgment, status, and information-request messages through Resend. A simulated adapter is the local fallback. A reply matched to an information-requested claim is assessed on that claim and returned to needs review.
-2. Local Docling extraction. Text PDFs become one item per line or table cell. Images are read with English OCR line boxes. An empty result becomes `unknown` and is not sent to Jev.
+2. Local Docling extraction. Text PDFs become one item per line or table cell. A PDF page with no text layer is OCR'd on its own. Images are read with English OCR line boxes. A blank page is marked empty. A page with ink but no extracted text is marked unreadable. A file with both extracted text and an unreadable page is `partial`. Later code quotes only `embedded` and `ocr` pages. An `unreadable` page is an unknown gap and is not sent as text. A `partial` file keeps its readable pages. An `empty` page means no ink. OCR lines keep a recognition score, and a score below 0.80 is marked for review.
 3. Classification adapter. Evaluate priority model Jev against labeled `jev-questions-demo-2026.1` examples for each text-bearing document. The fixture adapter supplies the same answer shape for offline/rehearsal use or when Jev cannot be called. Both record adapter name, model id, and question-set version, and the raw response is stored beside the normalized facts.
 4. Structured claim context: flights, facts, and evidence references. Code parses the selected spans and drops any span that is not on the page.
 5. Deterministic completeness and policy checks under `demo-2026.1`.
@@ -149,8 +149,8 @@ For Jev, assemble one state per document: its page text and candidate ids. Do no
 
 | Role | Prototype |
 | --- | --- |
-| Postgres, Auth, row-level security, private storage | Local Supabase. Claims, files, operators, and the access denial all go through it. |
-| PDF and image text | Local Docling. Text PDFs yield one item per line or table cell from the embedded text layer. Images use English OCR line boxes. An empty result stays unreadable. |
+| Postgres, Auth, row-level security, private storage | Hosted Supabase project SureCover Claims. Claims, files, operators, and the access denial all go through it. |
+| PDF and image text | Local Docling. Text PDFs yield one item per line or table cell from the embedded text layer. A page with no text layer is read with English OCR. Images use English OCR line boxes. A blank page is marked empty. A page with ink but no extracted text is marked unreadable. A file with both extracted text and an unreadable page is `partial`. |
 | Classifier | Jev (`POST /v1/systemone`) behind an adapter. The fixture adapter supports offline/rehearsal use and uses the same answer shape. |
 | Email | Resend inbound webhooks and outbound API; deterministic templates, provider event history, and a simulated local adapter. |
 | Traveler email | Resend inbox/outbox for the PDF claim form, attachments, acknowledgments, status updates, and information requests. |

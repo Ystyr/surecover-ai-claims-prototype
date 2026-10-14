@@ -7,7 +7,8 @@
   "pages": [
     {
       "page_number": 1,
-      "text": "Fictional demonstration data. Not a SureCover policy document.\nScheduled itinerary\nPassenger: Jamie Lee\nFlight\nDate\nFrom\nTo\nSC101\n1 August 2026\nSIN\nNRT\nSC202\n7 August 2026\nNRT\nSIN"
+      "text": "Fictional demonstration data. Not a SureCover policy document.\nScheduled itinerary\nPassenger: Jamie Lee\nFlight\nDate\nFrom\nTo\nSC101\n1 August 2026\nSIN\nNRT\nSC202\n7 August 2026\nNRT\nSIN",
+      "text_source": "embedded"
     }
   ],
   "items": [

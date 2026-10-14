@@ -7,7 +7,8 @@
   "pages": [
     {
       "page_number": 1,
-      "text": "SC AIR\nBOARDING PASS\nPASSENGER\nJamie Lee\nFLIGHT\nDATE\nSC101\n1 August 2026\nFROM\nTO\nSIN\nNRT\nFictional demonstration data. Not a SureCover policy document."
+      "text": "SC AIR\nBOARDING PASS\nPASSENGER\nJamie Lee\nFLIGHT\nDATE\nSC101\n1 August 2026\nFROM\nTO\nSIN\nNRT\nFictional demonstration data. Not a SureCover policy document.",
+      "text_source": "ocr"
     }
   ],
   "items": [
@@ -21,7 +22,9 @@
         "r": 438.0,
         "b": 1562.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 0.9997,
+      "review": false
     },
     {
       "text": "BOARDING PASS",
@@ -33,7 +36,9 @@
         "r": 591.0,
         "b": 1489.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 0.9999,
+      "review": false
     },
     {
       "text": "PASSENGER",
@@ -45,7 +50,9 @@
         "r": 373.0,
         "b": 1325.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 1.0,
+      "review": false
     },
     {
       "text": "Jamie Lee",
@@ -57,7 +64,9 @@
         "r": 507.0,
         "b": 1233.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 0.9714,
+      "review": false
     },
     {
       "text": "FLIGHT",
@@ -69,7 +78,9 @@
         "r": 284.0,
         "b": 1097.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 0.9999,
+      "review": false
     },
     {
       "text": "DATE",
@@ -81,7 +92,9 @@
         "r": 801.0,
         "b": 1074.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 0.9999,
+      "review": false
     },
     {
       "text": "SC101",
@@ -93,7 +106,9 @@
         "r": 371.0,
         "b": 1008.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 0.9999,
+      "review": false
     },
     {
       "text": "1 August 2026",
@@ -105,7 +120,9 @@
         "r": 1183.0,
         "b": 964.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 0.9859,
+      "review": false
     },
     {
       "text": "FROM",
@@ -117,7 +134,9 @@
         "r": 254.0,
         "b": 837.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 0.9999,
+      "review": false
     },
     {
       "text": "TO",
@@ -129,7 +148,9 @@
         "r": 748.0,
         "b": 818.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 0.9997,
+      "review": false
     },
     {
       "text": "SIN",
@@ -141,7 +162,9 @@
         "r": 272.0,
         "b": 750.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 0.9999,
+      "review": false
     },
     {
       "text": "NRT",
@@ -153,7 +176,9 @@
         "r": 847.0,
         "b": 728.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 1.0,
+      "review": false
     },
     {
       "text": "Fictional demonstration data. Not a SureCover policy document.",
@@ -165,7 +190,9 @@
         "r": 858.0,
         "b": 276.0,
         "coord_origin": "BOTTOMLEFT"
-      }
+      },
+      "confidence": 0.9918,
+      "review": false
     }
   ],
   "document": {

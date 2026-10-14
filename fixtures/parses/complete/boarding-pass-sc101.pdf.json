@@ -7,7 +7,8 @@
   "pages": [
     {
       "page_number": 1,
-      "text": "Fictional demonstration data. Not a SureCover policy document.\nBoarding pass\nPassenger: Jamie Lee\nFlight: SC101\nDate: 1 August 2026\nFrom: SIN\nTo: NRT"
+      "text": "Fictional demonstration data. Not a SureCover policy document.\nBoarding pass\nPassenger: Jamie Lee\nFlight: SC101\nDate: 1 August 2026\nFrom: SIN\nTo: NRT",
+      "text_source": "embedded"
     }
   ],
   "items": [

@@ -4,7 +4,7 @@ A one-week, risk-first backlog for the interview prototype. Reorder as implement
 
 ## Must demonstrate
 
-- [ ] Build a runnable Next.js App Router/TypeScript application with local Supabase for Postgres, Auth, RLS, and private Storage.
+- [ ] Build a runnable Next.js App Router/TypeScript application on the hosted Supabase project SureCover Claims for Postgres, Auth, RLS, and private Storage.
 - [ ] Define claim, document, extracted-fact, evidence-reference, policy-check, workflow, message, and operator-decision contracts.
 - [ ] Create a clearly labeled simplified policy configuration; include the stated 30-working-day deadline and required documents without inventing unverified policy terms.
 - [ ] Implement Resend inbound email/webhook processing for the PDF claim form and supporting documents, plus deterministic outbound acknowledgments, status updates, and information-request replies. Persist provider ids/status and audit events; retain a simulation adapter for local use.
@@ -21,7 +21,7 @@ A one-week, risk-first backlog for the interview prototype. Reorder as implement
 
 
 - [ ] Keep credentials server-side and enforce claim/role-scoped access.
-- [ ] Demonstrate access denial for a claim outside the operator's authorization.
+- [x] Demonstrate access denial for a claim outside the operator's authorization. `npm run verify:access` signs in as both officers: officer A reads `CLM-DEMO-1001` and its files, and officer B receives no rows and no file bytes.
 
 ## Explicitly out of scope unless time remains
 

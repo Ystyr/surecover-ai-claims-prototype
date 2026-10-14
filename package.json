@@ -1,0 +1,15 @@
+{
+  "name": "surecover-ai-claims-prototype",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed:claim": "node supabase/seed/seed-claim.mjs",
+    "verify:access": "node supabase/seed/verify-access.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.3"
+  },
+  "devDependencies": {
+    "supabase": "^2.120.0"
+  }
+}

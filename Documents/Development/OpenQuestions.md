@@ -43,7 +43,7 @@ Prioritize Jev and test whether it can handle most semantic judgment (document c
 
 ### Document parser
 
-Docling's standard pipeline is the stage-1 local parser. Provenance items are individual text lines or table cells, and every box is stored in `BOTTOMLEFT` coordinates. `text_source` records whether those items came from the embedded text layer or from English OCR. An empty result stays unreadable and is not sent onward. The vision-language pipeline and picture descriptions stay off. The application calls `parser/convert_document.py`. Docling Serve can host the same JSON contract later and is not part of stage 1. Recorded parses under `fixtures/parses/` are the rehearsal artifact. Reflected in `Direction.md`. Node.js, Supabase, the original-file viewer, and Resend setup remain open in section 10.
+Docling's standard pipeline is the stage-1 local parser. Provenance items are individual text lines or table cells, and every box is stored in `BOTTOMLEFT` coordinates. Each page records its own `text_source`. A scanned page in a mixed PDF is OCR'd on its own. A blank page is `empty`. A page with ink but no extracted text is `unreadable`. A file that has both extracted text and an unreadable page is `partial`. Neither an empty nor an unreadable result means the facts are absent. Later code quotes only `embedded` and `ocr` pages. An `unreadable` page is an unknown gap and is not sent as text. A `partial` file keeps its readable pages. An `empty` page means no ink. Each OCR line keeps its recognition score, and a score below 0.80 is marked `review` without dropping the line. A corrupt, password-protected, unsupported, or oversized file raises instead of returning a parse. The vision-language pipeline and picture descriptions stay off. The application calls `parser/convert_document.py`. Docling Serve can host the same JSON contract later and is not part of stage 1. Recorded parses under `fixtures/parses/` are the rehearsal artifact. Reflected in `Direction.md`. Node.js, Supabase, the original-file viewer, and Resend setup remain open in section 10.
 
 ### Complete-claim fixture locks
 
@@ -135,6 +135,8 @@ Working assumption: live external Jev calls use synthetic data only. Real custom
 
 Working status list: submitted, processing, needs review, information requested, approved, rejected. Working policy binding: every claim uses `demo-2026.1` unless a test omits the policy record on purpose.
 
+Stage 2 stores officers, one policy row, claims, documents, pages, and items in the hosted Supabase project SureCover Claims. The schema is `supabase/migrations/20261014065300_system_of_record.sql`. Reads use the assignment row and `auth.uid()`. The seeded claim `CLM-DEMO-1001` is assigned to `officer-a@example.com`. `officer-b@example.com` receives no claim rows and no file bytes. Facts, checks, and messages are not in this schema yet.
+
 - What is the minimal schema and relationship model for claims, operators/assignments, documents/storage objects, flights, facts, assessments, checks, events, and notifications?
 - Will claim and file reads run using the authenticated operator JWT and RLS/storage policies, or through a server endpoint? If a privileged service-role path is used, where is the explicit assignment check enforced and how is it verified?
 - How will the two operator identities and claim assignments be seeded locally, and what exact denial result should the unauthorized operator see?
@@ -156,11 +158,11 @@ Working assumption for the core path: the operator may approve, reject, or reque
 
 ### 10. Local development and dependencies
 
-- What Node.js and Supabase CLI/runtime versions will be used, and can local Supabase be started reliably on the development machine?
-- The local PDF and image parser is Docling. See the resolved document-parser note. An empty parse stays unreadable and is not sent onward.
+- What Node.js and Supabase CLI/runtime versions will be used, and can local Supabase be started reliably on the development machine? Node 24 and Supabase CLI 2.120 are installed. Local `supabase start` needs Docker, and this machine's firmware has virtualization disabled. The prototype uses the hosted project SureCover Claims (`xrsqiqcyvhkfvyipcqhf`) instead.
+- The local PDF and image parser is Docling. See the resolved document-parser note. An empty page means no ink. An unreadable page is an unknown gap and is not sent as text.
 - If section 9 requires rendering the original file, which viewer is used?
 - What are the setup steps and environment variables for a fresh clone, and how will secrets be excluded from Git?
-- If local Supabase setup threatens the stop line, what is the fallback persistence and auth approach that still demonstrates claim isolation? The fallback has to be described as a prototype boundary.
+- If local Supabase setup threatens the stop line, what is the fallback persistence and auth approach that still demonstrates claim isolation? Local Docker could not start because firmware virtualization is off. The prototype uses hosted project SureCover Claims. Claim isolation is the assignment row and row-level security, checked by `npm run verify:access`.
 
 ## Resolve before live integration and rehearsal
 

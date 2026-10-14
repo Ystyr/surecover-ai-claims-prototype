@@ -4,4 +4,14 @@ __pycache__/
 *.py[cod]
 .EasyOCR/
 
+node_modules/
+.env
+.env.*
+!.env.example
+supabase/.temp/
+supabase/.branches/
+
+# Adobe Stock previews. Local parser stress inputs only; no license to publish.
+fixtures/samples/samples/
+
 

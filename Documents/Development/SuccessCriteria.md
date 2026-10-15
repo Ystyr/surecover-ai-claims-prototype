@@ -60,9 +60,9 @@ This document turns the interview assignment and current project direction into 
 - The fictional 6-hour minimum, the seeded coverage period, and the holiday list are labeled as demo assumptions on the review screen. The assignment's filing window and required document list are not labeled as fictional.
 - An authorized operator can correct an extracted fact while preserving the original extraction and source; affected checks are recomputed and the correction is recorded.
 - An operator can approve, reject, or request more information. All three stay available and the screen does not rank one of them.
-- Each action requires a rationale. An approval recorded while any check is `fail` or `unknown` names those results in the rationale. The action does not rewrite `unknown` as `fail`.
+- Each action requires a rationale. An approval recorded while any check is `fail` or `unknown` names that check as its own words in the rationale. The action does not rewrite `unknown` as `fail`.
 - The final action is made by an operator and recorded with actor, timestamp, notes, and the assessment and policy version reviewed.
-- The queue lists only claims assigned to the signed-in officer. A claim assigned at intake appears there. Action needed is shown when the status is needs review.
+- The queue lists only claims assigned to the signed-in officer. A claim assigned at intake appears there. Action needed is shown when the status is needs review. Check failed is shown when the latest assessment has a `fail` or `unknown` check, and that indicator does not change the status.
 - The model cannot directly change a claim to approved/rejected or send a message.
 - An officer request for information triggers a deterministic email through Resend that names the missing evidence, and the claim status becomes information requested. Receipt acknowledgments and configured status updates are also sent. No LLM writes these messages. Keep the simulated adapter for local runs.
 - A later traveler reply matched to that claim is stored on the claim. The new documents are assessed, the previous assessment is kept, and the status returns to needs review. The reply does not approve or reject the claim.

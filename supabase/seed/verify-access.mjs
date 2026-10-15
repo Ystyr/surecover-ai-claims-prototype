@@ -52,7 +52,7 @@ async function main() {
   require(claims.data.length === 1, `officer A saw ${claims.data.length} claims`)
   require(claims.data[0].reference === CLAIM_REFERENCE, `officer A saw ${claims.data[0].reference}`)
   require(claims.data[0].claimant_name === "Jamie Lee", "officer A did not see Jamie Lee")
-  require(claims.data[0].status === "submitted", `claim status is ${claims.data[0].status}`)
+  require(claims.data[0].status === "information requested", `claim status is ${claims.data[0].status}`)
 
   const documents = await officerA
     .from("claim_documents")
@@ -77,7 +77,7 @@ async function main() {
   require(items.data.some((item) => item.text === "Jamie Lee" && typeof item.confidence === "number" && typeof item.review === "boolean"), "OCR item is missing its review signal")
 
   const officerB = await signIn(url, anonKey, "officer-b@example.com", password)
-  for (const table of ["claims", "claim_documents", "document_pages", "document_items", "quotable_pages"]) {
+  for (const table of ["claims", "claim_documents", "document_pages", "document_items", "quotable_pages", "claim_decisions"]) {
     const result = await officerB.from(table).select("*")
     if (result.error) throw result.error
     require(result.data.length === 0, `officer B saw ${result.data.length} ${table} rows`)

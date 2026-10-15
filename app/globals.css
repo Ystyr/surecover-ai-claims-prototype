@@ -137,3 +137,22 @@ button {
 .history { list-style: none; padding: 0; margin: 0; }
 .history li { padding: 0.45rem 0; border-top: 1px solid var(--line); }
 .history li:first-child { border-top: 0; }
+
+.fact {
+  margin: 0.8rem 0 0;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--line);
+}
+
+.fact h3 { margin: 0; font-size: 1rem; }
+.fact p { margin: 0.25rem 0; }
+
+.decision {
+  margin: 0.8rem 0 0;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--line);
+}
+
+.decision:first-of-type { margin-top: 0; padding-top: 0; border-top: 0; }
+
+.decision p { margin: 0.25rem 0 0; }

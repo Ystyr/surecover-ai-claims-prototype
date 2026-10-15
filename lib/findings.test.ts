@@ -10,6 +10,8 @@ import {
   MATCHING_STORED_DETAIL,
   assessmentHistoryNote,
   claimPageMessage,
+  latestCheckFailed,
+  timelineNewestFirst,
   expandQuotes,
   fileFailure,
   findingQuotes,
@@ -241,4 +243,22 @@ test("an empty assignment and a failed read are different messages", () => {
     }),
     null,
   )
+})
+
+test("a later assessment stays above an earlier decision", () => {
+  const events = timelineNewestFirst(
+    [{ id: "bbbbbbbb-0000-4000-a000-000000000001", created_at: "2026-10-15T10:00:00.000Z" }],
+    [{ id: "aaaaaaaa-0000-4000-a000-000000000002", created_at: "2026-10-15T11:00:00.000Z" }],
+  )
+  assert.deepEqual(
+    events.map((event) => event.kind + ":" + event.item.id),
+    ["assessment:aaaaaaaa-0000-4000-a000-000000000002", "decision:bbbbbbbb-0000-4000-a000-000000000001"],
+  )
+})
+
+test("a failed or unknown latest check is marked on the queue", () => {
+  assert.equal(latestCheckFailed(["pass", "pass"]), false)
+  assert.equal(latestCheckFailed(["pass", "fail"]), true)
+  assert.equal(latestCheckFailed(["unknown"]), true)
+  assert.equal(latestCheckFailed([]), false)
 })

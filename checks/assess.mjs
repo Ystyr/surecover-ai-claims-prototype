@@ -103,36 +103,245 @@ export function displayDate(iso) {
   return `${day} ${MONTH_NAMES[month - 1]} ${year}`
 }
 
-export function assessClaim({ receivedAt, policy, documents }) {
+const LEG_FIELDS = ["flight_number", "departure_date", "origin", "destination"]
+
+export function factKey(sourceFile, field, flight = null) {
+  if (!flight) return `${sourceFile}#${field}`
+  if (flight.sameDate) {
+    return `${sourceFile}#${flight.flightNumber}#${flight.departureDate}#${flight.origin}#${flight.destination}#${field}`
+  }
+  if (flight.duplicate) return `${sourceFile}#${flight.flightNumber}#${flight.departureDate}#${field}`
+  return `${sourceFile}#${flight.flightNumber}#${field}`
+}
+
+export function validateFactValue(field, value) {
+  const text = normalize(value)
+  if (!text) return null
+  if (field === "flight_number") return flightNumber(text)
+  if (field === "departure_date" || field === "return_date") return parseDisplayDate(text) ?? isoDate(text)
+  if (field === "origin" || field === "destination") return iata(text)
+  if (field === "hours") {
+    if (!/^[0-9]+(?:\.[0-9]+)?$/.test(text)) return null
+    const hours = Number(text)
+    if (!Number.isFinite(hours) || hours < 0) return null
+    return String(hours)
+  }
+  if (field === "claim_type" || field === "reason") return text
+  return null
+}
+
+/**
+ * @param {{
+ *   receivedAt: string,
+ *   policy: { coverage_start?: string, coverage_end?: string, public_holidays?: unknown },
+ *   documents: { sourceFile?: string, items?: { text: string, pageNumber?: number }[] }[],
+ *   corrections?: { factKey?: string, fact_key?: string, value?: string, corrected_value?: string }[],
+ * }} input
+ */
+export function assessClaim({ receivedAt, policy, documents, corrections = [] }) {
+  const parsed = parseDocuments(documents)
+  applyCorrections(parsed, corrections)
+  const arrival = singaporeArrival(parsed.revisedLegs.legs)
+  return {
+    adapter: ADAPTER,
+    facts: parsed.facts,
+    checks: [
+      completeness({
+        prepared: parsed.prepared,
+        unclassified: parsed.unclassified,
+        formLegs: parsed.formLegs,
+        passLegs: parsed.passLegs,
+      }),
+      filingDeadline({ receivedAt, policy, returnDate: parsed.returnDate, arrival }),
+      coverage({ policy, formLegs: parsed.formLegs }),
+      claimTypeCheck({ prepared: parsed.prepared, claimType: parsed.claimType }),
+      consistency({ formLegs: parsed.formLegs, passLegs: parsed.passLegs, returnDate: parsed.returnDate, arrival }),
+      delayCheck(parsed.delay),
+    ],
+  }
+}
+
+function parseDocuments(documents) {
   const prepared = documents.map((document) => ({
     ...document,
     role: establishedRole(document),
   }))
-  const unclassified = prepared.some((document) => document.role === null)
   const form = prepared.find((document) => document.role === "claim_form")
   const revised = prepared.find((document) => document.role === "revised_itinerary")
   const letter = prepared.find((document) => document.role === "delay_letter")
   const passes = prepared.filter((document) => document.role === "boarding_pass")
-
-  const formLegs = form ? readLegs(form) : { legs: [], unreadable: false }
-  const revisedLegs = revised ? readLegs(revised) : { legs: [], unreadable: false }
-  const passLegs = passes.map((document) => ({ document, ...readLegs(document) }))
-  const returnDate = form ? readReturnDate(form) : null
-  const arrival = singaporeArrival(revisedLegs.legs)
-  const claimType = form ? readClaimType(form) : null
-  const delay = letter ? readDelay(letter) : readDelay(null)
-
-  return {
-    adapter: ADAPTER,
-    checks: [
-      completeness({ prepared, unclassified, formLegs, passLegs }),
-      filingDeadline({ receivedAt, policy, returnDate, arrival }),
-      coverage({ policy, formLegs }),
-      claimTypeCheck({ prepared, claimType }),
-      consistency({ formLegs, passLegs, returnDate, arrival }),
-      delayCheck(delay),
-    ],
+  const parsed = {
+    prepared,
+    unclassified: prepared.some((document) => document.role === null),
+    form,
+    revised,
+    letter,
+    formLegs: form ? readLegs(form) : { legs: [], unreadable: false },
+    revisedLegs: revised ? readLegs(revised) : { legs: [], unreadable: false },
+    passLegs: passes.map((document) => ({ document, ...readLegs(document) })),
+    returnDate: form ? readReturnDate(form) : null,
+    claimType: form ? readClaimType(form) : null,
+    delay: letter ? readDelay(letter) : readDelay(null),
+    facts: [],
   }
+  if (parsed.form) assignFactKeys(parsed.form.sourceFile, parsed.formLegs.legs)
+  if (parsed.revised) assignFactKeys(parsed.revised.sourceFile, parsed.revisedLegs.legs)
+  for (const pass of parsed.passLegs) assignFactKeys(pass.document.sourceFile, pass.legs)
+  parsed.facts = collectFacts(parsed)
+  return parsed
+}
+
+function assignFactKeys(sourceFile, legs) {
+  const flightCounts = new Map()
+  const routeCounts = new Map()
+  for (const leg of legs) {
+    flightCounts.set(leg.flight_number, (flightCounts.get(leg.flight_number) ?? 0) + 1)
+    const route = `${leg.flight_number}#${leg.departure_date}`
+    routeCounts.set(route, (routeCounts.get(route) ?? 0) + 1)
+  }
+  for (const leg of legs) {
+    const route = `${leg.flight_number}#${leg.departure_date}`
+    const flight = {
+      flightNumber: leg.flight_number,
+      departureDate: leg.departure_date,
+      origin: leg.origin,
+      destination: leg.destination,
+      duplicate: (flightCounts.get(leg.flight_number) ?? 0) > 1,
+      sameDate: (routeCounts.get(route) ?? 0) > 1,
+    }
+    leg.originalDepartureDate = leg.departure_date
+    leg.factKeyFor = (field) => factKey(sourceFile, field, flight)
+  }
+}
+
+function collectFacts(parsed) {
+  const facts = []
+  const addLegs = (sourceFile, legs) => {
+    legs.forEach((entry, index) => {
+      for (const field of LEG_FIELDS) {
+        const source = entry.sources?.[field]
+        facts.push({
+          factKey: entry.factKeyFor(field),
+          sourceFile,
+          field,
+          legIndex: index,
+          originalValue: String(entry[field]),
+          quoteText: source?.text ?? null,
+          pageNumber: source?.pageNumber ?? null,
+        })
+      }
+    })
+  }
+  if (parsed.form) addLegs(parsed.form.sourceFile, parsed.formLegs.legs)
+  if (parsed.revised) addLegs(parsed.revised.sourceFile, parsed.revisedLegs.legs)
+  for (const pass of parsed.passLegs) addLegs(pass.document.sourceFile, pass.legs)
+  if (parsed.form && parsed.returnDate) {
+    facts.push({
+      factKey: factKey(parsed.form.sourceFile, "return_date"),
+      sourceFile: parsed.form.sourceFile,
+      field: "return_date",
+      legIndex: null,
+      originalValue: parsed.returnDate.date,
+      quoteText: parsed.returnDate.quote?.text ?? null,
+      pageNumber: parsed.returnDate.pageNumber ?? null,
+    })
+  }
+  if (parsed.form && parsed.claimType) {
+    facts.push({
+      factKey: factKey(parsed.form.sourceFile, "claim_type"),
+      sourceFile: parsed.form.sourceFile,
+      field: "claim_type",
+      legIndex: null,
+      originalValue: parsed.claimType.value,
+      quoteText: parsed.claimType.quote?.text ?? null,
+      pageNumber: parsed.claimType.pageNumber ?? null,
+    })
+  }
+  if (parsed.letter && parsed.delay?.hours !== null && parsed.delay?.hours !== undefined) {
+    facts.push({
+      factKey: factKey(parsed.letter.sourceFile, "hours"),
+      sourceFile: parsed.letter.sourceFile,
+      field: "hours",
+      legIndex: null,
+      originalValue: String(parsed.delay.hours),
+      quoteText: parsed.delay.quote?.text ?? null,
+      pageNumber: parsed.delay.hoursPage ?? null,
+    })
+  }
+  if (parsed.letter && parsed.delay?.reason) {
+    facts.push({
+      factKey: factKey(parsed.letter.sourceFile, "reason"),
+      sourceFile: parsed.letter.sourceFile,
+      field: "reason",
+      legIndex: null,
+      originalValue: parsed.delay.reason,
+      quoteText: parsed.delay.reason_quote?.text ?? null,
+      pageNumber: parsed.delay.reasonPage ?? null,
+    })
+  }
+  const seen = new Set()
+  return facts.filter((fact) => {
+    if (seen.has(fact.factKey)) return false
+    seen.add(fact.factKey)
+    return true
+  })
+}
+
+function applyCorrections(parsed, corrections) {
+  const values = new Map()
+  for (const correction of corrections) {
+    const key = correction.factKey ?? correction.fact_key
+    const value = correction.value ?? correction.corrected_value
+    if (typeof key === "string" && value !== undefined && value !== null) values.set(key, String(value))
+  }
+  const applyLegs = (sourceFile, legs) => {
+    if (!sourceFile) return
+    legs.forEach((entry) => {
+      for (const field of LEG_FIELDS) {
+        const value = values.get(entry.factKeyFor?.(field))
+        if (value !== undefined) entry[field] = value
+      }
+    })
+  }
+  if (parsed.form) applyLegs(parsed.form.sourceFile, parsed.formLegs.legs)
+  if (parsed.revised) applyLegs(parsed.revised.sourceFile, parsed.revisedLegs.legs)
+  for (const pass of parsed.passLegs) applyLegs(pass.document.sourceFile, pass.legs)
+  if (parsed.form && parsed.returnDate) {
+    const date = values.get(factKey(parsed.form.sourceFile, "return_date"))
+    if (date !== undefined) parsed.returnDate.date = date
+  }
+  if (parsed.form && parsed.claimType) {
+    const value = values.get(factKey(parsed.form.sourceFile, "claim_type"))
+    if (value !== undefined) {
+      parsed.claimType.value = value
+      parsed.claimType.flight_delay = isFlightDelay(value)
+    }
+  }
+  if (parsed.letter && parsed.delay) {
+    const hours = values.get(factKey(parsed.letter.sourceFile, "hours"))
+    if (hours !== undefined) {
+      const parsedHours = Number(hours)
+      parsed.delay.hours = parsedHours
+      parsed.delay.outcome = parsedHours >= MINIMUM_DELAY_HOURS ? "pass" : "fail"
+    }
+    const reason = values.get(factKey(parsed.letter.sourceFile, "reason"))
+    if (reason !== undefined) parsed.delay.reason = reason
+  }
+}
+
+function isoDate(text) {
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!match) return null
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+  const check = new Date(Date.UTC(year, month - 1, day))
+  if (check.getUTCFullYear() !== year || check.getUTCMonth() !== month - 1 || check.getUTCDate() !== day) return null
+  return text
+}
+
+function isFlightDelay(value) {
+  return normalize(value).replace(/_/g, " ").replace(/\s+/g, " ").toLowerCase() === "flight delay"
 }
 
 function completeness({ prepared, unclassified, formLegs, passLegs }) {
@@ -365,7 +574,14 @@ function readLabeledPass(items) {
   const origin = iata(normalize(fromItem.text).replace(/^From:\s*/i, ""))
   const destination = iata(normalize(toItem.text).replace(/^To:\s*/i, ""))
   if (!flight || !date || !origin || !destination) return []
-  return [leg(flight, date, origin, destination, [flightItem.text, dateItem.text, fromItem.text, toItem.text])]
+  return [
+    leg(flight, date, origin, destination, [flightItem.text, dateItem.text, fromItem.text, toItem.text], {
+      flight_number: fieldSource(flightItem),
+      departure_date: fieldSource(dateItem),
+      origin: fieldSource(fromItem),
+      destination: fieldSource(toItem),
+    }),
+  ]
 }
 
 function readTable(items) {
@@ -382,7 +598,22 @@ function readTable(items) {
       const origin = iata(items[cursor + 2].text)
       const destination = iata(items[cursor + 3].text)
       if (flight && date && origin && destination) {
-        legs.push(leg(flight, date, origin, destination, items.slice(cursor, cursor + 4).map((item) => item.text)))
+        const cells = items.slice(cursor, cursor + 4)
+        legs.push(
+          leg(
+            flight,
+            date,
+            origin,
+            destination,
+            cells.map((item) => item.text),
+            {
+              flight_number: fieldSource(cells[0]),
+              departure_date: fieldSource(cells[1]),
+              origin: fieldSource(cells[2]),
+              destination: fieldSource(cells[3]),
+            },
+          ),
+        )
         cursor += 4
         continue
       }
@@ -407,7 +638,21 @@ function readPhotoPass(items) {
     const origin = iata(items[index + 6].text)
     const destination = iata(items[index + 7].text)
     if (!flight || !date || !origin || !destination) continue
-    return [leg(flight, date, origin, destination, [items[index + 2].text, items[index + 3].text, items[index + 6].text, items[index + 7].text])]
+    return [
+      leg(
+        flight,
+        date,
+        origin,
+        destination,
+        [items[index + 2].text, items[index + 3].text, items[index + 6].text, items[index + 7].text],
+        {
+          flight_number: fieldSource(items[index + 2]),
+          departure_date: fieldSource(items[index + 3]),
+          origin: fieldSource(items[index + 6]),
+          destination: fieldSource(items[index + 7]),
+        },
+      ),
+    ]
   }
   return []
 }
@@ -417,19 +662,26 @@ function readReturnDate(document) {
   if (!item) return null
   const date = parseDisplayDate(item.text)
   if (!date) return null
-  return { date, quote: storedQuote(item.text, document.sourceFile) }
+  return { date, quote: storedQuote(item.text, document.sourceFile), pageNumber: pageNumber(item) }
 }
 
 function readClaimType(document) {
   const item = (document.items ?? []).find((entry) => /^Claim type:/i.test(normalize(entry.text)))
   if (!item) return null
   const value = normalize(item.text).replace(/^Claim type:\s*/i, "")
-  const flightDelay = value.replace(/_/g, " ").replace(/\s+/g, " ").toLowerCase() === "flight delay"
-  return { value, flight_delay: flightDelay, quote: storedQuote(item.text, document.sourceFile) }
+  return {
+    value,
+    flight_delay: isFlightDelay(value),
+    quote: storedQuote(item.text, document.sourceFile),
+    pageNumber: pageNumber(item),
+  }
 }
 
 function delayCheck(delay) {
-  return check("delay", delay.outcome, delay)
+  const detail = { ...delay }
+  delete detail.hoursPage
+  delete detail.reasonPage
+  return check("delay", delay.outcome, detail)
 }
 
 function readDelay(document) {
@@ -442,8 +694,10 @@ function readDelay(document) {
     minimum_hours: MINIMUM_DELAY_HOURS,
     minimum_label: "Fictional demo assumption",
     quote: storedQuote(durationItem?.text, sourceFile),
+    hoursPage: durationItem ? pageNumber(durationItem) : null,
     reason: reasonMatch ? reasonMatch[1] : null,
     reason_quote: storedQuote(reasonItem?.text, sourceFile),
+    reasonPage: reasonItem ? pageNumber(reasonItem) : null,
   }
   if (!durationItem) return { ...base, outcome: "unknown", hours: null }
   const match = normalize(durationItem.text).match(/delay duration:\s*([0-9]+(?:\.[0-9]+)?)\s*hours?\b/i)
@@ -455,17 +709,33 @@ function readDelay(document) {
 function singaporeArrival(legs) {
   const arrivals = legs.filter((flight) => flight.destination === "SIN")
   if (arrivals.length === 0) return null
+  const quotes = arrivals.map((flight) => flight.quotes[1])
   const dates = new Set(arrivals.map((flight) => flight.departure_date))
-  if (dates.size !== 1) return { date: null, quote: arrivals.map((flight) => flight.quotes[1]) }
-  return { date: arrivals[0].departure_date, quote: arrivals[0].quotes[1] }
+  if (dates.size !== 1) return { date: null, quote: quotes }
+  const shared = arrivals[0].departure_date
+  const originalDates = new Set(arrivals.map((flight) => flight.originalDepartureDate ?? flight.departure_date))
+  const quoteTexts = new Set(quotes.filter((quote) => quote?.text).map((quote) => quote.text))
+  if (quoteTexts.size > 1 && originalDates.size > 1 && originalDates.has(shared)) {
+    return { date: null, quote: quotes }
+  }
+  return { date: shared, quote: quotes[0] }
 }
 
 function flightGap(flight) {
   return `${flight.flight_number} on ${displayDate(flight.departure_date)} from ${flight.origin} to ${flight.destination}`
 }
 
-function leg(flight, date, origin, destination, quotes) {
-  return { flight_number: flight, departure_date: date, origin, destination, quotes }
+function leg(flight, date, origin, destination, quotes, sources) {
+  return { flight_number: flight, departure_date: date, origin, destination, quotes, sources }
+}
+
+function fieldSource(item) {
+  return { text: item.text, pageNumber: pageNumber(item) }
+}
+
+function pageNumber(item) {
+  const value = item?.pageNumber ?? item?.page_number
+  return Number.isInteger(value) ? value : null
 }
 
 function check(checkName, outcome, detail) {

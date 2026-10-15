@@ -66,7 +66,7 @@ Configured policy and consistency checks run against the claim facts and applica
 
 One workbench brings together claim details, evidence, extraction results, checks, discrepancies, history, and the available actions. The officer can inspect source files and correct an extracted fact. The correction preserves the original value and provenance, recomputes the affected deterministic checks, and keeps the prior assessment in history. It does not call the classifier again. Request missing information, approve, and reject all stay available. The workbench does not rank or recommend one of them. Material conflicts remain visible and are not silently overwritten by the system.
 
-`unknown` is not a failure and it does not remove an action. Approving while any check is `fail` or `unknown` requires a rationale that names those results. A missing document stays a completeness finding. It is not presented as proof that the traveler is ineligible.
+`unknown` is not a failure and it does not remove an action. Approving while any check is `fail` or `unknown` requires a rationale that names that check as its own words. A missing document stays a completeness finding. It is not presented as proof that the traveler is ineligible.
 
 ### 5. The outcome is recorded
 
@@ -89,7 +89,7 @@ Use a structured layout rather than a conversational interface as the primary re
 3. **Claim history:** intake channel, assessment versions, corrections, inbound replies, outbound messages, and decisions, each with actor and time. The decision records the assessment it used.
 4. **Available actions:** correct a fact, request missing information, approve, or reject. All three decisions stay available together and are not ranked. Each requires a rationale. Approving while any check is `fail` or `unknown` requires that rationale to name those results. The recorded action stores the actor, time, rationale, and assessment version.
 
-Which extracted fields an officer may correct, how a correction is validated, and the exact audit event remain open in `OpenQuestions.md` section 9. The product decision is that correction is supported. A correction does not erase the original extraction, and it does not choose a winner among conflicting sources.
+The officer may correct every parsed fact. The value must match the parser's shape, and the rationale is required. The original quote stays, and the corrected value, officer, time, and rationale are a separate event. A correction does not erase the original extraction, and it does not choose a winner among conflicting sources. The field list is recorded in `OpenQuestions.md` section 9.
 
 The exact visual layout is open to iteration. This sketch is the missing-pass demonstration claim, not a separate scenario:
 
@@ -127,12 +127,12 @@ Jev is the priority semantic model and the main hypothesis to test: can it handl
 ### Core vertical slice
 
 - Resend-backed traveler email with a PDF claim form and supporting attachments; send acknowledgment and claim-linked status/reply messages from deterministic templates. Keep a simulated email adapter for local runs.
-- Operations queue limited to claims assigned to the signed-in officer. Action needed means the status is needs review.
+- Operations queue limited to claims assigned to the signed-in officer. Action needed means the status is needs review. Check failed appears when the latest assessment has a `fail` or `unknown` check, and the claim status stays unchanged.
 - Classification, structured extraction, completeness checks, cross-document discrepancy detection, and configured policy checks.
 - Evidence-linked review workbench with original-file inspection.
-- Officer correction of an extracted fact, preserving the original extraction and provenance; recompute affected deterministic checks and retain the prior assessment in history. The editable field set and audit-event contract are still open in `OpenQuestions.md` section 9.
+- Officer correction of an extracted fact, preserving the original extraction and provenance; recompute affected deterministic checks and retain the prior assessment in history. The editable fields and the audit event are recorded in `OpenQuestions.md` section 9.
 - Real acknowledgment, status updates, and specific missing-information replies through Resend, recorded in claim history. A matched traveler reply stays on the existing claim, is assessed, and returns that claim to needs review. Test with fictional claim data and controlled recipient addresses; use the simulated adapter when external configuration is unavailable.
-- Explicit human approve, reject, and request-information actions. All three stay available and are not ranked. Each requires a rationale. An approval that proceeds while a check is `fail` or `unknown` names those results. The action is stored in the claim history with the assessment version.
+- Explicit human approve, reject, and request-information actions. All three stay available and are not ranked. Each requires a rationale. An approval that proceeds while a check is `fail` or `unknown` names that check as its own words. The action is stored in the claim history with the assessment version.
 - Synthetic demonstration scenarios: complete, incomplete, and conflicting or ambiguous evidence.
 
 The PDF form is a demonstration artifact, not a verified SureCover form. Resend is a prototype integration, not a production mail operations setup. Product details that depend on actual policy, real claim forms, or operator research must be labeled as assumptions.

@@ -192,6 +192,10 @@ export const FILE_READ_ERROR_MESSAGE = "This file could not be read."
 export const MATCHING_STORED_DETAIL = "Outcomes and the stored detail match the earlier assessment."
 export const DIFFERING_STORED_DETAIL = "Outcomes match the earlier assessment, and the stored detail differs."
 
+export function latestCheckFailed(outcomes: string[]) {
+  return outcomes.some((outcome) => outcome === "fail" || outcome === "unknown")
+}
+
 export function fileFailure(input: {
   claimId?: string
   documentId?: string
@@ -227,6 +231,21 @@ export function claimPageMessage(input: {
   if (input.claimError || input.documentError || input.assessmentError) return CLAIM_READ_ERROR_MESSAGE
   if (!input.claim) return CLAIM_ABSENT_MESSAGE
   return null
+}
+
+export function timelineNewestFirst<
+  D extends { id: string; created_at: string },
+  A extends { id: string; created_at: string },
+>(decisions: D[], assessments: A[]) {
+  const events: Array<{ kind: "decision"; item: D } | { kind: "assessment"; item: A }> = [
+    ...decisions.map((item) => ({ kind: "decision" as const, item })),
+    ...assessments.map((item) => ({ kind: "assessment" as const, item })),
+  ]
+  return events.sort((left, right) => {
+    const byTime = Date.parse(right.item.created_at) - Date.parse(left.item.created_at)
+    if (byTime !== 0) return byTime
+    return right.item.id < left.item.id ? -1 : right.item.id > left.item.id ? 1 : 0
+  })
 }
 
 export function assessmentHistoryNote(current: CheckRow[], earlier: CheckRow[] | null | undefined) {

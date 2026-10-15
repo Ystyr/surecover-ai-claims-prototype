@@ -47,18 +47,72 @@ async function signIn(url, anonKey, email, password) {
 async function main() {
   const { url, anonKey, password } = projectEnv()
   const officerA = await signIn(url, anonKey, "officer-a@example.com", password)
-  const assessments = await officerA.from("assessments").select("id, adapter, created_at").order("created_at", { ascending: false })
+  const claim = await officerA.from("claims").select("id").eq("reference", "CLM-DEMO-1001").single()
+  if (claim.error) throw claim.error
+  const denied = await officerA.from("assessments").insert({ claim_id: claim.data.id, adapter: "fixture" })
+  require(denied.error, "officer A inserted an assessment without the correction function")
+
+  const hidden = await officerA.schema("private").rpc("record_fact_correction", {
+    p_claim_id: claim.data.id,
+    p_fact_key: "delay-letter.pdf#hours",
+    p_corrected_value: "9",
+    p_rationale: "should not run",
+    p_checks: [],
+    p_baseline: [],
+  })
+  require(hidden.error, "the private correction function was exposed to the API")
+  require(
+    !/value invalid|six checks|stale correction|value unchanged|fact not found/.test(hidden.error.message),
+    `the private correction function ran: ${hidden.error.message}`,
+  )
+
+  const assessments = await officerA
+    .from("assessments")
+    .select("id, adapter, created_at")
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
   if (assessments.error) throw assessments.error
   require(assessments.data.length >= 1, "officer A saw no assessment")
   require(assessments.data[0].adapter === "fixture", `assessment adapter is ${assessments.data[0].adapter}`)
 
+  const hoursFact = await officerA
+    .from("extracted_facts")
+    .select("id")
+    .eq("claim_id", claim.data.id)
+    .eq("fact_key", "delay-letter.pdf#hours")
+    .single()
+  if (hoursFact.error) throw hoursFact.error
+  const corrections = await officerA
+    .from("fact_corrections")
+    .select("id, corrected_value, assessment_id")
+    .eq("fact_id", hoursFact.data.id)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true })
+  if (corrections.error) throw corrections.error
+  const restored = [...corrections.data].reverse().find((row) => row.corrected_value === "8")
+  const failedHours = corrections.data.filter((row) => row.corrected_value === "3")
+  require(restored, "the restored 8-hour correction is missing")
+  require(failedHours.length >= 1, "the 3-hour correction is missing")
+  require(
+    failedHours.every((row) => row.assessment_id !== assessments.data[0].id),
+    "a 3-hour assessment is the latest",
+  )
+  const latestDelay = await officerA
+    .from("policy_checks")
+    .select("detail")
+    .eq("assessment_id", assessments.data[0].id)
+    .eq("check_name", "delay")
+    .single()
+  if (latestDelay.error) throw latestDelay.error
+  require(Number(latestDelay.data.detail?.hours) !== 3, "the latest delay is 3 hours")
+
   const checks = await officerA
     .from("policy_checks")
     .select("check_name, outcome, detail")
-    .eq("assessment_id", assessments.data[0].id)
+    .eq("assessment_id", restored.assessment_id)
   if (checks.error) throw checks.error
   const byName = new Map(checks.data.map((entry) => [entry.check_name, entry]))
-  require(byName.size === CHECKS.length, `officer A saw ${byName.size} checks`)
+  require(byName.size === CHECKS.length, `the restored assessment has ${byName.size} checks`)
   for (const name of CHECKS) {
     require(byName.get(name)?.outcome === "pass", `${name} is ${byName.get(name)?.outcome}`)
   }
@@ -82,7 +136,8 @@ async function main() {
     require(result.data.length === 0, `officer B saw ${result.data.length} ${table} rows`)
   }
 
-  console.log("officer A can read the six passing checks for CLM-DEMO-1001")
+  console.log("officer A can read the restored 8-hour pass, and every 3-hour assessment is still in history")
+  console.log("officer A cannot insert an assessment directly")
   console.log("officer B receives no assessment and no check rows")
 }
 

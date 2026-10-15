@@ -310,6 +310,45 @@ test("claim type fails for another readable type and is unknown below the gate",
   assert.equal(outcome(low, "claim_type").detail.choice_probability, 0.59)
 })
 
+test("a quote records the file that produced it", () => {
+  const result = bundle()
+  const filing = outcome(result, "filing_deadline").detail
+  assert.equal(filing.return_quote.source_file, "claim-form.pdf")
+  assert.equal(filing.revised_quote.source_file, "revised-itinerary.pdf")
+  const claimType = outcome(result, "claim_type").detail
+  assert.equal(claimType.quote.text, "Claim type: Flight delay")
+  assert.equal(claimType.quote.source_file, "claim-form.pdf")
+  assert.equal(claimType.letter_source_file, "delay-letter.pdf")
+  const delay = outcome(result, "delay").detail
+  assert.equal(delay.quote.source_file, "delay-letter.pdf")
+  assert.equal(delay.reason_quote.source_file, "delay-letter.pdf")
+  const coverage = outcome(result, "coverage").detail
+  assert.equal(coverage.legs[0].quote.source_file, "claim-form.pdf")
+  const compared = outcome(result, "consistency").detail
+  assert.equal(compared.routes[0].form.quote[0].source_file, "claim-form.pdf")
+  assert.equal(compared.routes[0].pass.quote[0].source_file, "boarding-pass-sc101.pdf")
+})
+
+test("two Singapore arrivals keep both date quotes", () => {
+  const revised = [
+    ...flights,
+    { flight: "SC303", date: "8 August 2026", from: "BKK", to: "SIN" },
+  ]
+  const result = bundle({ revised })
+  const filing = outcome(result, "filing_deadline")
+  const compared = outcome(result, "consistency")
+  assert.equal(filing.outcome, "unknown")
+  assert.equal(filing.detail.revised_arrival, null)
+  assert.equal(filing.detail.revised_quote.length, 2)
+  assert.deepEqual(
+    filing.detail.revised_quote.map((quote) => quote.text),
+    ["7 August 2026", "8 August 2026"],
+  )
+  assert.equal(filing.detail.revised_quote[0].source_file, "revised-itinerary.pdf")
+  assert.equal(compared.outcome, "unknown")
+  assert.equal(compared.detail.return_date.revised_quote.length, 2)
+})
+
 test("quotes ignore a page that is not quotable", () => {
   const items = [
     { document_id: "doc", page_number: 1, text: "Delay duration: 8 hours." },

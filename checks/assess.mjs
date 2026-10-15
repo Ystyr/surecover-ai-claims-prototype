@@ -267,7 +267,7 @@ function claimTypeCheck({ prepared, claimType }) {
   return check("claim_type", "pass", {
     quote: claimType.quote,
     value: claimType.value,
-    source_file: letter.sourceFile,
+    letter_source_file: letter.sourceFile,
   })
 }
 
@@ -334,13 +334,24 @@ function establishedRole(document) {
 
 function readLegs(document) {
   const items = document.items ?? []
-  const labeled = readLabeledPass(items)
-  if (labeled.length > 0) return { legs: labeled, unreadable: false }
-  const table = readTable(items)
-  if (table.legs.length > 0 || table.unreadable) return table
-  const photo = readPhotoPass(items)
-  if (photo.length > 0) return { legs: photo, unreadable: false }
-  return { legs: [], unreadable: false }
+  let read = { legs: readLabeledPass(items), unreadable: false }
+  if (read.legs.length === 0) {
+    const table = readTable(items)
+    read = table.legs.length > 0 || table.unreadable ? table : { legs: readPhotoPass(items), unreadable: false }
+  }
+  const sourceFile = document.sourceFile ?? null
+  return {
+    unreadable: read.unreadable,
+    legs: read.legs.map((entry) => ({
+      ...entry,
+      quotes: entry.quotes.map((text) => storedQuote(text, sourceFile)),
+    })),
+  }
+}
+
+function storedQuote(text, sourceFile) {
+  if (typeof text !== "string" || text.length === 0) return null
+  return { text, source_file: sourceFile ?? null }
 }
 
 function readLabeledPass(items) {
@@ -406,7 +417,7 @@ function readReturnDate(document) {
   if (!item) return null
   const date = parseDisplayDate(item.text)
   if (!date) return null
-  return { date, quote: item.text }
+  return { date, quote: storedQuote(item.text, document.sourceFile) }
 }
 
 function readClaimType(document) {
@@ -414,7 +425,7 @@ function readClaimType(document) {
   if (!item) return null
   const value = normalize(item.text).replace(/^Claim type:\s*/i, "")
   const flightDelay = value.replace(/_/g, " ").replace(/\s+/g, " ").toLowerCase() === "flight delay"
-  return { value, flight_delay: flightDelay, quote: item.text }
+  return { value, flight_delay: flightDelay, quote: storedQuote(item.text, document.sourceFile) }
 }
 
 function delayCheck(delay) {
@@ -426,12 +437,13 @@ function readDelay(document) {
   const durationItem = items.find((item) => /delay duration:/i.test(item.text))
   const reasonItem = items.find((item) => /delayed because of /i.test(item.text))
   const reasonMatch = reasonItem ? normalize(reasonItem.text).match(/delayed because of (?:a\s+)?(.+?)(?:\.|$)/i) : null
+  const sourceFile = document?.sourceFile ?? null
   const base = {
     minimum_hours: MINIMUM_DELAY_HOURS,
     minimum_label: "Fictional demo assumption",
-    quote: durationItem?.text ?? null,
+    quote: storedQuote(durationItem?.text, sourceFile),
     reason: reasonMatch ? reasonMatch[1] : null,
-    reason_quote: reasonItem?.text ?? null,
+    reason_quote: storedQuote(reasonItem?.text, sourceFile),
   }
   if (!durationItem) return { ...base, outcome: "unknown", hours: null }
   const match = normalize(durationItem.text).match(/delay duration:\s*([0-9]+(?:\.[0-9]+)?)\s*hours?\b/i)

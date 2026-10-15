@@ -1,0 +1,139 @@
+:root {
+  color-scheme: light;
+  --ink: #1c2430;
+  --muted: #5c6770;
+  --paper: #f7f4ee;
+  --card: #fffdf8;
+  --line: #d9d1c3;
+  --banner: #14315c;
+  --pass: #1f6b45;
+  --fail: #8d2f2f;
+  --unknown: #8a5a12;
+  --focus: #14315c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 16px/1.5 "Segoe UI", sans-serif;
+}
+
+a { color: var(--banner); }
+
+.banner {
+  margin: 0;
+  padding: 0.55rem 1.25rem;
+  background: var(--banner);
+  color: #f3efe4;
+  font-size: 0.92rem;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem 0;
+}
+
+.top h1 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.top h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+main {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+.panel, .finding, .claim-row {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.panel, .finding { padding: 1rem 1.1rem; margin: 0 0 1rem; }
+
+.claim-row {
+  display: block;
+  padding: 0.9rem 1.1rem;
+  margin: 0 0 0.75rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.claim-row:hover { border-color: var(--banner); }
+
+.row-head, .finding-head, .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  align-items: baseline;
+}
+
+.muted { color: var(--muted); }
+
+.outcome, .needed {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.outcome-pass { color: var(--pass); background: #e7f4ec; }
+.outcome-fail { color: var(--fail); background: #f8e8e8; }
+.outcome-unknown { color: var(--unknown); background: #f8efdc; }
+.needed { color: var(--banner); background: #e7eef8; }
+
+label { display: block; margin: 0.8rem 0 0.25rem; }
+
+input {
+  width: min(100%, 28rem);
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+  background: white;
+}
+
+button, .actions span {
+  font: inherit;
+  border-radius: 6px;
+  padding: 0.45rem 0.8rem;
+}
+
+button {
+  border: 1px solid var(--banner);
+  background: var(--banner);
+  color: white;
+  cursor: pointer;
+}
+
+.actions span {
+  border: 1px solid var(--line);
+  background: white;
+}
+
+.quotes { margin: 0.6rem 0 0; padding-left: 1.1rem; }
+
+.quotes a { text-decoration: underline; }
+
+.error { color: var(--fail); }
+
+.files { list-style: none; padding: 0; margin: 0; }
+.files li { margin: 0.35rem 0; }
+
+.history { list-style: none; padding: 0; margin: 0; }
+.history li { padding: 0.45rem 0; border-top: 1px solid var(--line); }
+.history li:first-child { border-top: 0; }

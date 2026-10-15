@@ -66,8 +66,14 @@ async function main() {
   require(filing.working_days === 2, `working days are ${filing.working_days}`)
   require(filing.deadline === "2026-09-21", `deadline is ${filing.deadline}`)
   require(filing.return_date === "2026-08-07", `return date is ${filing.return_date}`)
+  require(filing.return_quote?.source_file === "claim-form.pdf", "filing return quote is not the claim form")
+  require(filing.revised_quote?.source_file === "revised-itinerary.pdf", "filing arrival quote is not the revised itinerary")
+  const claimType = byName.get("claim_type").detail
+  require(claimType.quote?.source_file === "claim-form.pdf", "claim type quote is not the claim form")
+  require(claimType.letter_source_file === "delay-letter.pdf", "claim type letter file is not the delay letter")
   const delay = byName.get("delay").detail
   require(byName.get("delay").outcome === "pass" && delay.hours === 8, `delay is ${byName.get("delay").outcome} ${delay.hours}`)
+  require(delay.quote?.source_file === "delay-letter.pdf", "delay quote is not the delay letter")
 
   const officerB = await signIn(url, anonKey, "officer-b@example.com", password)
   for (const table of ["assessments", "policy_checks"]) {

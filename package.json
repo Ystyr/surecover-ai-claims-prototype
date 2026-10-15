@@ -3,16 +3,25 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:checks": "node --test checks/assess.test.mjs",
+    "dev": "next dev",
+    "test:checks": "node --experimental-strip-types --test checks/assess.test.mjs lib/findings.test.ts",
     "seed:claim": "node supabase/seed/seed-claim.mjs",
     "assess:claim": "node supabase/seed/assess-claim.mjs",
     "verify:access": "node supabase/seed/verify-access.mjs",
     "verify:checks": "node supabase/seed/verify-checks.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.117.3"
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.3",
+    "next": "^16.4.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "supabase": "^2.120.0"
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "supabase": "^2.120.0",
+    "typescript": "^7.0.2"
   }
 }

@@ -2,7 +2,10 @@ import {
   CHECK_LABELS,
   CLAIM_ABSENT_MESSAGE,
   CLAIM_READ_ERROR_MESSAGE,
+  assessmentHistoryNote,
+  assessmentOutcomeLine,
   claimPageMessage,
+  isUuid,
   displayDate,
   displayInstant,
   findingQuotes,
@@ -22,6 +25,22 @@ type AssessmentRow = {
 
 export default async function ClaimPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  if (!isUuid(id)) {
+    return (
+      <ClaimNotice
+        message={
+          claimPageMessage({
+            claimId: id,
+            claimError: null,
+            claim: null,
+            documentError: null,
+            assessmentError: null,
+          }) ?? CLAIM_ABSENT_MESSAGE
+        }
+      />
+    )
+  }
+
   const supabase = await createClient()
   const claimResult = await supabase
     .from("claims")
@@ -35,6 +54,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ id: stri
       <ClaimNotice
         message={
           claimPageMessage({
+            claimId: id,
             claimError: claimResult.error,
             claim,
             documentError: null,
@@ -54,6 +74,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ id: stri
       .order("created_at", { ascending: false }),
   ])
   const blocked = claimPageMessage({
+    claimId: id,
     claimError: null,
     claim,
     documentError: documentResult.error,
@@ -108,14 +129,15 @@ export default async function ClaimPage({ params }: { params: Promise<{ id: stri
         <h2>History</h2>
         <ul className="history">
           {history.map((assessment, index) => {
-            const outcomes = sortChecks(assessment.policy_checks ?? [])
-              .map((check) => `${CHECK_LABELS[check.check_name] ?? check.check_name} ${check.outcome}`)
-              .join(", ")
+            const outcomes = assessmentOutcomeLine(assessment.policy_checks ?? [])
+            const earlier = history[index + 1]
+            const historyNote = earlier ? assessmentHistoryNote(assessment.policy_checks ?? [], earlier.policy_checks ?? []) : null
             return (
               <li key={assessment.id}>
                 <strong>{displayInstant(assessment.created_at)}</strong>
                 <span className="muted"> · {assessment.adapter}</span>
                 {index === 0 ? <span className="muted"> · shown above</span> : null}
+                {historyNote ? <span className="muted"> · {historyNote}</span> : null}
                 <div>{outcomes}</div>
               </li>
             )
@@ -176,6 +198,8 @@ function Finding({
                 ) : (
                   item.text
                 )}
+                {item.flightNumber ? <span className="muted"> · {item.flightNumber}</span> : null}
+                {item.sourceFile ? <span className="muted"> · {item.sourceFile}</span> : null}
               </li>
             )
           })}

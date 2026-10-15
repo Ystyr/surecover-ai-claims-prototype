@@ -1,5 +1,3 @@
-import { signIn } from "@/app/login/actions"
-
 export default async function LoginPage({
   searchParams,
 }: {
@@ -10,7 +8,7 @@ export default async function LoginPage({
   return (
     <section className="panel">
       <h2>Officer sign in</h2>
-      <form action={signIn}>
+      <form action="/login/session" method="post">
         <label htmlFor="email">Email</label>
         <input id="email" name="email" type="email" autoComplete="username" required />
         <label htmlFor="password">Password</label>

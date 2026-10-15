@@ -176,23 +176,82 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
 export type QuoteLink = {
   text: string
   sourceFile: string | null
+  flightNumber: string | null
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+export function isUuid(value: string) {
+  return UUID_PATTERN.test(value)
 }
 
 export const CLAIM_ABSENT_MESSAGE = "This claim is not in your queue."
 export const CLAIM_READ_ERROR_MESSAGE = "This claim could not be read."
+export const FILE_ABSENT_MESSAGE = "Not found"
+export const FILE_READ_ERROR_MESSAGE = "This file could not be read."
+export const MATCHING_STORED_DETAIL = "Outcomes and the stored detail match the earlier assessment."
+export const DIFFERING_STORED_DETAIL = "Outcomes match the earlier assessment, and the stored detail differs."
+
+export function fileFailure(input: {
+  claimId?: string
+  documentId?: string
+  selectError: unknown
+  document: unknown
+  downloadError: unknown
+}) {
+  const claimId = input.claimId
+  const documentId = input.documentId
+  if ((claimId !== undefined && !isUuid(claimId)) || (documentId !== undefined && !isUuid(documentId))) {
+    return { status: 404, message: FILE_ABSENT_MESSAGE }
+  }
+  if (input.selectError) return { status: 500, message: FILE_READ_ERROR_MESSAGE }
+  if (!input.document) return { status: 404, message: FILE_ABSENT_MESSAGE }
+  if (input.downloadError) return { status: 500, message: FILE_READ_ERROR_MESSAGE }
+  return null
+}
+
+export function assessmentOutcomeLine(checks: CheckRow[]) {
+  return sortChecks(checks)
+    .map((check) => `${CHECK_LABELS[check.check_name] ?? check.check_name} ${check.outcome}`)
+    .join(", ")
+}
 
 export function claimPageMessage(input: {
+  claimId?: string
   claimError: unknown
   claim: unknown
   documentError: unknown
   assessmentError: unknown
 }) {
+  if (input.claimId !== undefined && !isUuid(input.claimId)) return CLAIM_ABSENT_MESSAGE
   if (input.claimError || input.documentError || input.assessmentError) return CLAIM_READ_ERROR_MESSAGE
   if (!input.claim) return CLAIM_ABSENT_MESSAGE
   return null
 }
 
+export function assessmentHistoryNote(current: CheckRow[], earlier: CheckRow[] | null | undefined) {
+  if (!earlier) return null
+  if (assessmentOutcomeLine(current) !== assessmentOutcomeLine(earlier)) return null
+  return storedDetailLine(current) === storedDetailLine(earlier) ? MATCHING_STORED_DETAIL : DIFFERING_STORED_DETAIL
+}
+
+function storedDetailLine(checks: CheckRow[]) {
+  return JSON.stringify(sortChecks(checks).map((check) => [check.check_name, stableValue(check.detail ?? {})]))
+}
+
+function stableValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map((entry) => stableValue(entry))
+  if (isRecord(value)) {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, stableValue(value[key])]))
+  }
+  return value ?? null
+}
+
 export function findingQuotes(check: CheckRow): QuoteLink[] {
+  return storedQuotes(check)
+}
+
+function storedQuotes(check: CheckRow): QuoteLink[] {
   const detail = check.detail ?? {}
   if (check.check_name === "filing_deadline") {
     return [...expandQuotes(detail.return_quote), ...expandQuotes(detail.revised_quote)]
@@ -205,10 +264,16 @@ export function findingQuotes(check: CheckRow): QuoteLink[] {
   if (check.check_name === "consistency") {
     const links: QuoteLink[] = []
     const routes = Array.isArray(detail.routes) ? detail.routes : []
+    const shownFlights = new Set<string>()
     for (const route of routes) {
       if (!isRecord(route)) continue
-      if (isRecord(route.form)) links.push(...expandQuotes(route.form.quote))
-      if (isRecord(route.pass)) links.push(...expandQuotes(route.pass.quote))
+      const flightNumber = typeof route.flight_number === "string" && route.flight_number.length > 0 ? route.flight_number : null
+      const flightKey = `${flightNumber ?? ""}\0${typeof route.departure_date === "string" ? route.departure_date : ""}`
+      if (isRecord(route.form) && !shownFlights.has(flightKey)) {
+        links.push(...withFlight(expandQuotes(route.form.quote), flightNumber))
+        shownFlights.add(flightKey)
+      }
+      if (isRecord(route.pass)) links.push(...withFlight(expandQuotes(route.pass.quote), flightNumber))
     }
     const dates = isRecord(detail.return_date) ? detail.return_date : null
     if (dates) links.push(...expandQuotes(dates.form_quote), ...expandQuotes(dates.revised_quote))
@@ -221,10 +286,20 @@ export function findingQuotes(check: CheckRow): QuoteLink[] {
 }
 
 export function expandQuotes(value: unknown): QuoteLink[] {
-  if (typeof value === "string" && value.length > 0) return [{ text: value, sourceFile: null }]
+  if (typeof value === "string" && value.length > 0) return [{ text: value, sourceFile: null, flightNumber: null }]
   if (Array.isArray(value)) return value.flatMap((entry) => expandQuotes(entry))
   if (isRecord(value) && typeof value.text === "string" && value.text.length > 0) {
-    return [{ text: value.text, sourceFile: typeof value.source_file === "string" ? value.source_file : null }]
+    return [
+      {
+        text: value.text,
+        sourceFile: typeof value.source_file === "string" ? value.source_file : null,
+        flightNumber: null,
+      },
+    ]
   }
   return []
+}
+
+function withFlight(links: QuoteLink[], flightNumber: string | null) {
+  return links.map((link) => ({ ...link, flightNumber }))
 }

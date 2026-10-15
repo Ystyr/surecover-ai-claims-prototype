@@ -4,8 +4,14 @@ import test from "node:test"
 import {
   CLAIM_ABSENT_MESSAGE,
   CLAIM_READ_ERROR_MESSAGE,
+  FILE_ABSENT_MESSAGE,
+  FILE_READ_ERROR_MESSAGE,
+  DIFFERING_STORED_DETAIL,
+  MATCHING_STORED_DETAIL,
+  assessmentHistoryNote,
   claimPageMessage,
   expandQuotes,
+  fileFailure,
   findingQuotes,
   findingSummary,
   type CheckRow,
@@ -23,7 +29,7 @@ test("a claim-type pass links the form sentence to the claim form", () => {
       letter_source_file: "delay-letter.pdf",
     }),
   )
-  assert.deepEqual(links, [{ text: "Claim type: Flight delay", sourceFile: "claim-form.pdf" }])
+  assert.deepEqual(links, [{ text: "Claim type: Flight delay", sourceFile: "claim-form.pdf", flightNumber: null }])
 })
 
 test("delay and boarding-pass quotes use their own files", () => {
@@ -83,7 +89,129 @@ test("two Singapore arrivals stay visible and one quote stays one link", () => {
     revised_quote: detail.revised_quote,
   }
   assert.match(findingSummary(check("consistency", "unknown", { routes: [], return_date: dates })), /disagree/)
-  assert.deepEqual(expandQuotes("7 August 2026"), [{ text: "7 August 2026", sourceFile: null }])
+  assert.deepEqual(expandQuotes("7 August 2026"), [{ text: "7 August 2026", sourceFile: null, flightNumber: null }])
+})
+
+test("a flight's form quote is kept once and the other flight stays", () => {
+  const links = findingQuotes(
+    check("consistency", "pass", {
+      routes: [
+        {
+          flight_number: "SC101",
+          departure_date: "2026-08-01",
+          form: {
+            quote: [
+              { text: "SIN", source_file: "claim-form.pdf" },
+              { text: "NRT", source_file: "claim-form.pdf" },
+            ],
+          },
+          pass: { quote: [{ text: "From: SIN", source_file: "boarding-pass-sc101.pdf" }] },
+        },
+        {
+          flight_number: "SC101",
+          departure_date: "2026-08-01",
+          form: {
+            quote: [
+              { text: "SIN", source_file: "claim-form.pdf" },
+              { text: "NRT", source_file: "claim-form.pdf" },
+            ],
+          },
+          pass: { quote: [{ text: "SIN", source_file: "boarding-pass-sc101.png" }] },
+        },
+        {
+          flight_number: "SC202",
+          departure_date: "2026-08-07",
+          form: {
+            quote: [
+              { text: "NRT", source_file: "claim-form.pdf" },
+              { text: "SIN", source_file: "claim-form.pdf" },
+            ],
+          },
+          pass: { quote: [{ text: "From: NRT", source_file: "boarding-pass-sc202.pdf" }] },
+        },
+      ],
+      return_date: {},
+    }),
+  )
+  assert.deepEqual(
+    links.map((link) => `${link.text} ${link.flightNumber} ${link.sourceFile}`),
+    [
+      "SIN SC101 claim-form.pdf",
+      "NRT SC101 claim-form.pdf",
+      "From: SIN SC101 boarding-pass-sc101.pdf",
+      "SIN SC101 boarding-pass-sc101.png",
+      "NRT SC202 claim-form.pdf",
+      "SIN SC202 claim-form.pdf",
+      "From: NRT SC202 boarding-pass-sc202.pdf",
+    ],
+  )
+  const formSin = links.filter((link) => link.text === "SIN" && link.sourceFile === "claim-form.pdf")
+  assert.deepEqual(
+    formSin.map((link) => link.flightNumber),
+    ["SC101", "SC202"],
+  )
+})
+
+test("a missing file and a failed file read are different results", () => {
+  assert.deepEqual(fileFailure({ selectError: { message: "unavailable" }, document: null, downloadError: null }), {
+    status: 500,
+    message: FILE_READ_ERROR_MESSAGE,
+  })
+  assert.deepEqual(fileFailure({ selectError: null, document: null, downloadError: null }), {
+    status: 404,
+    message: FILE_ABSENT_MESSAGE,
+  })
+  assert.deepEqual(fileFailure({ selectError: null, document: { id: "file" }, downloadError: { message: "unavailable" } }), {
+    status: 500,
+    message: FILE_READ_ERROR_MESSAGE,
+  })
+  assert.equal(fileFailure({ selectError: null, document: { id: "file" }, downloadError: null }), null)
+})
+
+test("matching outcomes say whether the stored detail matches", () => {
+  const earlier = [
+    check("completeness", "pass", { quote: "old" }),
+    check("delay", "pass", { hours: 8 }),
+  ]
+  const sameDetail = [
+    check("delay", "pass", { hours: 8 }),
+    check("completeness", "pass", { quote: "old" }),
+  ]
+  const differentDetail = [
+    check("completeness", "pass", { quote: { text: "new", source_file: "claim-form.pdf" } }),
+    check("delay", "pass", { hours: 8 }),
+  ]
+  const fewerChecks = [check("completeness", "pass", { quote: "old" })]
+  assert.equal(assessmentHistoryNote(sameDetail, earlier), MATCHING_STORED_DETAIL)
+  assert.equal(assessmentHistoryNote(differentDetail, earlier), DIFFERING_STORED_DETAIL)
+  assert.equal(assessmentHistoryNote(fewerChecks, earlier), null)
+})
+
+test("a non-uuid id is missing and a select error is a failed read", () => {
+  assert.equal(
+    claimPageMessage({ claimId: "not-a-uuid", claimError: null, claim: null, documentError: null, assessmentError: null }),
+    CLAIM_ABSENT_MESSAGE,
+  )
+  assert.deepEqual(
+    fileFailure({
+      claimId: "c1a10001-de10-4000-a000-000000001001",
+      documentId: "not-a-uuid",
+      selectError: null,
+      document: null,
+      downloadError: null,
+    }),
+    { status: 404, message: FILE_ABSENT_MESSAGE },
+  )
+  assert.deepEqual(
+    fileFailure({
+      claimId: "c1a10001-de10-4000-a000-000000001001",
+      documentId: "00000000-0000-4000-a000-000000000000",
+      selectError: { message: "unavailable" },
+      document: null,
+      downloadError: null,
+    }),
+    { status: 500, message: FILE_READ_ERROR_MESSAGE },
+  )
 })
 
 test("an empty assignment and a failed read are different messages", () => {

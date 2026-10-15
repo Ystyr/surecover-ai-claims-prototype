@@ -11,6 +11,7 @@ import {
   assessmentHistoryNote,
   claimPageMessage,
   latestCheckFailed,
+  requestMessageText,
   timelineNewestFirst,
   expandQuotes,
   fileFailure,
@@ -242,6 +243,39 @@ test("an empty assignment and a failed read are different messages", () => {
       assessmentError: null,
     }),
     null,
+  )
+})
+
+test("the request message greets the claimant and keeps the rationale", () => {
+  const message = requestMessageText({
+    reference: "CLM-DEMO-1001",
+    claimantName: "Jamie Lee",
+    rationale: "Ask the traveler for the original boarding pass for the delayed return. This records the request only.",
+  })
+  assert.equal(message.subject, "Information requested for CLM-DEMO-1001")
+  assert.equal(
+    message.body,
+    [
+      "Hello Jamie Lee,",
+      "",
+      "We need more information to continue claim CLM-DEMO-1001.",
+      "",
+      "Ask the traveler for the original boarding pass for the delayed return. This records the request only.",
+      "",
+      "Fictional demonstration data. Not a SureCover policy document.",
+    ].join("\n"),
+  )
+})
+
+test("a later message stays above an earlier decision", () => {
+  const events = timelineNewestFirst(
+    [{ id: "bbbbbbbb-0000-4000-a000-000000000001", created_at: "2026-10-15T10:00:00.000Z" }],
+    [],
+    [{ id: "cccccccc-0000-4000-a000-000000000003", created_at: "2026-10-15T12:00:00.000Z" }],
+  )
+  assert.deepEqual(
+    events.map((event) => event.kind + ":" + event.item.id),
+    ["message:cccccccc-0000-4000-a000-000000000003", "decision:bbbbbbbb-0000-4000-a000-000000000001"],
   )
 })
 

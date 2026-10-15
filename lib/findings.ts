@@ -233,13 +233,30 @@ export function claimPageMessage(input: {
   return null
 }
 
+export function requestMessageText(input: { reference: string; claimantName: string; rationale: string }) {
+  return {
+    subject: `Information requested for ${input.reference}`,
+    body: [
+      `Hello ${input.claimantName},`,
+      "",
+      `We need more information to continue claim ${input.reference}.`,
+      "",
+      input.rationale,
+      "",
+      "Fictional demonstration data. Not a SureCover policy document.",
+    ].join("\n"),
+  }
+}
+
 export function timelineNewestFirst<
   D extends { id: string; created_at: string },
   A extends { id: string; created_at: string },
->(decisions: D[], assessments: A[]) {
-  const events: Array<{ kind: "decision"; item: D } | { kind: "assessment"; item: A }> = [
+  M extends { id: string; created_at: string },
+>(decisions: D[], assessments: A[], messages: M[] = []) {
+  const events: Array<{ kind: "decision"; item: D } | { kind: "assessment"; item: A } | { kind: "message"; item: M }> = [
     ...decisions.map((item) => ({ kind: "decision" as const, item })),
     ...assessments.map((item) => ({ kind: "assessment" as const, item })),
+    ...messages.map((item) => ({ kind: "message" as const, item })),
   ]
   return events.sort((left, right) => {
     const byTime = Date.parse(right.item.created_at) - Date.parse(left.item.created_at)

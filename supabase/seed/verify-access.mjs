@@ -76,8 +76,24 @@ async function main() {
   require(items.data.some((item) => item.text === "Claimant: Jamie Lee" && item.confidence === null), "embedded item is missing or has an OCR score")
   require(items.data.some((item) => item.text === "Jamie Lee" && typeof item.confidence === "number" && typeof item.review === "boolean"), "OCR item is missing its review signal")
 
+  const messages = await officerA
+    .from("claim_messages")
+    .select("to_address, subject, body, provider, status, provider_message_id")
+  if (messages.error) throw messages.error
+  require(messages.data.length === 1, `officer A saw ${messages.data.length} messages`)
+  require(messages.data[0].to_address === "jamie.lee@example.com", `message address is ${messages.data[0].to_address}`)
+  require(messages.data[0].subject === "Information requested for CLM-DEMO-1001", `message subject is ${messages.data[0].subject}`)
+  require(messages.data[0].provider === "simulated", `message provider is ${messages.data[0].provider}`)
+  require(messages.data[0].status === "recorded", `message status is ${messages.data[0].status}`)
+  require(String(messages.data[0].provider_message_id).startsWith("simulated-"), "message id is not simulated")
+  require(
+    messages.data[0].body.includes("Ask the traveler for the original boarding pass for the delayed return. This records the request only."),
+    "message body omitted the stored rationale",
+  )
+  require(messages.data[0].body.startsWith("Hello Jamie Lee,"), "message body omitted the greeting")
+
   const officerB = await signIn(url, anonKey, "officer-b@example.com", password)
-  for (const table of ["claims", "claim_documents", "document_pages", "document_items", "quotable_pages", "claim_decisions"]) {
+  for (const table of ["claims", "claim_documents", "document_pages", "document_items", "quotable_pages", "claim_decisions", "claim_messages"]) {
     const result = await officerB.from(table).select("*")
     if (result.error) throw result.error
     require(result.data.length === 0, `officer B saw ${result.data.length} ${table} rows`)

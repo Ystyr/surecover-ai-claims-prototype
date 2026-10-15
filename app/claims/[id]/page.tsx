@@ -1,10 +1,11 @@
-import { correctFact, recordDecision } from "@/app/claims/[id]/actions"
+import { correctFact, recordDecision, sendRequestMessage } from "@/app/claims/[id]/actions"
 import {
   CHECK_LABELS,
   CLAIM_ABSENT_MESSAGE,
   CLAIM_READ_ERROR_MESSAGE,
   assessmentHistoryNote,
   assessmentOutcomeLine,
+  requestMessageText,
   timelineNewestFirst,
   claimPageMessage,
   isUuid,
@@ -40,6 +41,17 @@ type DecisionRow = {
   id: string
   action: "request" | "approve" | "reject"
   rationale: string
+  created_at: string
+}
+
+type MessageRow = {
+  id: string
+  decision_id: string
+  to_address: string
+  subject: string
+  body: string
+  provider: string
+  status: string
   created_at: string
 }
 
@@ -89,6 +101,11 @@ const DECISION_MESSAGES: Record<string, string> = {
   save: "The decision could not be saved.",
 }
 
+const MESSAGE_ERRORS: Record<string, string> = {
+  recorded: "This request message is already recorded.",
+  save: "The message could not be saved.",
+}
+
 const CORRECTION_MESSAGES: Record<string, string> = {
   rationale: "A rationale is required.",
   invalid: "That value is not valid for this fact.",
@@ -104,7 +121,7 @@ export default async function ClaimPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ correction?: string; decision?: string }>
+  searchParams: Promise<{ correction?: string; decision?: string; message?: string }>
 }) {
   const { id } = await params
   const query = await searchParams
@@ -148,7 +165,7 @@ export default async function ClaimPage({
     )
   }
 
-  const [documentResult, assessmentResult, factResult, decisionResult] = await Promise.all([
+  const [documentResult, assessmentResult, factResult, decisionResult, messageResult] = await Promise.all([
     supabase.from("claim_documents").select("id, source_file, media_type").eq("claim_id", claim.id).order("source_file"),
     supabase
       .from("assessments")
@@ -169,6 +186,12 @@ export default async function ClaimPage({
       .eq("claim_id", claim.id)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false }),
+    supabase
+      .from("claim_messages")
+      .select("id, decision_id, to_address, subject, body, provider, status, created_at")
+      .eq("claim_id", claim.id)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false }),
   ])
   const factIds = (factResult.data ?? []).map((fact) => fact.id)
   const correctionResult = factIds.length
@@ -183,7 +206,7 @@ export default async function ClaimPage({
     claimId: id,
     claimError: null,
     claim,
-    documentError: documentResult.error || factResult.error || correctionResult.error || decisionResult.error,
+    documentError: documentResult.error || factResult.error || correctionResult.error || decisionResult.error || messageResult.error,
     assessmentError: assessmentResult.error,
   })
   if (blocked) return <ClaimNotice message={blocked} />
@@ -201,6 +224,7 @@ export default async function ClaimPage({
   })
   const corrections = (correctionResult.data ?? []) as CorrectionRow[]
   const decisions = (decisionResult.data ?? []) as DecisionRow[]
+  const messages = (messageResult.data ?? []) as MessageRow[]
   const history = (assessments ?? []) as AssessmentRow[]
   const latest = history[0]
   const checks = sortChecks(latest?.policy_checks ?? [])
@@ -255,13 +279,24 @@ export default async function ClaimPage({
       <section className="panel">
         <h2>History</h2>
         <ul className="history">
-          {timelineNewestFirst(decisions, history).map((event) => {
+          {timelineNewestFirst(decisions, history, messages).map((event) => {
             if (event.kind === "decision") {
               return (
                 <li key={event.item.id}>
                   <strong>{displayInstant(event.item.created_at)}</strong>
                   <span> · {ACTION_LABELS[event.item.action]}</span>
                   <div>{event.item.rationale}</div>
+                </li>
+              )
+            }
+            if (event.kind === "message") {
+              return (
+                <li key={event.item.id}>
+                  <strong>{displayInstant(event.item.created_at)}</strong>
+                  <span> · Message</span>
+                  <div>{event.item.subject}</div>
+                  <p className="muted">To {event.item.to_address} · {event.item.provider} · {event.item.status}</p>
+                  <div className="message-body">{event.item.body}</div>
                 </li>
               )
             }
@@ -288,8 +323,12 @@ export default async function ClaimPage({
         <DecisionActions
           assessmentId={latest?.id ?? null}
           claimId={claim.id}
+          claimantName={claim.claimant_name}
           decisions={decisions}
           message={query.decision ? DECISION_MESSAGES[query.decision] : undefined}
+          messages={messages}
+          reference={claim.reference}
+          requestMessage={query.message ? MESSAGE_ERRORS[query.message] : undefined}
         />
       </section>
     </article>
@@ -337,15 +376,28 @@ function FactForm({ claimId, fact, corrections }: { claimId: string; fact: FactR
 function DecisionActions({
   claimId,
   assessmentId,
+  claimantName,
   decisions,
   message,
+  messages,
+  reference,
+  requestMessage,
 }: {
   claimId: string
   assessmentId: string | null
+  claimantName: string
   decisions: DecisionRow[]
   message?: string
+  messages: MessageRow[]
+  reference: string
+  requestMessage?: string
 }) {
   const finished = decisions.find((decision) => decision.action === "approve" || decision.action === "reject")
+  const request = decisions.find((decision) => decision.action === "request")
+  const pendingRequest = request && !messages.some((row) => row.decision_id === request.id) ? request : null
+  const preview = pendingRequest
+    ? requestMessageText({ reference, claimantName, rationale: pendingRequest.rationale })
+    : null
   const openActions = finished
     ? []
     : decisions.some((decision) => decision.action === "request")
@@ -354,6 +406,18 @@ function DecisionActions({
   return (
     <>
       {message ? <p className="error">{message}</p> : null}
+      {requestMessage ? <p className="error">{requestMessage}</p> : null}
+      {preview && pendingRequest ? (
+        <form action={sendRequestMessage} className="decision">
+          <p>{preview.subject}</p>
+          <p className="message-body">{preview.body}</p>
+          <input name="claim_id" type="hidden" value={claimId} />
+          <input name="decision_id" type="hidden" value={pendingRequest.id} />
+          <p>
+            <button type="submit">Send request</button>
+          </p>
+        </form>
+      ) : null}
       {finished ? (
         <p>
           {ACTION_LABELS[finished.action]} · {finished.rationale}

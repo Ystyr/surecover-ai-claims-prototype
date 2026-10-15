@@ -89,6 +89,29 @@ export async function recordDecision(formData: FormData) {
   redirect(`/claims/${claimId}`)
 }
 
+export async function sendRequestMessage(formData: FormData) {
+  const claimId = String(formData.get("claim_id") ?? "")
+  const decisionId = String(formData.get("decision_id") ?? "")
+  if (!isUuid(claimId)) redirect("/")
+  if (!isUuid(decisionId)) redirect(`/claims/${claimId}?message=save`)
+
+  const supabase = await createClient()
+  const saved = await supabase.rpc("record_request_message", { p_decision_id: decisionId })
+  if (saved.error) {
+    const code = messageCode(saved.error.message)
+    if (code === "missing") redirect("/")
+    redirect(`/claims/${claimId}?message=${code}`)
+  }
+  redirect(`/claims/${claimId}`)
+}
+
+function messageCode(message: string) {
+  const text = message.toLowerCase()
+  if (text.includes("message recorded")) return "recorded"
+  if (text.includes("claim not found")) return "missing"
+  return "save"
+}
+
 function decisionCode(message: string) {
   const text = message.toLowerCase()
   if (text.includes("rationale required")) return "rationale"

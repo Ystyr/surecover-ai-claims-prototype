@@ -156,3 +156,4 @@ button {
 .decision:first-of-type { margin-top: 0; padding-top: 0; border-top: 0; }
 
 .decision p { margin: 0.25rem 0 0; }
+.message-body { white-space: pre-wrap; }

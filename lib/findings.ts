@@ -1,3 +1,5 @@
+import { CHOICE_GATE } from "../checks/assess.mjs"
+
 const MONTHS = [
   "January",
   "February",
@@ -138,7 +140,8 @@ function claimTypeSummary(outcome: string, detail: Record<string, unknown>) {
   if (outcome === "unknown") {
     return typeof detail.reason === "string" ? detail.reason : "The claim type could not be established."
   }
-  return `The form says ${value ?? "flight delay"}. The delay letter was established by the fixture adapter.`
+  const letter = text(detail, "letter_source_file")
+  return `The form says ${value ?? "flight delay"}. The check treated ${letter ?? "the filename"} as the delay letter.`
 }
 
 function consistencySummary(outcome: string, detail: Record<string, unknown>) {
@@ -231,6 +234,19 @@ export function claimPageMessage(input: {
   if (input.claimError || input.documentError || input.assessmentError) return CLAIM_READ_ERROR_MESSAGE
   if (!input.claim) return CLAIM_ABSENT_MESSAGE
   return null
+}
+
+export const ROLE_LABELS: Record<string, string> = {
+  claim_form: "Claim form",
+  scheduled_itinerary: "Scheduled itinerary",
+  revised_itinerary: "Revised itinerary",
+  boarding_pass: "Boarding pass",
+  delay_letter: "Delay letter",
+  other: "Other",
+}
+
+export function classificationEstablished(label: string, probability: number) {
+  return label !== "other" && probability >= CHOICE_GATE
 }
 
 export function requestMessageText(input: { reference: string; claimantName: string; rationale: string }) {

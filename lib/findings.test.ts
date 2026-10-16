@@ -10,6 +10,7 @@ import {
   MATCHING_STORED_DETAIL,
   assessmentHistoryNote,
   claimPageMessage,
+  classificationEstablished,
   latestCheckFailed,
   requestMessageText,
   timelineNewestFirst,
@@ -33,6 +34,10 @@ test("a claim-type pass links the form sentence to the claim form", () => {
     }),
   )
   assert.deepEqual(links, [{ text: "Claim type: Flight delay", sourceFile: "claim-form.pdf", flightNumber: null }])
+  assert.equal(
+    findingSummary(check("claim_type", "pass", { value: "Flight delay", letter_source_file: "delay-letter.pdf" })),
+    "The form says Flight delay. The check treated delay-letter.pdf as the delay letter.",
+  )
 })
 
 test("delay and boarding-pass quotes use their own files", () => {
@@ -244,6 +249,12 @@ test("an empty assignment and a failed read are different messages", () => {
     }),
     null,
   )
+})
+
+test("a Jev label below the gate or other is not established", () => {
+  assert.equal(classificationEstablished("boarding_pass", 0.6), true)
+  assert.equal(classificationEstablished("boarding_pass", 0.59), false)
+  assert.equal(classificationEstablished("other", 1), false)
 })
 
 test("the request message greets the claimant and keeps the rationale", () => {

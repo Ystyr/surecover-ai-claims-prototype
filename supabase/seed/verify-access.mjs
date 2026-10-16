@@ -92,8 +92,17 @@ async function main() {
   )
   require(messages.data[0].body.startsWith("Hello Jamie Lee,"), "message body omitted the greeting")
 
+  const classifications = await officerA.from("document_classifications").select("adapter, document_id")
+  if (classifications.error) throw classifications.error
+  for (const adapter of ["fixture", "jev"]) {
+    const rows = classifications.data.filter((row) => row.adapter === adapter)
+    const documents = new Set(rows.map((row) => row.document_id))
+    require(rows.length === 7, `officer A saw ${rows.length} ${adapter} classifications`)
+    require(documents.size === 7, `officer A saw ${adapter} classifications for ${documents.size} files`)
+  }
+
   const officerB = await signIn(url, anonKey, "officer-b@example.com", password)
-  for (const table of ["claims", "claim_documents", "document_pages", "document_items", "quotable_pages", "claim_decisions", "claim_messages"]) {
+  for (const table of ["claims", "claim_documents", "document_pages", "document_items", "quotable_pages", "claim_decisions", "claim_messages", "document_classifications"]) {
     const result = await officerB.from(table).select("*")
     if (result.error) throw result.error
     require(result.data.length === 0, `officer B saw ${result.data.length} ${table} rows`)

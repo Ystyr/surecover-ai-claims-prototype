@@ -5,8 +5,10 @@ import {
   CLAIM_READ_ERROR_MESSAGE,
   assessmentHistoryNote,
   assessmentOutcomeLine,
+  ROLE_LABELS,
   requestMessageText,
   timelineNewestFirst,
+  classificationEstablished,
   claimPageMessage,
   isUuid,
   displayDate,
@@ -41,6 +43,17 @@ type DecisionRow = {
   id: string
   action: "request" | "approve" | "reject"
   rationale: string
+  created_at: string
+}
+
+type ClassificationRow = {
+  id: string
+  document_id: string
+  adapter: string
+  model: string | null
+  question_set: string
+  label: string
+  probability: number | string
   created_at: string
 }
 
@@ -165,7 +178,7 @@ export default async function ClaimPage({
     )
   }
 
-  const [documentResult, assessmentResult, factResult, decisionResult, messageResult] = await Promise.all([
+  const [documentResult, assessmentResult, factResult, decisionResult, messageResult, classificationResult] = await Promise.all([
     supabase.from("claim_documents").select("id, source_file, media_type").eq("claim_id", claim.id).order("source_file"),
     supabase
       .from("assessments")
@@ -192,6 +205,12 @@ export default async function ClaimPage({
       .eq("claim_id", claim.id)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false }),
+    supabase
+      .from("document_classifications")
+      .select("id, document_id, adapter, model, question_set, label, probability, created_at")
+      .eq("claim_id", claim.id)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false }),
   ])
   const factIds = (factResult.data ?? []).map((fact) => fact.id)
   const correctionResult = factIds.length
@@ -206,7 +225,7 @@ export default async function ClaimPage({
     claimId: id,
     claimError: null,
     claim,
-    documentError: documentResult.error || factResult.error || correctionResult.error || decisionResult.error || messageResult.error,
+    documentError: documentResult.error || factResult.error || correctionResult.error || decisionResult.error || messageResult.error || classificationResult.error,
     assessmentError: assessmentResult.error,
   })
   if (blocked) return <ClaimNotice message={blocked} />
@@ -225,6 +244,7 @@ export default async function ClaimPage({
   const corrections = (correctionResult.data ?? []) as CorrectionRow[]
   const decisions = (decisionResult.data ?? []) as DecisionRow[]
   const messages = (messageResult.data ?? []) as MessageRow[]
+  const classifications = (classificationResult.data ?? []) as ClassificationRow[]
   const history = (assessments ?? []) as AssessmentRow[]
   const latest = history[0]
   const checks = sortChecks(latest?.policy_checks ?? [])
@@ -268,11 +288,23 @@ export default async function ClaimPage({
       <section className="panel">
         <h2>Files</h2>
         <ul className="files">
-          {files.map((document) => (
-            <li key={document.id}>
-              <a href={`/claims/${claim.id}/files/${document.id}`}>{document.source_file}</a>
-            </li>
-          ))}
+          {files.map((document) => {
+            const fixture = classifications.find((row) => row.document_id === document.id && row.adapter === "fixture")
+            const jev = classifications.find((row) => row.document_id === document.id && row.adapter === "jev")
+            const established = jev ? classificationEstablished(jev.label, Number(jev.probability)) : false
+            return (
+              <li key={document.id}>
+                <a href={`/claims/${claim.id}/files/${document.id}`}>{document.source_file}</a>
+                {fixture ? <p className="muted">Fixture · {ROLE_LABELS[fixture.label] ?? fixture.label}</p> : null}
+                {jev ? (
+                  <p className="muted">
+                    Jev · {ROLE_LABELS[jev.label] ?? jev.label} · {jev.probability} · {jev.model} · {jev.question_set}
+                    {established ? null : " · the label is not established"}
+                  </p>
+                ) : null}
+              </li>
+            )
+          })}
         </ul>
       </section>
 

@@ -73,7 +73,7 @@ These are excluded from the core path unless evaluation identifies a specific un
 - **A vector store or general-purpose agent workflow for the core prototype.** Policy rules and claim facts are structured; retrieval does not decide coverage. LangGraph is also unnecessary unless the workflow becomes more complex. Docling is a parser option, not a classifier.
 - **A generative LLM as a default second model.** First evaluate Jev on labeled examples; use fixture outputs for reliable rehearsal.
 
-Text extraction stays necessary. An image-only file has no state to send, so the pipeline skips Jev and records `unknown`.
+Text extraction stays necessary. A photo whose OCR produced text is sent to Jev, as the SC101 boarding-pass photo was. A page with ink and no extracted text is left out.
 
 ## Backup if Jev is unavailable
 
@@ -181,6 +181,14 @@ Leave these for the production-risk slide: production-scale OCR for difficult ph
 5. **Fixture fallback:** The complete claim runs again with the fixture adapter. The timeline names the adapter and records no provider token usage.
 
 The malicious-document example is a stretch goal. Its text would sit in Jev state. The workflow still cannot approve from that text. It waits until the required cases above are reliable.
+
+## Later: ask for a clearer copy of one field
+
+Come back to this after the main path is settled. A file can be present while one detail on it cannot be read. That is a different request from a missing document. The missing-pass message names the absent file. This message names the document that arrived and the field that did not.
+
+The reason comes from the parse. An unreadable page has ink and no text. An OCR line marked for review was read uncertainly. A required field that never appears on a document of the expected type, such as a flight number on a delay notice, is a gap. Application code turns that gap into one sentence. An example is: the delay notice is on file, the flight number on it is unclear, and the traveler should reply with a sharper photo of that notice with the flight number readable. The recognition score stays out of the email. Jev does not write the message. A later support question may say whether the letter states the flight number. The wording stays a template filled from that result. The officer still sends it.
+
+The reply stores the new photo on the same claim. A new assessment sits beside the previous one, and the claim returns to needs review. Another request is available only after that. `CLM-DEMO-1001` cannot show this round trip: its delay letter is readable, and a second request is rejected while the claim is information requested. The case needs its own file, where the notice is present and one field is unclear.
 
 ## Build sequence
 

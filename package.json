@@ -8,6 +8,7 @@
     "seed:claim": "node supabase/seed/seed-claim.mjs",
     "assess:claim": "node supabase/seed/assess-claim.mjs",
     "extract:facts": "node supabase/seed/extract-facts.mjs",
+    "classify:claim": "node supabase/seed/classify-claim.mjs",
     "verify:access": "node supabase/seed/verify-access.mjs",
     "verify:checks": "node supabase/seed/verify-checks.mjs"
   },

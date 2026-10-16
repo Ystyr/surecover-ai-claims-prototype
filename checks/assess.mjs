@@ -1,5 +1,5 @@
 // Deterministic demo-2026.1 checks. Document roles come from the fixture
-// filenames until a classifier supplies the same choice.
+// filenames. The stored Jev label is not read by these checks.
 export const ADAPTER = "fixture"
 export const CHOICE_GATE = 0.6
 export const MINIMUM_DELAY_HOURS = 6
@@ -12,7 +12,7 @@ export const CHECK_NAMES = [
   "delay",
 ]
 
-const FIXTURE_ROLES = {
+export const FIXTURE_ROLES = {
   "claim-form.pdf": "claim_form",
   "scheduled-itinerary.pdf": "scheduled_itinerary",
   "revised-itinerary.pdf": "revised_itinerary",

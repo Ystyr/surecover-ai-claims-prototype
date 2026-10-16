@@ -6,6 +6,8 @@ import { createClient } from "@supabase/supabase-js"
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const CLAIM_REFERENCE = "CLM-DEMO-1001"
+const MISSING_REFERENCE = "CLM-DEMO-1002"
+const MISSING_GAP = "SC202 on 7 August 2026 from NRT to SIN"
 
 function projectEnv() {
   let raw
@@ -47,18 +49,30 @@ async function signIn(url, anonKey, email, password) {
 async function main() {
   const { url, anonKey, password } = projectEnv()
   const officerA = await signIn(url, anonKey, "officer-a@example.com", password)
-  const claims = await officerA.from("claims").select("reference, claimant_name, status, assigned_officer_id")
+  const claims = await officerA.from("claims").select("id, reference, claimant_name, status, assigned_officer_id")
   if (claims.error) throw claims.error
-  require(claims.data.length === 1, `officer A saw ${claims.data.length} claims`)
-  require(claims.data[0].reference === CLAIM_REFERENCE, `officer A saw ${claims.data[0].reference}`)
-  require(claims.data[0].claimant_name === "Jamie Lee", "officer A did not see Jamie Lee")
-  require(claims.data[0].status === "information requested", `claim status is ${claims.data[0].status}`)
+  require(claims.data.length === 2, `officer A saw ${claims.data.length} claims`)
+  const complete = claims.data.find((claim) => claim.reference === CLAIM_REFERENCE)
+  const missing = claims.data.find((claim) => claim.reference === MISSING_REFERENCE)
+  require(complete, `officer A did not see ${CLAIM_REFERENCE}`)
+  require(missing, `officer A did not see ${MISSING_REFERENCE}`)
+  require(complete.claimant_name === "Jamie Lee", "officer A did not see Jamie Lee")
+  require(complete.status === "information requested", `claim status is ${complete.status}`)
+  require(missing.claimant_name === "Jamie Lee", `${MISSING_REFERENCE} claimant is ${missing.claimant_name}`)
+  require(missing.status === "needs review", `${MISSING_REFERENCE} status is ${missing.status}`)
 
   const documents = await officerA
     .from("claim_documents")
-    .select("id, source_file, storage_path, text_source, media_type")
+    .select("id, claim_id, source_file, storage_path, text_source, media_type")
   if (documents.error) throw documents.error
-  require(documents.data.length === 7, `officer A saw ${documents.data.length} documents`)
+  const completeFiles = documents.data.filter((document) => document.claim_id === complete.id)
+  const missingFiles = documents.data.filter((document) => document.claim_id === missing.id)
+  require(completeFiles.length === 7, `officer A saw ${completeFiles.length} files on ${CLAIM_REFERENCE}`)
+  require(missingFiles.length === 6, `officer A saw ${missingFiles.length} files on ${MISSING_REFERENCE}`)
+  require(
+    missingFiles.every((document) => document.source_file !== "boarding-pass-sc202.pdf"),
+    `${MISSING_REFERENCE} includes the 7 August boarding pass`,
+  )
 
   const pages = await officerA.from("document_pages").select("text_source, text")
   if (pages.error) throw pages.error
@@ -78,9 +92,10 @@ async function main() {
 
   const messages = await officerA
     .from("claim_messages")
-    .select("to_address, subject, body, provider, status, provider_message_id")
+    .select("claim_id, to_address, subject, body, provider, status, provider_message_id")
   if (messages.error) throw messages.error
   require(messages.data.length === 1, `officer A saw ${messages.data.length} messages`)
+  require(messages.data[0].claim_id === complete.id, "the recorded message is not on CLM-DEMO-1001")
   require(messages.data[0].to_address === "jamie.lee@example.com", `message address is ${messages.data[0].to_address}`)
   require(messages.data[0].subject === "Information requested for CLM-DEMO-1001", `message subject is ${messages.data[0].subject}`)
   require(messages.data[0].provider === "simulated", `message provider is ${messages.data[0].provider}`)
@@ -99,6 +114,10 @@ async function main() {
     const documents = new Set(rows.map((row) => row.document_id))
     require(rows.length === 7, `officer A saw ${rows.length} ${adapter} classifications`)
     require(documents.size === 7, `officer A saw ${adapter} classifications for ${documents.size} files`)
+    require(
+      rows.every((row) => completeFiles.some((document) => document.id === row.document_id)),
+      `a ${adapter} classification is not on ${CLAIM_REFERENCE}`,
+    )
   }
 
   const judgments = await officerA.from("document_judgments").select("question, document_id")
@@ -111,8 +130,32 @@ async function main() {
   const judgedFile = documents.data.find((document) => document.id === judgments.data[0].document_id)
   require(judgedFile?.source_file === "delay-letter.pdf", "the delay judgments are not on the delay letter")
 
+  const spans = await officerA.from("document_span_choices").select("question, document_id")
+  if (spans.error) throw spans.error
+  const spanQuestions = new Set(spans.data.map((row) => row.question))
+  const spanDocuments = new Set(spans.data.map((row) => row.document_id))
+  require(spans.data.length === 2, `officer A saw ${spans.data.length} span choices`)
+  require(spanQuestions.has("delay_reason_span") && spanQuestions.has("delay_duration_span"), "officer A is missing a delay span")
+  require(spanDocuments.size === 1, `officer A saw span choices for ${spanDocuments.size} files`)
+  const spannedFile = documents.data.find((document) => document.id === spans.data[0].document_id)
+  require(spannedFile?.source_file === "delay-letter.pdf", "the delay spans are not on the delay letter")
+
+  const checks = await officerA.from("policy_checks").select("claim_id, check_name, outcome, detail").eq("claim_id", missing.id)
+  if (checks.error) throw checks.error
+  require(checks.data.length === 6, `${MISSING_REFERENCE} has ${checks.data.length} checks`)
+  const completeness = checks.data.find((check) => check.check_name === "completeness")
+  require(completeness?.outcome === "fail", `${MISSING_REFERENCE} completeness is ${completeness?.outcome}`)
+  require(
+    JSON.stringify(completeness.detail.gaps) === JSON.stringify([MISSING_GAP]),
+    `${MISSING_REFERENCE} gap is ${JSON.stringify(completeness.detail.gaps)}`,
+  )
+  for (const name of ["filing_deadline", "coverage", "claim_type", "consistency", "delay"]) {
+    const check = checks.data.find((entry) => entry.check_name === name)
+    require(check?.outcome === "pass", `${MISSING_REFERENCE} ${name} is ${check?.outcome}`)
+  }
+
   const officerB = await signIn(url, anonKey, "officer-b@example.com", password)
-  for (const table of ["claims", "claim_documents", "document_pages", "document_items", "quotable_pages", "claim_decisions", "claim_messages", "document_classifications", "document_judgments"]) {
+  for (const table of ["claims", "claim_documents", "document_pages", "document_items", "quotable_pages", "assessments", "policy_checks", "claim_decisions", "claim_messages", "document_classifications", "document_judgments", "document_span_choices"]) {
     const result = await officerB.from(table).select("*")
     if (result.error) throw result.error
     require(result.data.length === 0, `officer B saw ${result.data.length} ${table} rows`)
@@ -141,7 +184,8 @@ async function main() {
   if (policy.error) throw policy.error
   require(policy.data.length === 1, "the shared policy row was not readable")
 
-  console.log("officer A can read CLM-DEMO-1001 and all seven files match the fixtures")
+  console.log("officer A can read CLM-DEMO-1001 and CLM-DEMO-1002, and the stored files match the fixtures")
+  console.log("CLM-DEMO-1002 completeness fails on the missing 7 August pass")
   console.log("officer B receives no claim rows and no file bytes")
 }
 

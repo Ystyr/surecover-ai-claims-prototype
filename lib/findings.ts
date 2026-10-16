@@ -260,6 +260,15 @@ export function judgmentReading(noul: number) {
   return "not established"
 }
 
+export const SPAN_LABELS: Record<string, string> = {
+  delay_reason_span: "Delay reason",
+  delay_duration_span: "Delay duration",
+}
+
+export function spanEstablished(choice: string, probability: number, quote: string | null) {
+  return choice !== "none" && probability >= CHOICE_GATE && Boolean(quote)
+}
+
 export function requestMessageText(input: { reference: string; claimantName: string; rationale: string }) {
   return {
     subject: `Information requested for ${input.reference}`,

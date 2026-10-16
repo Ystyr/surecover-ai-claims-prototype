@@ -11,6 +11,8 @@ import {
   classificationEstablished,
   JUDGMENT_LABELS,
   judgmentReading,
+  SPAN_LABELS,
+  spanEstablished,
   claimPageMessage,
   isUuid,
   displayDate,
@@ -65,6 +67,15 @@ type JudgmentRow = {
   question: string
   noul: number | string
   created_at: string
+}
+
+type SpanRow = {
+  id: string
+  document_id: string
+  question: string
+  choice: string
+  quote: string | null
+  probability: number | string
 }
 
 type MessageRow = {
@@ -188,7 +199,7 @@ export default async function ClaimPage({
     )
   }
 
-  const [documentResult, assessmentResult, factResult, decisionResult, messageResult, classificationResult, judgmentResult] = await Promise.all([
+  const [documentResult, assessmentResult, factResult, decisionResult, messageResult, classificationResult, judgmentResult, spanResult] = await Promise.all([
     supabase.from("claim_documents").select("id, source_file, media_type").eq("claim_id", claim.id).order("source_file"),
     supabase
       .from("assessments")
@@ -227,6 +238,10 @@ export default async function ClaimPage({
       .eq("claim_id", claim.id)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false }),
+    supabase
+      .from("document_span_choices")
+      .select("id, document_id, question, choice, quote, probability")
+      .eq("claim_id", claim.id),
   ])
   const factIds = (factResult.data ?? []).map((fact) => fact.id)
   const correctionResult = factIds.length
@@ -241,7 +256,7 @@ export default async function ClaimPage({
     claimId: id,
     claimError: null,
     claim,
-    documentError: documentResult.error || factResult.error || correctionResult.error || decisionResult.error || messageResult.error || classificationResult.error || judgmentResult.error,
+    documentError: documentResult.error || factResult.error || correctionResult.error || decisionResult.error || messageResult.error || classificationResult.error || judgmentResult.error || spanResult.error,
     assessmentError: assessmentResult.error,
   })
   if (blocked) return <ClaimNotice message={blocked} />
@@ -262,6 +277,7 @@ export default async function ClaimPage({
   const messages = (messageResult.data ?? []) as MessageRow[]
   const classifications = (classificationResult.data ?? []) as ClassificationRow[]
   const judgments = (judgmentResult.data ?? []) as JudgmentRow[]
+  const spans = (spanResult.data ?? []) as SpanRow[]
   const history = (assessments ?? []) as AssessmentRow[]
   const latest = history[0]
   const checks = sortChecks(latest?.policy_checks ?? [])
@@ -312,6 +328,9 @@ export default async function ClaimPage({
             const fileJudgments = ["delay_reason", "delay_duration"].flatMap((question) =>
               judgments.filter((row) => row.document_id === document.id && row.question === question),
             )
+            const fileSpans = ["delay_reason_span", "delay_duration_span"].flatMap((question) =>
+              spans.filter((row) => row.document_id === document.id && row.question === question),
+            )
             return (
               <li key={document.id}>
                 <a href={`/claims/${claim.id}/files/${document.id}`}>{document.source_file}</a>
@@ -327,6 +346,16 @@ export default async function ClaimPage({
                     Jev · {JUDGMENT_LABELS[row.question] ?? row.question} · {row.noul} · {judgmentReading(Number(row.noul))}
                   </p>
                 ))}
+                {fileSpans.map((row) => {
+                  const established = spanEstablished(row.choice, Number(row.probability), row.quote)
+                  return (
+                    <p className="muted" key={row.id}>
+                      Jev · {SPAN_LABELS[row.question] ?? row.question}
+                      {established ? ` · ${row.quote}` : ""} · {row.probability}
+                      {established ? "" : " · the span is not established"}
+                    </p>
+                  )
+                })}
               </li>
             )
           })}

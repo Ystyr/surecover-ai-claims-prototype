@@ -12,6 +12,7 @@ import {
   claimPageMessage,
   classificationEstablished,
   judgmentReading,
+  spanEstablished,
   latestCheckFailed,
   requestMessageText,
   timelineNewestFirst,
@@ -263,6 +264,13 @@ test("a delay judgment supports, contradicts, or stays unestablished", () => {
   assert.equal(judgmentReading(0.74), "not established")
   assert.equal(judgmentReading(0.25), "contradicts")
   assert.equal(judgmentReading(0.26), "not established")
+})
+
+test("a span is established only when the chosen line is on the page", () => {
+  assert.equal(spanEstablished("line-id", 0.6, "Delay duration: 8 hours."), true)
+  assert.equal(spanEstablished("none", 1, null), false)
+  assert.equal(spanEstablished("line-id", 0.59, "Delay duration: 8 hours."), false)
+  assert.equal(spanEstablished("line-id", 1, null), false)
 })
 
 test("the request message greets the claimant and keeps the rationale", () => {

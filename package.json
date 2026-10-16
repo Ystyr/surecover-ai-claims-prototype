@@ -6,10 +6,12 @@
     "dev": "next dev",
     "test:checks": "node --experimental-strip-types --test checks/assess.test.mjs lib/findings.test.ts",
     "seed:claim": "node supabase/seed/seed-claim.mjs",
+    "seed:missing": "node supabase/seed/seed-missing-pass.mjs",
     "assess:claim": "node supabase/seed/assess-claim.mjs",
     "extract:facts": "node supabase/seed/extract-facts.mjs",
     "classify:claim": "node supabase/seed/classify-claim.mjs",
     "judge:claim": "node supabase/seed/judge-claim.mjs",
+    "select:spans": "node supabase/seed/select-spans.mjs",
     "verify:access": "node supabase/seed/verify-access.mjs",
     "verify:checks": "node supabase/seed/verify-checks.mjs"
   },

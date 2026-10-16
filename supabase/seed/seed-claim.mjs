@@ -69,6 +69,13 @@ async function main() {
     auth: { persistSession: false, autoRefreshToken: false },
   })
 
+  const existing = await db.from("claims").select("reference")
+  if (existing.error) throw existing.error
+  const others = existing.data.filter((row) => row.reference !== CLAIM_REFERENCE).map((row) => row.reference)
+  if (others.length > 0) {
+    throw new Error(`seed:claim stops before deleting anything. Other claims are still stored: ${others.join(", ")}`)
+  }
+
   const removed = await db.from("claims").delete().eq("reference", CLAIM_REFERENCE)
   if (removed.error) throw removed.error
   const listed = await db.storage.from("claim-files").list(CLAIM_ID)
@@ -174,5 +181,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(error.message || error)
-  process.exit(1)
+  process.exitCode = 1
 })

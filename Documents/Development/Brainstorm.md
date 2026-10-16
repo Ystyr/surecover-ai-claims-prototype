@@ -34,7 +34,7 @@ Status and progress are part of that workflow. They live in persisted events and
 
 A Jev label is not a policy determination. A policy check is not the final decision. Missing evidence must not be silently converted into a negative eligibility decision.
 
-Jev is the priority semantic model to evaluate. A generative LLM is a backup only if Jev cannot handle a specific semantic task adequately; do not add it to the core without evidence of that gap.
+Jev is the priority semantic model to evaluate. A generative language model is not part of this prototype. The parser reads dates and flight numbers.
 
 ## Jev
 
@@ -66,12 +66,12 @@ The API key stays on the server. Code checks that a chosen span actually occurs 
 
 ## What Jev makes unnecessary
 
-These are excluded from the core path unless evaluation identifies a specific unmet need. The generative LLM is a backup if priority model Jev cannot handle a semantic task adequately.
+These are excluded from the core path. A generative language model is not part of this prototype.
 
-- **A generative LLM in the core pipeline.** Jev is the priority for semantic classification and span selection; use a generative model only as a justified task-specific backup.
+- **A generative LLM in the core pipeline.** Not used. Jev handles the semantic calls already made, and code parses and checks values.
 - **An LLM explanation or email polish.** Follow-up text comes from deterministic templates assembled from check results.
 - **A vector store or general-purpose agent workflow for the core prototype.** Policy rules and claim facts are structured; retrieval does not decide coverage. LangGraph is also unnecessary unless the workflow becomes more complex. Docling is a parser option, not a classifier.
-- **A generative LLM as a default second model.** First evaluate Jev on labeled examples; use fixture outputs for reliable rehearsal.
+- **A generative LLM as a default second model.** Not used. The fixture adapter remains for rehearsal.
 
 Text extraction stays necessary. A photo whose OCR produced text is sent to Jev, as the SC101 boarding-pass photo was. A page with ink and no extracted text is left out.
 
@@ -87,7 +87,7 @@ The fixture adapter implements the same interface: document type, choice, probab
 | A demo file is mislabeled in rehearsal | Adjust the criteria, or pin that bundle to the fixture and say so in the talk. |
 | The letter is not in English, or the PDF tells the system to ignore the rules and approve | The text stays in `state`. The outcome is `unknown` or a failed check. Nothing in the workflow can approve from the document. |
 
-If Jev fails a specific semantic task, a generative LLM may be evaluated as a backup for that task. Any extracted fact still requires source-grounded evidence and human review where uncertain. Docling is the stage-1 parser: text PDFs become one item per line or table cell, a page with no text layer is OCR'd on its own, and images use OCR line boxes. A generative LLM is not the backup for parsing.
+Any extracted fact still requires source-grounded evidence and human review where uncertain. Docling is the stage-1 parser: text PDFs become one item per line or table cell, a page with no text layer is OCR'd on its own, and images use OCR line boxes. A generative language model is not the backup for parsing.
 
 ## Policy assumptions
 
@@ -141,7 +141,7 @@ Treat persisted state as the source of truth, not an ever-growing prompt history
 - **Policy context:** the exact policy version, holiday list, and configured rules used for this assessment.
 - **Workflow context:** current stage, completed checks, outstanding tasks, prior operator decisions, notification records, and allowed next actions. Keep the full claim-scoped history for the operator and audit trail; expose only the minimum relevant history to any model task.
 
-`workflow_events` and `notifications` are the status tracker: submitted, processing, needs review, information requested, approved, rejected. Keep an append-only, claim-scoped interaction timeline of submissions, processing events, requests, replies, and operator decisions. The operator can inspect that history; it is not all copied into model context. The receipt acknowledgment, status updates, and operator-requested missing-information message are deterministic templates sent through Resend and recorded with provider message ids and delivery status. A matched reply returns that claim to needs review with a new assessment beside the previous one. The simulated adapter supports local runs. Use the existing claim status/history in code to avoid duplicate follow-ups. If the Jev-backup LLM is ever used for a task, provide only that task input and the minimum claim context it needs.
+`workflow_events` and `notifications` are the status tracker: submitted, processing, needs review, information requested, approved, rejected. Keep an append-only, claim-scoped interaction timeline of submissions, processing events, requests, replies, and operator decisions. The operator can inspect that history; it is not all copied into model context. The receipt acknowledgment, status updates, and operator-requested missing-information message are deterministic templates sent through Resend and recorded with provider message ids and delivery status. A matched reply returns that claim to needs review with a new assessment beside the previous one. The simulated adapter supports local runs. Use the existing claim status/history in code to avoid duplicate follow-ups. A generative language model is not part of this prototype.
 
 For Jev, assemble one state per document: its page text and candidate ids. Do not send other claims or full interaction history, and do not send policy rules as instructions inside the document state. Keep policy rules in structured, versioned records with references to the source policy clauses. A vector database is not needed for the core demo. If a larger policy library later requires semantic search, use retrieval only to surface candidate clauses for review; deterministic policy code remains authoritative. Opening the review screen does not call Jev. A deliberate reprocess stores a new assessment beside the previous one, and the operator decision names the assessment it used.
 
@@ -155,7 +155,7 @@ For Jev, assemble one state per document: its page text and candidate ids. Do no
 | Email | Resend inbound webhooks and outbound API; deterministic templates, provider event history, and a simulated local adapter. |
 | Traveler email | Resend inbox/outbox for the PDF claim form, attachments, acknowledgments, status updates, and information requests. |
 
-Leave these for the production-risk slide: production-scale OCR for difficult phone photos, a queue for slow extraction, the insurer's core claims system, and payouts. A generative LLM is the backup only if Jev cannot adequately handle a specific semantic task; it is not a default prototype service.
+Leave these for the production-risk slide: production-scale OCR for difficult phone photos, a queue for slow extraction, the insurer's core claims system, and payouts. A generative language model is not part of this prototype.
 
 ## Security and operational risks
 
@@ -198,7 +198,7 @@ The reply stores the new photo on the same claim. A new assessment sits beside t
 
 **3. Intake.** Resend inbound webhook receives the PDF claim form and attachments, creates the claim, records `submitted`, and sends a deterministic acknowledgment. The simulated adapter is the local fallback.
 
-**4. Classify and extract.** Parse page text, find candidate spans, and call the adapter. Jev is the priority live candidate; evaluate its semantic task results before deciding whether the backup LLM is needed. The fixture is used when Jev cannot be called, and for any demo bundle pinned to it after rehearsal. Both write document types and facts with document, page, and quoted span.
+**4. Classify and extract.** Parse page text, find candidate spans, and call the adapter. Jev is the priority live candidate. A generative language model is not part of the prototype. The fixture is used when Jev cannot be called, and for any demo bundle pinned to it after rehearsal. Both write document types and facts with document, page, and quoted span.
 
 **5. Checks.** Rules read stored facts and write `pass`, `fail`, or `unknown`. A missing boarding pass fails completeness. When the officer requests it, the app sends a deterministic Resend reply naming the gap; tests can use the simulated adapter. A date conflict or image-only file yields `unknown`. Nothing is auto-approved.
 

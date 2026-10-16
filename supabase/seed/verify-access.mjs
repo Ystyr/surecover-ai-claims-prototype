@@ -101,8 +101,18 @@ async function main() {
     require(documents.size === 7, `officer A saw ${adapter} classifications for ${documents.size} files`)
   }
 
+  const judgments = await officerA.from("document_judgments").select("question, document_id")
+  if (judgments.error) throw judgments.error
+  const questions = new Set(judgments.data.map((row) => row.question))
+  const judgmentDocuments = new Set(judgments.data.map((row) => row.document_id))
+  require(judgments.data.length === 2, `officer A saw ${judgments.data.length} judgments`)
+  require(questions.has("delay_reason") && questions.has("delay_duration"), "officer A is missing a delay judgment")
+  require(judgmentDocuments.size === 1, `officer A saw judgments for ${judgmentDocuments.size} files`)
+  const judgedFile = documents.data.find((document) => document.id === judgments.data[0].document_id)
+  require(judgedFile?.source_file === "delay-letter.pdf", "the delay judgments are not on the delay letter")
+
   const officerB = await signIn(url, anonKey, "officer-b@example.com", password)
-  for (const table of ["claims", "claim_documents", "document_pages", "document_items", "quotable_pages", "claim_decisions", "claim_messages", "document_classifications"]) {
+  for (const table of ["claims", "claim_documents", "document_pages", "document_items", "quotable_pages", "claim_decisions", "claim_messages", "document_classifications", "document_judgments"]) {
     const result = await officerB.from(table).select("*")
     if (result.error) throw result.error
     require(result.data.length === 0, `officer B saw ${result.data.length} ${table} rows`)

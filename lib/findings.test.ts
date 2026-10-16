@@ -11,6 +11,7 @@ import {
   assessmentHistoryNote,
   claimPageMessage,
   classificationEstablished,
+  judgmentReading,
   latestCheckFailed,
   requestMessageText,
   timelineNewestFirst,
@@ -255,6 +256,13 @@ test("a Jev label below the gate or other is not established", () => {
   assert.equal(classificationEstablished("boarding_pass", 0.6), true)
   assert.equal(classificationEstablished("boarding_pass", 0.59), false)
   assert.equal(classificationEstablished("other", 1), false)
+})
+
+test("a delay judgment supports, contradicts, or stays unestablished", () => {
+  assert.equal(judgmentReading(0.75), "supports")
+  assert.equal(judgmentReading(0.74), "not established")
+  assert.equal(judgmentReading(0.25), "contradicts")
+  assert.equal(judgmentReading(0.26), "not established")
 })
 
 test("the request message greets the claimant and keeps the rationale", () => {

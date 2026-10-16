@@ -2,6 +2,8 @@
 // filenames. The stored Jev label is not read by these checks.
 export const ADAPTER = "fixture"
 export const CHOICE_GATE = 0.6
+export const NOUL_SUPPORT = 0.75
+export const NOUL_CONTRADICT = 0.25
 export const MINIMUM_DELAY_HOURS = 6
 export const CHECK_NAMES = [
   "completeness",

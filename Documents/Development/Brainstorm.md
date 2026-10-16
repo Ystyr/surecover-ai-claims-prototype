@@ -54,8 +54,8 @@ Question set **`jev-questions-demo-2026.1`**, stored with the policy version on 
 | --- | --- | --- |
 | Document type | Choice: claim form, scheduled itinerary, revised itinerary, boarding pass, delay letter, `other` | Store the label, the full distribution, the model id, and the question-set version |
 | Which span is the departure date, flight number, or stated delay | Choice over candidates a parser already found | Copy that span verbatim and parse it in code |
-| Does this letter state a delay reason? | Noul | At or above 0.75 supports it. At or below 0.25 contradicts it. In between is `unknown` |
-| Does this letter state a delay duration? | Noul | Same gates. The 6-hour comparison stays in code |
+| Does this letter state a delay reason? | Noul | Show the stored answer under `delay-letter.pdf`. At or above 0.75 supports it. At or below 0.25 contradicts it. In between is not established. The delay check still uses the parsed reason |
+| Does this letter state a delay duration? | Noul | Same display and the same gates. The 6-hour comparison stays on the parsed duration |
 | Do two dates fall on the same day, and was the claim filed within 30 working days? | Not a Jev question | Code compares the parsed values |
 | Is the delay at least 6 hours, and is the claim type flight delay? | Not a Jev question | Code applies `demo-2026.1` |
 | Coverage period | Not a Jev question | Code compares parsed claim dates with the seeded `demo-2026.1` policy record. Flight documents do not supply the period, and the record is not placed in Jev state |

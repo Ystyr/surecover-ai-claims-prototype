@@ -1,4 +1,4 @@
-import { CHOICE_GATE } from "../checks/assess.mjs"
+import { CHOICE_GATE, NOUL_CONTRADICT, NOUL_SUPPORT } from "../checks/assess.mjs"
 
 const MONTHS = [
   "January",
@@ -247,6 +247,17 @@ export const ROLE_LABELS: Record<string, string> = {
 
 export function classificationEstablished(label: string, probability: number) {
   return label !== "other" && probability >= CHOICE_GATE
+}
+
+export const JUDGMENT_LABELS: Record<string, string> = {
+  delay_reason: "Delay reason",
+  delay_duration: "Delay duration",
+}
+
+export function judgmentReading(noul: number) {
+  if (noul >= NOUL_SUPPORT) return "supports"
+  if (noul <= NOUL_CONTRADICT) return "contradicts"
+  return "not established"
 }
 
 export function requestMessageText(input: { reference: string; claimantName: string; rationale: string }) {

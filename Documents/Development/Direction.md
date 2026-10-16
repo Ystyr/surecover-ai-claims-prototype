@@ -27,7 +27,7 @@ Prioritize TypeSafe Jev as the semantic model to evaluate behind a replaceable a
 
 The hypothesis is that Jev can handle document labels, semantic support questions, and span choice, while code controls workflow and operators resolve uncertain cases. Evaluate this on labeled synthetic examples. Jev is the priority. A generative LLM is the backup plan only for a specific semantic task that Jev cannot handle adequately, and only when the added cost, data exposure, and failure modes are justified. Deterministic code remains responsible for parsing and checking values.
 
-Keep a fixture adapter with the same contract so the full demo can run without a live Jev call. Record which adapter and model produced each result. A classification request has been made and reviewed. Support questions and span choice are still unevaluated, so Jev is not described as handling most semantic judgment.
+Keep a fixture adapter with the same contract so the full demo can run without a live Jev call. Record which adapter and model produced each result. A classification request has been made and reviewed. The delay letter was asked whether it states a reason and a duration, and both answers supported the proposition. `supabase/seed/judge-claim.mjs` copies the page-id state format from `supabase/seed/classify-claim.mjs`. A change to one has to be made in the other. A supporting noul does not name the quoted reason or the quoted duration. That waits for span selection. Span choice is still unevaluated, so Jev is not described as handling most semantic judgment.
 
 ### Deterministic policy and workflow logic
 

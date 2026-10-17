@@ -96,6 +96,9 @@ function completenessSummary(outcome: string, detail: Record<string, unknown>) {
   if (outcome === "fail") {
     return gaps.length > 0 ? `Missing ${gaps.join("; ")}.` : "A required document is missing."
   }
+  if (outcome === "unknown" && detail.unclassified === true && gaps.length > 0 && typeof detail.reason === "string") {
+    return `${detail.reason} ${gaps.join("; ")} has no established boarding pass.`
+  }
   if (typeof detail.reason === "string") return detail.reason
   return "A required document is not established."
 }
@@ -269,7 +272,46 @@ export function spanEstablished(choice: string, probability: number, quote: stri
   return choice !== "none" && probability >= CHOICE_GATE && Boolean(quote)
 }
 
-export function requestMessageText(input: { reference: string; claimantName: string; rationale: string }) {
+const UNCLASSIFIED_FILE_REASON = "A file is present but its document type is not established."
+
+export function failedCompletenessGaps(check: CheckRow | undefined) {
+  if (!check || check.outcome !== "fail" || !Array.isArray(check.detail.gaps)) return []
+  return check.detail.gaps.filter((gap): gap is string => typeof gap === "string" && gap.trim().length > 0)
+}
+
+export function clearerPhotoGaps(check: CheckRow | undefined) {
+  if (!check || check.outcome !== "unknown" || check.detail.unclassified !== true) return []
+  if (check.detail.reason !== UNCLASSIFIED_FILE_REASON || !Array.isArray(check.detail.gaps)) return []
+  return check.detail.gaps.filter((gap): gap is string => typeof gap === "string" && gap.trim().length > 0)
+}
+
+export function boardingPassGapSentence(gap: string) {
+  return `The boarding pass for ${gap} is not on file.`
+}
+
+export function clearerPhotoSentence(gap: string) {
+  return `Please send a clearer photo of the boarding pass for ${gap}.`
+}
+
+export function conflictingReturnSentence(check: CheckRow | undefined) {
+  if (!check || check.outcome !== "unknown" || "deadline" in check.detail) return null
+  const returned = displayDate(text(check.detail, "return_date"))
+  const arrival = displayDate(text(check.detail, "revised_arrival"))
+  if (!returned || !arrival || returned === arrival) return null
+  return `The form return date ${returned} disagrees with the revised Singapore arrival ${arrival}. Both dates stay visible.`
+}
+
+export function requestMessageText(input: {
+  reference: string
+  claimantName: string
+  rationale: string
+  gaps?: string[]
+  photoGaps?: string[]
+  dateLine?: string | null
+}) {
+  const gaps = (input.gaps ?? []).filter((gap) => gap.trim().length > 0).map((gap) => boardingPassGapSentence(gap))
+  const photos = (input.photoGaps ?? []).filter((gap) => gap.trim().length > 0).map((gap) => clearerPhotoSentence(gap))
+  const lines = [...gaps, ...photos, ...(input.dateLine ? [input.dateLine] : [])]
   return {
     subject: `Information requested for ${input.reference}`,
     body: [
@@ -277,7 +319,21 @@ export function requestMessageText(input: { reference: string; claimantName: str
       "",
       `We need more information to continue claim ${input.reference}.`,
       "",
+      ...(lines.length > 0 ? [...lines, ""] : []),
       input.rationale,
+      "",
+      "Fictional demonstration data. Not a SureCover policy document.",
+    ].join("\n"),
+  }
+}
+
+export function acknowledgmentText(input: { reference: string; claimantName: string }) {
+  return {
+    subject: `Received ${input.reference}`,
+    body: [
+      `Hello ${input.claimantName},`,
+      "",
+      `We received claim ${input.reference}.`,
       "",
       "Fictional demonstration data. Not a SureCover policy document.",
     ].join("\n"),
@@ -288,11 +344,15 @@ export function timelineNewestFirst<
   D extends { id: string; created_at: string },
   A extends { id: string; created_at: string },
   M extends { id: string; created_at: string },
->(decisions: D[], assessments: A[], messages: M[] = []) {
-  const events: Array<{ kind: "decision"; item: D } | { kind: "assessment"; item: A } | { kind: "message"; item: M }> = [
+  R extends { id: string; created_at: string },
+>(decisions: D[], assessments: A[], messages: M[] = [], replies: R[] = []) {
+  const events: Array<
+    { kind: "decision"; item: D } | { kind: "assessment"; item: A } | { kind: "message"; item: M } | { kind: "reply"; item: R }
+  > = [
     ...decisions.map((item) => ({ kind: "decision" as const, item })),
     ...assessments.map((item) => ({ kind: "assessment" as const, item })),
     ...messages.map((item) => ({ kind: "message" as const, item })),
+    ...replies.map((item) => ({ kind: "reply" as const, item })),
   ]
   return events.sort((left, right) => {
     const byTime = Date.parse(right.item.created_at) - Date.parse(left.item.created_at)

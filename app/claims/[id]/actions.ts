@@ -1,8 +1,10 @@
 "use server"
 
+import { createClient as createServiceClient } from "@supabase/supabase-js"
 import { redirect } from "next/navigation"
 
 import { assessClaim, quotableItems, validateFactValue } from "@/checks/assess.mjs"
+import { sendResendEmail } from "@/lib/email"
 import { isUuid } from "@/lib/findings"
 import { createClient } from "@/lib/supabase/server"
 
@@ -102,7 +104,37 @@ export async function sendRequestMessage(formData: FormData) {
     if (code === "missing") redirect("/")
     redirect(`/claims/${claimId}?message=${code}`)
   }
+  if (typeof saved.data === "string") await deliverRecordedMessage(saved.data)
   redirect(`/claims/${claimId}`)
+}
+
+async function deliverRecordedMessage(messageId: string) {
+  const apiKey = process.env.RESEND_API_KEY
+  const from = process.env.RESEND_FROM
+  const url = process.env.SUPABASE_URL
+  const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!apiKey || !from || !url || !serviceRole) return
+  const admin = createServiceClient(url, serviceRole, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+  const message = await admin
+    .from("claim_messages")
+    .select("to_address, subject, body, provider, status")
+    .eq("id", messageId)
+    .maybeSingle()
+  if (message.error || !message.data || message.data.provider !== "simulated" || message.data.status !== "recorded") return
+  try {
+    const providerId = await sendResendEmail({
+      apiKey,
+      from,
+      to: message.data.to_address,
+      subject: message.data.subject,
+      text: message.data.body,
+    })
+    await admin.rpc("mark_request_message_sent", { p_message_id: messageId, p_provider_message_id: providerId })
+  } catch {
+    return
+  }
 }
 
 function messageCode(message: string) {

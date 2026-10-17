@@ -5,7 +5,7 @@ from __future__ import annotations
 import random
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -14,6 +14,12 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "fixtures" / "samples" / "complete"
+CONFLICT = ROOT / "fixtures" / "samples" / "conflict"
+UNREADABLE = ROOT / "fixtures" / "samples" / "unreadable"
+CONFLICT_FLIGHTS = [
+    ["SC101", "1 August 2026", "SIN", "NRT"],
+    ["SC202", "8 August 2026", "NRT", "SIN"],
+]
 BANNER = "Fictional demonstration data. Not a SureCover policy document."
 
 FLIGHT_HEADER = ["Flight", "Date", "From", "To"]
@@ -52,8 +58,9 @@ def styles() -> dict[str, ParagraphStyle]:
     }
 
 
-def flight_table() -> Table:
-    table = Table([FLIGHT_HEADER, *FLIGHTS], colWidths=[35 * mm, 45 * mm, 30 * mm, 30 * mm])
+def flight_table(flights: list[list[str]] | None = None) -> Table:
+    rows = FLIGHTS if flights is None else flights
+    table = Table([FLIGHT_HEADER, *rows], colWidths=[35 * mm, 45 * mm, 30 * mm, 30 * mm])
     table.setStyle(
         TableStyle(
             [
@@ -105,7 +112,7 @@ def write_claim_form(path: Path) -> None:
     )
 
 
-def write_itinerary(path: Path, title: str) -> None:
+def write_itinerary(path: Path, title: str, flights: list[list[str]] | None = None) -> None:
     style = styles()
     write_pdf(
         path,
@@ -114,7 +121,7 @@ def write_itinerary(path: Path, title: str) -> None:
             Paragraph(title, style["title"]),
             Paragraph("Passenger: Jamie Lee", style["body"]),
             Spacer(1, 4 * mm),
-            flight_table(),
+            flight_table(flights),
         ],
     )
 
@@ -177,7 +184,12 @@ def draw_barcode(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int]) -> N
         cursor += bar + gap
 
 
-def render_boarding_pass_card() -> Image.Image:
+def render_boarding_pass_card(
+    flight: str = "SC101",
+    date: str = "1 August 2026",
+    origin: str = "SIN",
+    destination: str = "NRT",
+) -> Image.Image:
     """Sharp fictional pass. The claim phrases stay large and high contrast for OCR."""
     width, height = 1240, 1600
     card = Image.new("RGB", (width, height), "#F3EFE4")
@@ -197,10 +209,10 @@ def render_boarding_pass_card() -> Image.Image:
         draw.text((x, y + 48), text, fill=ink, font=value)
 
     field("PASSENGER", "Jamie Lee", 72, 330)
-    field("FLIGHT", "SC101", 72, 560)
-    field("DATE", "1 August 2026", 620, 560)
-    field("FROM", "SIN", 72, 820)
-    field("TO", "NRT", 620, 820)
+    field("FLIGHT", flight, 72, 560)
+    field("DATE", date, 620, 560)
+    field("FROM", origin, 72, 820)
+    field("TO", destination, 620, 820)
     draw_barcode(draw, (72, 1120, width - 72, 1280))
     draw.text(
         (72, 1360),
@@ -214,6 +226,18 @@ def render_boarding_pass_card() -> Image.Image:
 def write_boarding_pass_png(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     render_boarding_pass_card().save(path, format="PNG")
+
+
+def write_conflict_itinerary() -> None:
+    write_itinerary(CONFLICT / "revised-itinerary.pdf", "Revised itinerary", CONFLICT_FLIGHTS)
+
+
+def write_unreadable_return_pass() -> None:
+    card = render_boarding_pass_card(flight="SC202", date="7 August 2026", origin="NRT", destination="SIN")
+    blurred = card.filter(ImageFilter.GaussianBlur(radius=18))
+    path = UNREADABLE / "return-pass.png"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    blurred.save(path, format="PNG")
 
 
 def main() -> None:
@@ -233,6 +257,10 @@ def main() -> None:
     # photograph_evidence.py replaces this file with a ComfyUI photo. Do not clobber it.
     if not boarding_pass_png.exists():
         write_boarding_pass_png(boarding_pass_png)
+    write_conflict_itinerary()
+    write_unreadable_return_pass()
+    print((CONFLICT / "revised-itinerary.pdf").relative_to(ROOT))
+    print((UNREADABLE / "return-pass.png").relative_to(ROOT))
     for path in sorted(OUT.iterdir()):
         print(path.relative_to(ROOT))
 

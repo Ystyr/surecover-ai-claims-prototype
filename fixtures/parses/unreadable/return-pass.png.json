@@ -1,0 +1,54 @@
+{
+  "parser": "docling",
+  "parser_version": "2.138.0",
+  "source_file": "return-pass.png",
+  "media_type": "image/png",
+  "text_source": "unreadable",
+  "pages": [
+    {
+      "page_number": 1,
+      "text": "",
+      "text_source": "unreadable"
+    }
+  ],
+  "items": [],
+  "document": {
+    "schema_name": "DoclingDocument",
+    "version": "1.10.0",
+    "name": "return-pass",
+    "origin": {
+      "mimetype": "application/pdf",
+      "binary_hash": "16647400800187123596",
+      "filename": "return-pass.png"
+    },
+    "furniture": {
+      "self_ref": "#/furniture",
+      "children": [],
+      "content_layer": "furniture",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "body": {
+      "self_ref": "#/body",
+      "children": [],
+      "content_layer": "body",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "groups": [],
+    "texts": [],
+    "pictures": [],
+    "tables": [],
+    "key_value_items": [],
+    "form_items": [],
+    "pages": {
+      "1": {
+        "size": {
+          "width": 1240.0,
+          "height": 1600.0
+        },
+        "page_no": 1
+      }
+    }
+  }
+}

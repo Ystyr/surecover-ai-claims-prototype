@@ -6,6 +6,9 @@ import {
   assessmentHistoryNote,
   assessmentOutcomeLine,
   ROLE_LABELS,
+  clearerPhotoGaps,
+  conflictingReturnSentence,
+  failedCompletenessGaps,
   requestMessageText,
   timelineNewestFirst,
   classificationEstablished,
@@ -80,12 +83,20 @@ type SpanRow = {
 
 type MessageRow = {
   id: string
-  decision_id: string
+  decision_id: string | null
   to_address: string
   subject: string
   body: string
   provider: string
   status: string
+  created_at: string
+}
+
+type ReplyRow = {
+  id: string
+  from_address: string
+  subject: string
+  provider: string
   created_at: string
 }
 
@@ -199,7 +210,7 @@ export default async function ClaimPage({
     )
   }
 
-  const [documentResult, assessmentResult, factResult, decisionResult, messageResult, classificationResult, judgmentResult, spanResult] = await Promise.all([
+  const [documentResult, assessmentResult, factResult, decisionResult, messageResult, replyResult, classificationResult, judgmentResult, spanResult] = await Promise.all([
     supabase.from("claim_documents").select("id, source_file, media_type").eq("claim_id", claim.id).order("source_file"),
     supabase
       .from("assessments")
@@ -223,6 +234,12 @@ export default async function ClaimPage({
     supabase
       .from("claim_messages")
       .select("id, decision_id, to_address, subject, body, provider, status, created_at")
+      .eq("claim_id", claim.id)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false }),
+    supabase
+      .from("inbound_messages")
+      .select("id, from_address, subject, provider, created_at")
       .eq("claim_id", claim.id)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false }),
@@ -256,7 +273,7 @@ export default async function ClaimPage({
     claimId: id,
     claimError: null,
     claim,
-    documentError: documentResult.error || factResult.error || correctionResult.error || decisionResult.error || messageResult.error || classificationResult.error || judgmentResult.error || spanResult.error,
+    documentError: documentResult.error || factResult.error || correctionResult.error || decisionResult.error || messageResult.error || replyResult.error || classificationResult.error || judgmentResult.error || spanResult.error,
     assessmentError: assessmentResult.error,
   })
   if (blocked) return <ClaimNotice message={blocked} />
@@ -275,6 +292,7 @@ export default async function ClaimPage({
   const corrections = (correctionResult.data ?? []) as CorrectionRow[]
   const decisions = (decisionResult.data ?? []) as DecisionRow[]
   const messages = (messageResult.data ?? []) as MessageRow[]
+  const replies = (replyResult.data ?? []) as ReplyRow[]
   const classifications = (classificationResult.data ?? []) as ClassificationRow[]
   const judgments = (judgmentResult.data ?? []) as JudgmentRow[]
   const spans = (spanResult.data ?? []) as SpanRow[]
@@ -365,13 +383,23 @@ export default async function ClaimPage({
       <section className="panel">
         <h2>History</h2>
         <ul className="history">
-          {timelineNewestFirst(decisions, history, messages).map((event) => {
+          {timelineNewestFirst(decisions, history, messages, replies).map((event) => {
             if (event.kind === "decision") {
               return (
                 <li key={event.item.id}>
                   <strong>{displayInstant(event.item.created_at)}</strong>
                   <span> · {ACTION_LABELS[event.item.action]}</span>
                   <div>{event.item.rationale}</div>
+                </li>
+              )
+            }
+            if (event.kind === "reply") {
+              return (
+                <li key={event.item.id}>
+                  <strong>{displayInstant(event.item.created_at)}</strong>
+                  <span> · Reply</span>
+                  <div>{event.item.subject}</div>
+                  <p className="muted">From {event.item.from_address} · {event.item.provider}</p>
                 </li>
               )
             }
@@ -411,6 +439,9 @@ export default async function ClaimPage({
           claimId={claim.id}
           claimantName={claim.claimant_name}
           decisions={decisions}
+          dateLine={conflictingReturnSentence(checks.find((entry) => entry.check_name === "filing_deadline"))}
+          gaps={failedCompletenessGaps(checks.find((entry) => entry.check_name === "completeness"))}
+          photoGaps={clearerPhotoGaps(checks.find((entry) => entry.check_name === "completeness"))}
           message={query.decision ? DECISION_MESSAGES[query.decision] : undefined}
           messages={messages}
           reference={claim.reference}
@@ -463,18 +494,24 @@ function DecisionActions({
   claimId,
   assessmentId,
   claimantName,
+  dateLine,
   decisions,
+  gaps,
   message,
   messages,
+  photoGaps,
   reference,
   requestMessage,
 }: {
   claimId: string
   assessmentId: string | null
   claimantName: string
+  dateLine: string | null
   decisions: DecisionRow[]
+  gaps: string[]
   message?: string
   messages: MessageRow[]
+  photoGaps: string[]
   reference: string
   requestMessage?: string
 }) {
@@ -482,7 +519,7 @@ function DecisionActions({
   const request = decisions.find((decision) => decision.action === "request")
   const pendingRequest = request && !messages.some((row) => row.decision_id === request.id) ? request : null
   const preview = pendingRequest
-    ? requestMessageText({ reference, claimantName, rationale: pendingRequest.rationale })
+    ? requestMessageText({ reference, claimantName, rationale: pendingRequest.rationale, gaps, photoGaps, dateLine })
     : null
   const openActions = finished
     ? []

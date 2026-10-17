@@ -44,7 +44,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   const onLogin = path === "/login" || path.startsWith("/login/")
-  if (!signedIn && !onLogin) return redirectTo("/login")
+  const inbound = path === "/inbound/resend"
+  if (!signedIn && !onLogin && !inbound) return redirectTo("/login")
   if (signedIn && path === "/login") return redirectTo("/")
   return response
 }

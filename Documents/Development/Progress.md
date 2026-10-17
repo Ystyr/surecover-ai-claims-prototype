@@ -193,7 +193,7 @@ On this run every Jev label matched the filename and the probability was 1, so e
 
 `npm run judge:claim` asks `delay-letter.pdf` once whether it states a reason for the delay and whether it states a duration. The other six files are not sent, and the stored document-type call is not repeated. The state is that letter's page text and page id. The model is `jev-1.13.0` and the question set is `jev-questions-demo-2026.1`. The wording is in the script and does not quote the letter. Each answer is a noul. At least 0.75 supports the proposition, at most 0.25 contradicts it, and a value strictly between those two is not established.
 
-On this run the reason was 0.98 and the duration was 0.99, so both support the proposition. The request used 387 input tokens and 38 output tokens. Both `document_judgments` rows store those counts, and they are one request. Adding the two rows counts it twice. A later run keeps the stored answers and does not call again. The rows are in `document_judgments`. The assigned officer can read them. An officer session cannot insert them. Officer B receives none. The file list shows both lines under `delay-letter.pdf`. The six checks were not rewritten. The claim stays `information requested` and the latest delay stays 8 hours. Span selection and a second model stay later.
+On this run the reason was 0.98 and the duration was 0.99, so both support the proposition. The request used 387 input tokens and 38 output tokens. Both `document_judgments` rows store those counts, and they are one request. Adding the two rows counts it twice. A later run keeps the stored answers and does not call again. The rows are in `document_judgments`. The assigned officer can read them. An officer session cannot insert them. Officer B receives none. The file list shows both lines under `delay-letter.pdf`. The six checks were not rewritten. The claim stays `information requested` and the latest delay stays 8 hours. This call did not ask Jev to choose a line.
 
 ## Delay letter spans
 
@@ -203,6 +203,88 @@ On this run the reason line was "Flight SC202 from NRT to SIN on 7 August 2026 w
 
 ## Missing boarding pass
 
-`npm run seed:missing` adds `CLM-DEMO-1002` and leaves `CLM-DEMO-1001` in place. It does not recreate the officers. The new claim uses the same traveler, policy, and received time, and its status is `needs review`. The files are the complete bundle without `boarding-pass-sc202.pdf`. The stored parses are reused. No Jev call is made, and no decision or message is stored.
+The complete claim already has a pass for SC202, so dropping that file from `CLM-DEMO-1001` would have removed the case the other stages stored. `npm run seed:missing` adds `CLM-DEMO-1002` beside it. The script does not recreate the officers. It reads the existing `officer-a@example.com` row and assigns the new claim to that id. The traveler, policy, return date, and received time are the same as the complete claim. The status is `needs review`. The files are the six stored parses other than `boarding-pass-sc202.pdf`. No Jev call is made, and no decision or message is stored.
 
-The one assessment fails completeness with the gap `SC202 on 7 August 2026 from NRT to SIN`. Filing, coverage, claim type, consistency, and delay pass. The queue shows Action needed and Check failed on this claim. `CLM-DEMO-1001` stays `information requested` and shows neither. Officer A can read both claims. Officer B receives no rows. A later run replaces only `CLM-DEMO-1002`. `npm run seed:claim` stops before it deletes anything when another claim is stored, because that script also recreates the officers and `CLM-DEMO-1002` is assigned to officer A.
+The assessment is written only when completeness fails with the gap `SC202 on 7 August 2026 from NRT to SIN` and the other five checks pass. Filing, coverage, claim type, consistency, and delay pass because those do not depend on the return-flight pass. After the insert, the script reads `CLM-DEMO-1001` again and throws if its id, status, or file count changed. A later run deletes and replaces only `CLM-DEMO-1002`, including that claim's stored files.
+
+`npm run seed:claim` recreates both officers, so running it while `CLM-DEMO-1002` is assigned to officer A would delete that claim with the officer. It now reads the claim table first and stops before it deletes anything when any reference other than `CLM-DEMO-1001` is stored.
+
+The queue shows Action needed and Check failed on `CLM-DEMO-1002`. `CLM-DEMO-1001` stays `information requested` and shows neither. `npm run verify:access` sees both claims. Officer A has seven files on the complete claim and six on the missing-pass claim, and none of those six is `boarding-pass-sc202.pdf`. The completeness row for `CLM-DEMO-1002` fails on that named flight. Officer B receives no rows for either claim.
+
+## Conflicting return date
+
+The revised itinerary on the complete bundle agrees with the form, so this case has its own file. `parser/generate_samples.py` writes `fixtures/samples/conflict/revised-itinerary.pdf` with SC202 on 8 August 2026. The complete PDFs stay on 7 August. `parser/convert_document.py` parsed that file into `fixtures/parses/conflict/revised-itinerary.pdf.json`. The stored items include `8 August 2026`.
+
+`npm run seed:conflict` adds `CLM-DEMO-1003` beside the other two claims. It does not recreate the officers. The traveler, policy, and received time match the complete claim, and the status is `needs review`. Six files come from the complete bundle. `revised-itinerary.pdf` comes from the conflict file. No Jev call is made, and no facts, decision, or message are stored.
+
+Filing and consistency are `unknown`. The form date stays 7 August 2026 and the revised Singapore arrival stays 8 August 2026. No deadline is stored. Completeness, coverage, claim type, and delay pass. A later run replaces only `CLM-DEMO-1003`. `CLM-DEMO-1001` and `CLM-DEMO-1002` keep their ids, statuses, and file counts.
+
+The queue shows Action needed and Check failed on `CLM-DEMO-1003`. `CLM-DEMO-1001` stays `information requested` and shows neither. `CLM-DEMO-1002` still shows both badges for the missing pass. The filing finding names both dates. Officer A can read all three claims. Officer B receives no rows.
+
+## Unreadable return pass
+
+A missing file fails completeness. A file with ink and no readable text is a different result. `parser/generate_samples.py` writes `fixtures/samples/unreadable/return-pass.png` from the SC202 boarding-pass card, then blurs it at radius 18. The name is not a fixture role, so the check does not treat the blur as a boarding pass. `parser/convert_document.py` parsed that file into `fixtures/parses/unreadable/return-pass.png.json`. The page is `unreadable`, the page text is empty, and there are no items.
+
+`npm run seed:unreadable` adds `CLM-DEMO-1004` beside the other three claims. It does not recreate the officers. The traveler, policy, and received time match the complete claim, and the status is `needs review`. Six files come from the complete bundle, with `boarding-pass-sc202.pdf` left out. `return-pass.png` comes from the unreadable photo. No Jev call is made, and no facts, decision, or message are stored.
+
+Completeness stays `unknown`. The finding is "A file is present but its document type is not established. SC202 on 7 August 2026 from NRT to SIN has no established boarding pass." It does not say the file is missing. Filing, coverage, claim type, consistency, and delay pass. A later run replaces only `CLM-DEMO-1004`. `CLM-DEMO-1001`, `CLM-DEMO-1002`, and `CLM-DEMO-1003` keep their ids, statuses, and file counts.
+
+The queue shows Action needed and Check failed on `CLM-DEMO-1004`. The earlier claims stay as they were. The file list includes `return-pass.png`. Officer A can read all four claims. Officer B receives no rows. `npm run verify:checks` still reads only `CLM-DEMO-1001`.
+
+## Traveler email
+
+The missing-pass request now names the flight. When the latest completeness check is `fail`, the message keeps the greeting and the officer's rationale and adds one sentence per gap. For `CLM-DEMO-1002` that sentence is "The boarding pass for SC202 on 7 August 2026 from NRT to SIN is not on file." A passing check, including the stored message on `CLM-DEMO-1001`, keeps the earlier template. An `unknown` completeness check does not get this sentence. The officer does not edit the template. `private.record_request_message` reads the latest completeness row and writes the same sentence.
+
+`npm run request:missing` signs in as officer A and records one request on `CLM-DEMO-1002` when none exists. The claim becomes `information requested`. Approve and Reject stay available. A second run leaves that decision and message in place. The row is `simulated` and `recorded`. If `RESEND_API_KEY` and `RESEND_FROM` are set, the server action sends that stored body and marks it `sent`. The mark function is not granted to the officer session. Those keys are not set, so nothing was delivered.
+
+`POST /inbound/resend` is outside the login redirect. It verifies the Resend signature on the raw body and returns 401 otherwise. A repeated provider email id returns 200 and does not create a second claim. The webhook payload is not used as the file bytes. When `RESEND_API_KEY` is set, the route fetches the attachments and keeps PDF, PNG, and JPEG files within 25 MB.
+
+`npm run intake:email` stores `CLM-DEMO-1005` from the fixture email `fixture-email-1005`. It reuses the seven complete files and their stored parses. It does not call Docling or Jev, and it stores no facts or decision. The traveler, policy, and received time match the complete claim. The status is `needs review`. All six checks pass. The acknowledgment is "Hello Jamie Lee," / "We received claim CLM-DEMO-1005." / the usual fictional footer. Its provider is `simulated` and its status is `recorded`. A second run replaces only this claim and this inbound row.
+
+On the queue, `CLM-DEMO-1002` shows Check failed and does not show Action needed. `CLM-DEMO-1005` shows Action needed only. `CLM-DEMO-1001` shows neither. `CLM-DEMO-1003` and `CLM-DEMO-1004` still show both. The 1002 history names the 7 August flight. The 1005 history shows the acknowledgment. Officer A can read all five claims. Officer B receives no rows. `npm run verify:checks` still reads only `CLM-DEMO-1001`.
+
+## Missing pass reply
+
+The request on `CLM-DEMO-1002` stays. `npm run reply:missing` stores the traveler's reply on that same claim. The inbound row is `fixture-reply-1002`, from `jamie.lee@example.com`, with the subject `Re: Information requested for CLM-DEMO-1002`. The file is the stored complete `boarding-pass-sc202.pdf`. No Docling call and no Jev call are made.
+
+A second assessment is stored beside the failed one. All six checks on that new assessment pass. The earlier completeness check still fails on `SC202 on 7 August 2026 from NRT to SIN`. The status returns to `needs review`. The request decision and its message stay. A second run does not add another file, assessment, or reply. The other four claims keep their statuses, file counts, and mail.
+
+The history lists the reply first, then the passing assessment, then the request, then the failed assessment. Approve and Reject stay available. Request stays hidden because a request decision already exists. On the queue, `CLM-DEMO-1002` shows Action needed and does not show Check failed. The other rows keep their badges. Officer A can read all five claims. Officer B receives no rows. `npm run verify:checks` still reads only `CLM-DEMO-1001`.
+
+## Clearer photo request
+
+An unreadable file is not a missing file. When the latest completeness check is `unknown`, the file is unclassified, and the reason is that the document type is not established, the request names each gap as a clearer photo. For `CLM-DEMO-1004` that sentence is "Please send a clearer photo of the boarding pass for SC202 on 7 August 2026 from NRT to SIN." It does not say the boarding pass is not on file. A failed completeness check still uses the missing-pass sentence. A passing check, including the stored message on `CLM-DEMO-1001`, gets neither sentence. The officer does not edit the template. `private.record_request_message` reads the latest completeness row and writes the same sentence.
+
+`npm run request:photo` signs in as officer A and records one request on `CLM-DEMO-1004` when none exists. The rationale is "Please send a clearer photo of the return boarding pass." The claim becomes `information requested`. Completeness stays `unknown`. The file `return-pass.png` stays. Approve and Reject stay available. A second run leaves that decision and message in place. The row is `simulated` and `recorded`. The other four claims keep their ids, statuses, and file counts.
+
+On the queue, `CLM-DEMO-1004` shows Check failed and does not show Action needed. The history lists the message, then the request, then the unknown assessment. Officer A can read all five claims. Officer B receives no rows. `npm run verify:checks` still reads only `CLM-DEMO-1001`.
+
+## Clearer photo reply
+
+The request on `CLM-DEMO-1004` stays. `npm run reply:photo` stores the traveler's reply on that same claim. The inbound row is `fixture-reply-1004`, from `jamie.lee@example.com`, with the subject `Re: Information requested for CLM-DEMO-1004`. The file is the stored complete `boarding-pass-sc202.pdf`. `return-pass.png` stays. No Docling call and no Jev call are made.
+
+A second assessment is stored beside the unknown one. All six checks on that new assessment pass. The earlier completeness check still says the document type is not established and names `SC202 on 7 August 2026 from NRT to SIN`. The status returns to `needs review`. The request decision and its message stay. A second run does not add another file, assessment, or reply. The other four claims keep their statuses, file counts, and mail.
+
+The history lists the reply first, then the passing assessment, then the request, then the unknown assessment. Approve and Reject stay available. Request stays hidden because a request decision already exists. On the queue, `CLM-DEMO-1004` shows Action needed and does not show Check failed. The other rows keep their badges. Officer A can read all five claims. Officer B receives no rows. `npm run verify:checks` still reads only `CLM-DEMO-1001`.
+
+## Conflicting return request
+
+A date conflict is not a missing file. When the latest filing check is `unknown` and the form return date differs from the revised Singapore arrival, the request names both dates and does not pick one. For `CLM-DEMO-1003` that sentence is "The form return date 7 August 2026 disagrees with the revised Singapore arrival 8 August 2026. Both dates stay visible." It does not say a boarding pass is missing and it does not ask for a clearer photo. A passing filing check gets no date sentence. The officer does not edit the template. `private.record_request_message` reads the latest filing row and writes the same sentence.
+
+`npm run request:conflict` signs in as officer A and records one request on `CLM-DEMO-1003` when none exists. The rationale is "Please confirm which return date is correct." The claim becomes `information requested`. Filing and consistency stay `unknown`. No deadline is stored. Approve and Reject stay available. A second run leaves that decision and message in place. The row is `simulated` and `recorded`. The other four claims keep their ids, statuses, and file counts.
+
+On the queue, `CLM-DEMO-1003` shows Check failed and does not show Action needed. The history lists the message, then the request, then the assessment whose filing and consistency are `unknown`. Officer A can read all five claims. Officer B receives no rows. `npm run verify:checks` still reads only `CLM-DEMO-1001`.
+
+## Conflicting return reply
+
+The request on `CLM-DEMO-1003` stays. `npm run reply:conflict` stores the traveler's reply on that same claim. The inbound row is `fixture-reply-1003`, from `jamie.lee@example.com`, with the subject `Re: Information requested for CLM-DEMO-1003`. The 8 August file stays, now named `revised-itinerary-8-august.pdf`, and the earlier quote still points at it. `revised-itinerary.pdf` is the stored complete itinerary, which says 7 August 2026. No Docling call and no Jev call are made.
+
+A second assessment is stored beside the unknown one. All six checks on that new assessment pass. Filing now has the 7 August return, working day 2, and deadline 21 September 2026. The earlier filing check still disagrees, 7 August against 8 August, and still stores no deadline. The status returns to `needs review`. The request decision and its message stay. A second run does not add another file, assessment, or reply. The other four claims keep their statuses, file counts, and mail.
+
+The history lists the reply first, then the passing assessment, then the request, then the unknown assessment. Approve and Reject stay available. Request stays hidden because a request decision already exists. On the queue, `CLM-DEMO-1003` shows Action needed and does not show Check failed. The other rows keep their badges. Officer A can read all five claims. Officer B receives no rows. `npm run verify:checks` still reads only `CLM-DEMO-1001`.
+
+## Missing pass approval
+
+`CLM-DEMO-1002` is the claim that finished the round trip. The latest six checks pass, the earlier completeness failure stays, and the request and reply stay. `npm run approve:missing` signs in as officer A and records one approval when none exists. The rationale is "The missing boarding pass is now on file and the latest checks pass." The claim becomes `approved`. No message is recorded. A second run leaves that decision in place. The other four claims keep their ids, statuses, file counts, and mail.
+
+The history lists the approval first, then the reply, then the passing assessment, then the request, then the failed assessment. Approve and Reject are gone. On the queue, `CLM-DEMO-1002` shows `approved` and shows neither badge. Officer A can read all five claims. Officer B receives no rows. `npm run verify:checks` still reads only `CLM-DEMO-1001`.

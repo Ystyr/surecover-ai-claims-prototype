@@ -14,6 +14,12 @@ import {
   judgmentReading,
   spanEstablished,
   latestCheckFailed,
+  acknowledgmentText,
+  boardingPassGapSentence,
+  clearerPhotoGaps,
+  clearerPhotoSentence,
+  conflictingReturnSentence,
+  failedCompletenessGaps,
   requestMessageText,
   timelineNewestFirst,
   expandQuotes,
@@ -100,6 +106,21 @@ test("two Singapore arrivals stay visible and one quote stays one link", () => {
   }
   assert.match(findingSummary(check("consistency", "unknown", { routes: [], return_date: dates })), /disagree/)
   assert.deepEqual(expandQuotes("7 August 2026"), [{ text: "7 August 2026", sourceFile: null, flightNumber: null }])
+})
+
+test("an unreadable file names the flight that has no established pass", () => {
+  const summary = findingSummary(
+    check("completeness", "unknown", {
+      gaps: ["SC202 on 7 August 2026 from NRT to SIN"],
+      unclassified: true,
+      reason: "A file is present but its document type is not established.",
+    }),
+  )
+  assert.equal(
+    summary,
+    "A file is present but its document type is not established. SC202 on 7 August 2026 from NRT to SIN has no established boarding pass.",
+  )
+  assert.equal(summary.includes("Missing"), false)
 })
 
 test("a flight's form quote is kept once and the other flight stays", () => {
@@ -273,6 +294,96 @@ test("a span is established only when the chosen line is on the page", () => {
   assert.equal(spanEstablished("line-id", 1, null), false)
 })
 
+test("a failed completeness gap names the missing boarding pass", () => {
+  const gap = "SC202 on 7 August 2026 from NRT to SIN"
+  assert.deepEqual(
+    failedCompletenessGaps(check("completeness", "fail", { gaps: [gap] })),
+    [gap],
+  )
+  assert.deepEqual(failedCompletenessGaps(check("completeness", "unknown", { gaps: [gap], unclassified: true })), [])
+  assert.deepEqual(failedCompletenessGaps(check("completeness", "pass", { gaps: [] })), [])
+  const message = requestMessageText({
+    reference: "CLM-DEMO-1002",
+    claimantName: "Jamie Lee",
+    rationale: "Please send the missing boarding pass.",
+    gaps: [gap],
+  })
+  assert.equal(
+    message.body,
+    [
+      "Hello Jamie Lee,",
+      "",
+      "We need more information to continue claim CLM-DEMO-1002.",
+      "",
+      boardingPassGapSentence(gap),
+      "",
+      "Please send the missing boarding pass.",
+      "",
+      "Fictional demonstration data. Not a SureCover policy document.",
+    ].join("\n"),
+  )
+})
+
+test("an unreadable return pass asks for a clearer photo", () => {
+  const gap = "SC202 on 7 August 2026 from NRT to SIN"
+  const detail = {
+    gaps: [gap],
+    unclassified: true,
+    reason: "A file is present but its document type is not established.",
+  }
+  assert.deepEqual(clearerPhotoGaps(check("completeness", "unknown", detail)), [gap])
+  assert.deepEqual(clearerPhotoGaps(check("completeness", "fail", { gaps: [gap], unclassified: false })), [])
+  assert.deepEqual(
+    clearerPhotoGaps(check("completeness", "unknown", { gaps: [], unclassified: true, reason: "The affected flights could not be read." })),
+    [],
+  )
+  assert.deepEqual(failedCompletenessGaps(check("completeness", "unknown", detail)), [])
+  const message = requestMessageText({
+    reference: "CLM-DEMO-1004",
+    claimantName: "Jamie Lee",
+    rationale: "Please send a clearer photo of the return boarding pass.",
+    photoGaps: [gap],
+  })
+  assert.equal(
+    message.body,
+    [
+      "Hello Jamie Lee,",
+      "",
+      "We need more information to continue claim CLM-DEMO-1004.",
+      "",
+      clearerPhotoSentence(gap),
+      "",
+      "Please send a clearer photo of the return boarding pass.",
+      "",
+      "Fictional demonstration data. Not a SureCover policy document.",
+    ].join("\n"),
+  )
+  assert.equal(message.body.includes("is not on file."), false)
+})
+
+test("a conflicting return date names both dates and does not pick one", () => {
+  const filing = check("filing_deadline", "unknown", {
+    return_date: "2026-08-07",
+    revised_arrival: "2026-08-08",
+  })
+  const sentence = conflictingReturnSentence(filing)
+  assert.equal(
+    sentence,
+    "The form return date 7 August 2026 disagrees with the revised Singapore arrival 8 August 2026. Both dates stay visible.",
+  )
+  assert.equal(conflictingReturnSentence(check("filing_deadline", "pass", { return_date: "2026-08-07", revised_arrival: "2026-08-07", deadline: "2026-09-21" })), null)
+  assert.equal(conflictingReturnSentence(check("filing_deadline", "unknown", { return_date: "2026-08-07", revised_arrival: "2026-08-08", deadline: "2026-09-21" })), null)
+  const message = requestMessageText({
+    reference: "CLM-DEMO-1003",
+    claimantName: "Jamie Lee",
+    rationale: "Please confirm which return date is correct.",
+    dateLine: sentence,
+  })
+  assert.equal(message.body.includes(sentence ?? ""), true)
+  assert.equal(message.body.includes("is not on file."), false)
+  assert.equal(message.body.includes("clearer photo"), false)
+})
+
 test("the request message greets the claimant and keeps the rationale", () => {
   const message = requestMessageText({
     reference: "CLM-DEMO-1001",
@@ -294,6 +405,21 @@ test("the request message greets the claimant and keeps the rationale", () => {
   )
 })
 
+test("an acknowledgment names the received claim", () => {
+  const message = acknowledgmentText({ reference: "CLM-DEMO-1005", claimantName: "Jamie Lee" })
+  assert.equal(message.subject, "Received CLM-DEMO-1005")
+  assert.equal(
+    message.body,
+    [
+      "Hello Jamie Lee,",
+      "",
+      "We received claim CLM-DEMO-1005.",
+      "",
+      "Fictional demonstration data. Not a SureCover policy document.",
+    ].join("\n"),
+  )
+})
+
 test("a later message stays above an earlier decision", () => {
   const events = timelineNewestFirst(
     [{ id: "bbbbbbbb-0000-4000-a000-000000000001", created_at: "2026-10-15T10:00:00.000Z" }],
@@ -303,6 +429,19 @@ test("a later message stays above an earlier decision", () => {
   assert.deepEqual(
     events.map((event) => event.kind + ":" + event.item.id),
     ["message:cccccccc-0000-4000-a000-000000000003", "decision:bbbbbbbb-0000-4000-a000-000000000001"],
+  )
+})
+
+test("a later reply stays above an earlier assessment", () => {
+  const events = timelineNewestFirst(
+    [],
+    [{ id: "aaaaaaaa-0000-4000-a000-000000000002", created_at: "2026-10-15T11:00:00.000Z" }],
+    [],
+    [{ id: "dddddddd-0000-4000-a000-000000000004", created_at: "2026-10-15T12:00:00.000Z" }],
+  )
+  assert.deepEqual(
+    events.map((event) => event.kind + ":" + event.item.id),
+    ["reply:dddddddd-0000-4000-a000-000000000004", "assessment:aaaaaaaa-0000-4000-a000-000000000002"],
   )
 })
 

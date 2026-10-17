@@ -151,6 +151,31 @@ test("a missing 7 August pass fails completeness and names that flight", () => {
   assert.equal(displayDate("2026-08-07"), "7 August 2026")
 })
 
+test("an unreadable return pass leaves completeness unknown and names that flight", () => {
+  const result = assessClaim({
+    receivedAt: "2026-08-12T09:00:00+08:00",
+    policy,
+    documents: [
+      {
+        sourceFile: "claim-form.pdf",
+        items: [item("Claim type: Flight delay"), item("Return to Singapore: Friday 7 August 2026"), ...table(flights)],
+      },
+      { sourceFile: "scheduled-itinerary.pdf", items: table(flights) },
+      { sourceFile: "revised-itinerary.pdf", items: table(flights) },
+      pass("boarding-pass-sc101.pdf", "SC101", "1 August 2026", "SIN", "NRT"),
+      { sourceFile: "return-pass.png", items: [] },
+      letter(),
+    ],
+  })
+  const completeness = outcome(result, "completeness")
+  assert.equal(completeness.outcome, "unknown")
+  assert.equal(completeness.detail.unclassified, true)
+  assert.deepEqual(completeness.detail.gaps, ["SC202 on 7 August 2026 from NRT to SIN"])
+  for (const name of ["filing_deadline", "coverage", "claim_type", "consistency", "delay"]) {
+    assert.equal(outcome(result, name).outcome, "pass", name)
+  }
+})
+
 test("two passes for the same flight still satisfy that flight", () => {
   const result = bundle()
   assert.equal(outcome(result, "completeness").outcome, "pass")

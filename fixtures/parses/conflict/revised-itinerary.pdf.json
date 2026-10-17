@@ -1,0 +1,857 @@
+{
+  "parser": "docling",
+  "parser_version": "2.138.0",
+  "source_file": "revised-itinerary.pdf",
+  "media_type": "application/pdf",
+  "text_source": "embedded",
+  "pages": [
+    {
+      "page_number": 1,
+      "text": "Fictional demonstration data. Not a SureCover policy document.\nRevised itinerary\nPassenger: Jamie Lee\nFlight\nDate\nFrom\nTo\nSC101\n1 August 2026\nSIN\nNRT\nSC202\n8 August 2026\nNRT\nSIN",
+      "text_source": "embedded"
+    }
+  ],
+  "items": [
+    {
+      "text": "Fictional demonstration data. Not a SureCover policy document.",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.761619567871094,
+        "t": 782.4180908203125,
+        "r": 311.3455810546875,
+        "b": 773.985107421875,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Revised itinerary",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 58.191619873046875,
+        "t": 760.3220825195312,
+        "r": 185.71160888671875,
+        "b": 745.5220947265625,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Passenger: Jamie Lee",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 57.87062072753906,
+        "t": 729.7420654296875,
+        "r": 166.01161193847656,
+        "b": 719.5670776367188,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Flight",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 106.02660369873047,
+        "t": 693.403564453125,
+        "r": 135.02259826660156,
+        "b": 683.2285766601562,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "Date",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 205.2172088623047,
+        "t": 693.403564453125,
+        "r": 227.85519409179688,
+        "b": 685.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "From",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 332.7983093261719,
+        "t": 693.403564453125,
+        "r": 358.7693176269531,
+        "b": 685.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "To",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 417.2546081542969,
+        "t": 693.403564453125,
+        "r": 430.0696105957031,
+        "b": 685.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "SC101",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 105.70760345458984,
+        "t": 673.5355834960938,
+        "r": 136.82659912109375,
+        "b": 665.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "1 August 2026",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 205.62420654296875,
+        "t": 673.4365844726562,
+        "r": 274.85821533203125,
+        "b": 663.2285766601562,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "SIN",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 332.47930908203125,
+        "t": 673.5355834960938,
+        "r": 349.4193115234375,
+        "b": 665.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "NRT",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 417.859619140625,
+        "t": 673.403564453125,
+        "r": 439.40863037109375,
+        "b": 665.527587890625,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "SC202",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 105.70760345458984,
+        "t": 653.5355834960938,
+        "r": 138.25660705566406,
+        "b": 645.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "8 August 2026",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 204.87620544433594,
+        "t": 653.4365844726562,
+        "r": 274.85821533203125,
+        "b": 643.2285766601562,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "NRT",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 332.8203125,
+        "t": 653.403564453125,
+        "r": 354.36932373046875,
+        "b": 645.527587890625,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    },
+    {
+      "text": "SIN",
+      "label": "text_line",
+      "page_number": 1,
+      "bbox": {
+        "l": 417.51861572265625,
+        "t": 653.5355834960938,
+        "r": 434.4586181640625,
+        "b": 645.4066162109375,
+        "coord_origin": "BOTTOMLEFT"
+      }
+    }
+  ],
+  "document": {
+    "schema_name": "DoclingDocument",
+    "version": "1.10.0",
+    "name": "revised-itinerary",
+    "origin": {
+      "mimetype": "application/pdf",
+      "binary_hash": "5935449530685713473",
+      "filename": "revised-itinerary.pdf"
+    },
+    "furniture": {
+      "self_ref": "#/furniture",
+      "children": [],
+      "content_layer": "furniture",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "body": {
+      "self_ref": "#/body",
+      "children": [
+        {
+          "$ref": "#/texts/0"
+        },
+        {
+          "$ref": "#/texts/1"
+        },
+        {
+          "$ref": "#/texts/2"
+        },
+        {
+          "$ref": "#/tables/0"
+        }
+      ],
+      "content_layer": "body",
+      "name": "_root_",
+      "label": "unspecified"
+    },
+    "groups": [],
+    "texts": [
+      {
+        "self_ref": "#/texts/0",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "text",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 782.3281,
+              "r": 312.12861999999996,
+              "b": 774.0030999999999,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              62
+            ]
+          }
+        ],
+        "orig": "Fictional demonstration data. Not a SureCover policy document.",
+        "text": "Fictional demonstration data. Not a SureCover policy document."
+      },
+      {
+        "self_ref": "#/texts/1",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "section_header",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 760.3541,
+              "r": 185.96762,
+              "b": 745.5541,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              17
+            ]
+          }
+        ],
+        "orig": "Revised itinerary",
+        "text": "Revised itinerary",
+        "level": 1
+      },
+      {
+        "self_ref": "#/texts/2",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "section_header",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 57.02362,
+              "t": 729.7641,
+              "r": 166.46262000000002,
+              "b": 719.5890999999999,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              20
+            ]
+          }
+        ],
+        "orig": "Passenger: Jamie Lee",
+        "text": "Passenger: Jamie Lee",
+        "level": 1
+      }
+    ],
+    "pictures": [],
+    "tables": [
+      {
+        "self_ref": "#/tables/0",
+        "parent": {
+          "$ref": "#/body"
+        },
+        "children": [],
+        "content_layer": "body",
+        "label": "table",
+        "prov": [
+          {
+            "page_no": 1,
+            "bbox": {
+              "l": 98.39521496831907,
+              "t": 701.3250237065657,
+              "r": 496.6028906875508,
+              "b": 640.1591714288598,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            "charspan": [
+              0,
+              0
+            ]
+          }
+        ],
+        "captions": [],
+        "references": [],
+        "footnotes": [],
+        "data": {
+          "table_cells": [
+            {
+              "bbox": {
+                "l": 105.2126,
+                "t": 148.4642,
+                "r": 135.1546,
+                "b": 158.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "Flight",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 204.4252,
+                "t": 148.4642,
+                "r": 228.2622,
+                "b": 158.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "Date",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 331.9843,
+                "t": 148.4642,
+                "r": 359.4843,
+                "b": 158.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "From",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 417.0236,
+                "t": 148.4642,
+                "r": 430.4656,
+                "b": 158.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 0,
+              "end_row_offset_idx": 1,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "To",
+              "column_header": true,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 105.2126,
+                "t": 168.4642,
+                "r": 138.8396,
+                "b": 178.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "SC101",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 204.4252,
+                "t": 168.4642,
+                "r": 275.36420000000004,
+                "b": 178.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "1 August 2026",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 331.9843,
+                "t": 168.4642,
+                "r": 350.3213,
+                "b": 178.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "SIN",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 417.0236,
+                "t": 168.4642,
+                "r": 439.6286,
+                "b": 178.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 1,
+              "end_row_offset_idx": 2,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "NRT",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 105.2126,
+                "t": 188.4642,
+                "r": 138.8396,
+                "b": 198.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 0,
+              "end_col_offset_idx": 1,
+              "text": "SC202",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 204.4252,
+                "t": 188.4642,
+                "r": 275.36420000000004,
+                "b": 198.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 1,
+              "end_col_offset_idx": 2,
+              "text": "8 August 2026",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 331.9843,
+                "t": 188.4642,
+                "r": 354.58930000000004,
+                "b": 198.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 2,
+              "end_col_offset_idx": 3,
+              "text": "NRT",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            },
+            {
+              "bbox": {
+                "l": 417.0236,
+                "t": 188.4642,
+                "r": 435.3606,
+                "b": 198.63920000000007,
+                "coord_origin": "TOPLEFT"
+              },
+              "row_span": 1,
+              "col_span": 1,
+              "start_row_offset_idx": 2,
+              "end_row_offset_idx": 3,
+              "start_col_offset_idx": 3,
+              "end_col_offset_idx": 4,
+              "text": "SIN",
+              "column_header": false,
+              "row_header": false,
+              "row_section": false,
+              "fillable": false
+            }
+          ],
+          "num_rows": 3,
+          "num_cols": 4,
+          "orientation": "rot_0",
+          "grid": [
+            [
+              {
+                "bbox": {
+                  "l": 105.2126,
+                  "t": 148.4642,
+                  "r": 135.1546,
+                  "b": 158.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 0,
+                "end_row_offset_idx": 1,
+                "start_col_offset_idx": 0,
+                "end_col_offset_idx": 1,
+                "text": "Flight",
+                "column_header": true,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 204.4252,
+                  "t": 148.4642,
+                  "r": 228.2622,
+                  "b": 158.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 0,
+                "end_row_offset_idx": 1,
+                "start_col_offset_idx": 1,
+                "end_col_offset_idx": 2,
+                "text": "Date",
+                "column_header": true,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 331.9843,
+                  "t": 148.4642,
+                  "r": 359.4843,
+                  "b": 158.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 0,
+                "end_row_offset_idx": 1,
+                "start_col_offset_idx": 2,
+                "end_col_offset_idx": 3,
+                "text": "From",
+                "column_header": true,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 417.0236,
+                  "t": 148.4642,
+                  "r": 430.4656,
+                  "b": 158.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 0,
+                "end_row_offset_idx": 1,
+                "start_col_offset_idx": 3,
+                "end_col_offset_idx": 4,
+                "text": "To",
+                "column_header": true,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              }
+            ],
+            [
+              {
+                "bbox": {
+                  "l": 105.2126,
+                  "t": 168.4642,
+                  "r": 138.8396,
+                  "b": 178.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 1,
+                "end_row_offset_idx": 2,
+                "start_col_offset_idx": 0,
+                "end_col_offset_idx": 1,
+                "text": "SC101",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 204.4252,
+                  "t": 168.4642,
+                  "r": 275.36420000000004,
+                  "b": 178.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 1,
+                "end_row_offset_idx": 2,
+                "start_col_offset_idx": 1,
+                "end_col_offset_idx": 2,
+                "text": "1 August 2026",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 331.9843,
+                  "t": 168.4642,
+                  "r": 350.3213,
+                  "b": 178.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 1,
+                "end_row_offset_idx": 2,
+                "start_col_offset_idx": 2,
+                "end_col_offset_idx": 3,
+                "text": "SIN",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 417.0236,
+                  "t": 168.4642,
+                  "r": 439.6286,
+                  "b": 178.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 1,
+                "end_row_offset_idx": 2,
+                "start_col_offset_idx": 3,
+                "end_col_offset_idx": 4,
+                "text": "NRT",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              }
+            ],
+            [
+              {
+                "bbox": {
+                  "l": 105.2126,
+                  "t": 188.4642,
+                  "r": 138.8396,
+                  "b": 198.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 2,
+                "end_row_offset_idx": 3,
+                "start_col_offset_idx": 0,
+                "end_col_offset_idx": 1,
+                "text": "SC202",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 204.4252,
+                  "t": 188.4642,
+                  "r": 275.36420000000004,
+                  "b": 198.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 2,
+                "end_row_offset_idx": 3,
+                "start_col_offset_idx": 1,
+                "end_col_offset_idx": 2,
+                "text": "8 August 2026",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 331.9843,
+                  "t": 188.4642,
+                  "r": 354.58930000000004,
+                  "b": 198.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 2,
+                "end_row_offset_idx": 3,
+                "start_col_offset_idx": 2,
+                "end_col_offset_idx": 3,
+                "text": "NRT",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              },
+              {
+                "bbox": {
+                  "l": 417.0236,
+                  "t": 188.4642,
+                  "r": 435.3606,
+                  "b": 198.63920000000007,
+                  "coord_origin": "TOPLEFT"
+                },
+                "row_span": 1,
+                "col_span": 1,
+                "start_row_offset_idx": 2,
+                "end_row_offset_idx": 3,
+                "start_col_offset_idx": 3,
+                "end_col_offset_idx": 4,
+                "text": "SIN",
+                "column_header": false,
+                "row_header": false,
+                "row_section": false,
+                "fillable": false
+              }
+            ]
+          ]
+        },
+        "annotations": []
+      }
+    ],
+    "key_value_items": [],
+    "form_items": [],
+    "pages": {
+      "1": {
+        "size": {
+          "width": 595.2756,
+          "height": 841.8898
+        },
+        "page_no": 1
+      }
+    }
+  }
+}

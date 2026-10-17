@@ -1,7 +1,22 @@
+import { spawn } from "node:child_process"
+
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse, type NextRequest } from "next/server"
 
 import { listReceivedAttachments, MAX_ATTACHMENT_BYTES, verifyResendSignature } from "@/lib/email"
+
+const INBOUND_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+function queueReceive(inboundId: string) {
+  if (!INBOUND_ID.test(inboundId)) return
+  const child = spawn(process.execPath, ["--experimental-strip-types", "supabase/seed/receive-mail.mjs", inboundId], {
+    cwd: process.cwd(),
+    detached: true,
+    stdio: "ignore",
+    windowsHide: true,
+  })
+  child.unref()
+}
 
 export async function POST(request: NextRequest) {
   const payload = await request.text()
@@ -59,15 +74,24 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const inserted = await db.from("inbound_messages").insert({
-    provider: "resend",
-    provider_email_id: emailId,
-    from_address: from,
-    subject,
-  })
+  const inserted = await db
+    .from("inbound_messages")
+    .insert({
+      provider: "resend",
+      provider_email_id: emailId,
+      from_address: from,
+      subject,
+    })
+    .select("id")
+    .single()
   if (inserted.error) {
-    if (inserted.error.code === "23505") return new NextResponse("ok", { status: 200 })
+    if (inserted.error.code === "23505") {
+      const existing = await db.from("inbound_messages").select("id, claim_id").eq("provider_email_id", emailId).maybeSingle()
+      if (existing.data && !existing.data.claim_id) queueReceive(existing.data.id)
+      return new NextResponse("ok", { status: 200 })
+    }
     return new NextResponse("unavailable", { status: 500 })
   }
+  queueReceive(inserted.data.id)
   return new NextResponse("ok", { status: 200 })
 }

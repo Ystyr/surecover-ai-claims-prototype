@@ -64,7 +64,10 @@ async function main() {
   const officerA = await signIn(url, anonKey, "officer-a@example.com", password)
   const claims = await officerA.from("claims").select("id, reference, claimant_name, status, assigned_officer_id")
   if (claims.error) throw claims.error
-  require(claims.data.length === 5, `officer A saw ${claims.data.length} claims`)
+  const demoClaims = claims.data.filter((claim) => claim.reference.startsWith("CLM-DEMO-"))
+  const liveClaims = claims.data.filter((claim) => !claim.reference.startsWith("CLM-DEMO-"))
+  require(demoClaims.length === 5, `officer A saw ${demoClaims.length} demo claims`)
+  require(liveClaims.every((claim) => claim.reference.startsWith("CLM-LIVE-")), "a claim is neither a demo nor a live claim")
   const complete = claims.data.find((claim) => claim.reference === CLAIM_REFERENCE)
   const missing = claims.data.find((claim) => claim.reference === MISSING_REFERENCE)
   const conflict = claims.data.find((claim) => claim.reference === CONFLICT_REFERENCE)
@@ -144,7 +147,8 @@ async function main() {
     .from("claim_messages")
     .select("claim_id, to_address, subject, body, provider, status, provider_message_id")
   if (messages.error) throw messages.error
-  require(messages.data.length === 5, `officer A saw ${messages.data.length} messages`)
+  const demoClaimIds = new Set([complete.id, missing.id, conflict.id, unreadable.id, inbound.id])
+  require(messages.data.filter((message) => demoClaimIds.has(message.claim_id)).length === 5, "a demo claim gained or lost a message")
   const completeMessage = messages.data.find((message) => message.claim_id === complete.id)
   const missingMessage = messages.data.find((message) => message.claim_id === missing.id)
   const inboundMessage = messages.data.find((message) => message.claim_id === inbound.id)
@@ -181,7 +185,12 @@ async function main() {
 
   const inboundMail = await officerA.from("inbound_messages").select("provider, provider_email_id, claim_id, from_address, subject")
   if (inboundMail.error) throw inboundMail.error
-  require(inboundMail.data.length === 4, `officer A saw ${inboundMail.data.length} inbound emails`)
+  const fixtureMail = new Set([INBOUND_EMAIL, REPLY_EMAIL, PHOTO_REPLY_EMAIL, DATE_REPLY_EMAIL])
+  require(inboundMail.data.filter((row) => fixtureMail.has(row.provider_email_id)).length === 4, "a fixture email is missing")
+  require(
+    inboundMail.data.filter((row) => !fixtureMail.has(row.provider_email_id)).every((row) => row.provider === "resend"),
+    "a live inbound email is not from Resend",
+  )
   const receivedMail = inboundMail.data.find((row) => row.provider_email_id === INBOUND_EMAIL)
   const replyMail = inboundMail.data.find((row) => row.provider_email_id === REPLY_EMAIL)
   const photoReply = inboundMail.data.find((row) => row.provider_email_id === PHOTO_REPLY_EMAIL)

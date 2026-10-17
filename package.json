@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "test:checks": "node --experimental-strip-types --test checks/assess.test.mjs lib/findings.test.ts lib/email.test.ts",
+    "test:checks": "node --experimental-strip-types --test checks/assess.test.mjs lib/findings.test.ts lib/email.test.ts lib/inbound.test.ts",
+    "receive:mail": "node --experimental-strip-types supabase/seed/receive-mail.mjs",
     "seed:claim": "node supabase/seed/seed-claim.mjs",
     "seed:missing": "node supabase/seed/seed-missing-pass.mjs",
     "seed:conflict": "node supabase/seed/seed-conflict.mjs",

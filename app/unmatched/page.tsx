@@ -12,10 +12,13 @@ export default async function UnmatchedPage() {
 
   return (
     <section>
-      <h2>Unmatched mail</h2>
+      <div className="place-head">
+        <h2>Mail without a claim</h2>
+        <a href="/">Queue</a>
+      </div>
       <p className="muted">These messages did not become claims.</p>
-      {error ? <p className="error">The unmatched mail could not be read.</p> : null}
-      {!error && data?.length === 0 ? <p>No unmatched mail.</p> : null}
+      {error ? <p className="error">This list could not be read.</p> : null}
+      {!error && data?.length === 0 ? <p>No messages are waiting here.</p> : null}
       {!error && data?.map((mail) => (
         <article className="claim-row" key={mail.id}>
           <div className="row-head">

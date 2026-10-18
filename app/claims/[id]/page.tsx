@@ -307,6 +307,9 @@ export default async function ClaimPage({
 
   return (
     <article>
+      <p className="back">
+        <a href="/">Back to the queue</a>
+      </p>
       <section className="panel">
         <div className="row-head">
           <h2>{claim.reference}</h2>

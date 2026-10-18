@@ -43,7 +43,10 @@ export default async function QueuePage() {
 
   return (
     <section>
-      <h2>Queue</h2>
+      <div className="place-head">
+        <h2>Queue</h2>
+        <a href="/unmatched">Mail without a claim</a>
+      </div>
       {failed ? <p className="error">The queue could not be read.</p> : null}
       {!failed && ordered.length === 0 ? <p>No claims are assigned to you.</p> : null}
       {!failed && ordered.map((claim) => (

@@ -74,7 +74,7 @@ A reply can bring the missing file, or it can say the requested document cannot 
 
 ### Asking what to send
 
-An email with no `claim-form.pdf` and no claim reference can ask which documents to send. A clear question receives `Documents to send` and does not become a claim. The list is the claim form, the scheduled itinerary, the revised itinerary, the delay letter, and a boarding pass for each flight. That mail stays on the officer’s Unmatched mail page.
+An email with no `claim-form.pdf` and no claim reference can ask which documents to send. A clear question receives `Documents to send` and does not become a claim. The list is the claim form, the scheduled itinerary, the revised itinerary, the delay letter, and a boarding pass for each flight. That mail stays on the officer’s Mail without a claim page.
 
 ### What the officer sees
 
@@ -118,7 +118,7 @@ flowchart TD
   again --> sooner
   kind -->|No form and no claim reference| which{Asking which documents to send?}
   which -->|Clear yes| list[Stored document list sent. No claim created]
-  which -->|Not a clear yes| unmatched[Stays on Unmatched mail]
+  which -->|Not a clear yes| unmatched[Stays on Mail without a claim]
 ```
 
 The three questions are:

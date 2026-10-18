@@ -307,6 +307,10 @@ export function noulSupported(noul: number | null | undefined) {
   return typeof noul === "number" && noul >= NOUL_SUPPORT
 }
 
+export function claimUrgent(nouls: Array<number | null | undefined>) {
+  return nouls.some((noul) => noulSupported(noul))
+}
+
 export function documentUnavailable(noul: number | null | undefined) {
   return noulSupported(noul)
 }

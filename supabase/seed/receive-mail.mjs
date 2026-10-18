@@ -20,6 +20,7 @@ const POLICY_VERSION = "demo-2026.1"
 const MODEL = "jev-1.13.0"
 const UNAVAILABLE_QUESTION = "Does the traveler say a requested document is missing or cannot be obtained?"
 const DOCUMENTS_QUESTION = "Is the traveler asking which documents to send?"
+const URGENCY_QUESTION = "Is the traveler frustrated or asking for the claim to be handled sooner?"
 
 function projectEnv() {
   let raw
@@ -422,6 +423,41 @@ async function judgeUnavailable(apiKey, message, gaps) {
   return answer.noul
 }
 
+async function judgeUrgency(apiKey, message, subject) {
+  const response = await fetch("https://api.typesafe.ai/v1/systemone", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      state: { message, subject },
+      model: MODEL,
+      questions: { handle_sooner: { type: "noul", instructions: URGENCY_QUESTION } },
+    }),
+  })
+  if (!response.ok) throw new Error(`Jev returned ${response.status}`)
+  const body = await response.json()
+  const answer = body.answers?.handle_sooner
+  if (!answer || answer.type !== "noul" || typeof answer.noul !== "number") throw new Error("Jev did not return a noul")
+  return answer.noul
+}
+
+async function rememberUrgency(db, row, env) {
+  const message = typeof row.body === "string" ? row.body.trim() : ""
+  if (!message || row.urgency_noul != null || !env.typesafeKey) return
+  try {
+    const noul = await judgeUrgency(env.typesafeKey, message, row.subject)
+    const saved = await db
+      .from("inbound_messages")
+      .update({ urgency_noul: noul })
+      .eq("id", row.id)
+      .is("urgency_noul", null)
+      .select("urgency_noul")
+      .single()
+    if (saved.error) throw saved.error
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : "Jev did not return a noul")
+  }
+}
+
 async function linkMail(db, inboundId, claimId) {
   const linked = await db.from("inbound_messages").update({ claim_id: claimId }).eq("id", inboundId).is("claim_id", null).select("id")
   if (linked.error) throw linked.error
@@ -431,7 +467,7 @@ async function linkMail(db, inboundId, claimId) {
 async function processInbound(db, inboundId, env) {
   const row = await db
     .from("inbound_messages")
-    .select("id, provider, provider_email_id, from_address, subject, body, unavailable_noul, documents_noul, documents_reply_subject, claim_id, created_at")
+    .select("id, provider, provider_email_id, from_address, subject, body, unavailable_noul, documents_noul, documents_reply_subject, urgency_noul, claim_id, created_at")
     .eq("id", inboundId)
     .maybeSingle()
   if (row.error) throw row.error
@@ -477,6 +513,7 @@ async function processInbound(db, inboundId, env) {
       await recordNotice(db, { id: claim.data.id, travelerEmail: claim.data.traveler_email }, notice, env)
       const updated = await db.from("claims").update({ status: "needs review" }).eq("id", claim.data.id).eq("status", "information requested")
       if (updated.error) throw updated.error
+      await rememberUrgency(db, row.data, env)
       await linkMail(db, row.data.id, claim.data.id)
       return `unavailable reply stored on ${named}`
     }
@@ -486,6 +523,7 @@ async function processInbound(db, inboundId, env) {
     await storeAssessment(db, claim.data.id, claim.data.received_at)
     const updated = await db.from("claims").update({ status: "needs review" }).eq("id", claim.data.id).eq("status", "information requested")
     if (updated.error) throw updated.error
+    await rememberUrgency(db, row.data, env)
     await linkMail(db, row.data.id, claim.data.id)
     return `reply stored on ${named}`
   }
@@ -528,6 +566,7 @@ async function processInbound(db, inboundId, env) {
     { id: claim.data.id, reference, claimantName: identity.claimantName, travelerEmail },
     env,
   )
+  await rememberUrgency(db, row.data, env)
   await linkMail(db, row.data.id, claim.data.id)
   return `${reference} stored from ${row.data.provider_email_id} (${status})`
 }

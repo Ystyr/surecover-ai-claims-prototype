@@ -94,7 +94,7 @@ main {
 
 .muted { color: var(--muted); }
 
-.outcome, .needed {
+.outcome, .needed, .urgent {
   display: inline-block;
   padding: 0.1rem 0.45rem;
   border-radius: 999px;
@@ -107,6 +107,7 @@ main {
 .outcome-fail { color: var(--fail); background: #f8e8e8; }
 .outcome-unknown { color: var(--unknown); background: #f8efdc; }
 .needed { color: var(--banner); background: #e7eef8; }
+.urgent { color: var(--unknown); background: #f8efdc; }
 
 label { display: block; margin: 0.8rem 0 0.25rem; }
 

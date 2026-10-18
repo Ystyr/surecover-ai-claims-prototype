@@ -17,6 +17,7 @@ import {
   SPAN_LABELS,
   spanEstablished,
   claimPageMessage,
+  claimUrgent,
   isUuid,
   displayDate,
   displayInstant,
@@ -97,6 +98,7 @@ type ReplyRow = {
   from_address: string
   subject: string
   body: string | null
+  urgency_noul: number | null
   provider: string
   created_at: string
 }
@@ -240,7 +242,7 @@ export default async function ClaimPage({
       .order("id", { ascending: false }),
     supabase
       .from("inbound_messages")
-      .select("id, from_address, subject, body, provider, created_at")
+      .select("id, from_address, subject, body, urgency_noul, provider, created_at")
       .eq("claim_id", claim.id)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false }),
@@ -307,6 +309,7 @@ export default async function ClaimPage({
         <div className="row-head">
           <h2>{claim.reference}</h2>
           <span>{claim.status}</span>
+          {claimUrgent(replies.map((reply) => reply.urgency_noul)) ? <span className="urgent">Urgent</span> : null}
           {claim.status === "needs review" ? <span className="needed">Action needed</span> : null}
         </div>
         <p>

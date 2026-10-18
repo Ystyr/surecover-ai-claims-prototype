@@ -19,6 +19,7 @@ import {
   clearerPhotoGaps,
   clearerPhotoSentence,
   conflictingReturnSentence,
+  claimUrgent,
   documentUnavailable,
   documentsToSendText,
   noulSupported,
@@ -442,6 +443,13 @@ test("an unavailable document keeps the claim with the officer", () => {
   )
   assert.equal(message.body.includes("is not on file."), false)
   assert.equal(message.body.includes("clearer photo"), false)
+})
+
+test("an urgent reply is flagged at the support line", () => {
+  assert.equal(claimUrgent([0.75]), true)
+  assert.equal(claimUrgent([0.74]), false)
+  assert.equal(claimUrgent([null, undefined]), false)
+  assert.equal(claimUrgent([]), false)
 })
 
 test("a documents question names the required files", () => {

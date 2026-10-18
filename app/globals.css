@@ -113,6 +113,87 @@ main {
 
 .panel, .finding { padding: 1rem 1.1rem; margin: 0 0 1rem; }
 
+.finding { scroll-margin-top: 1rem; }
+
+.finding > summary,
+.facts > summary,
+.history summary,
+.reading > summary,
+.correct > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.finding > summary::-webkit-details-marker,
+.facts > summary::-webkit-details-marker,
+.history summary::-webkit-details-marker,
+.reading > summary::-webkit-details-marker,
+.correct > summary::-webkit-details-marker {
+  display: none;
+}
+
+.finding > summary::before,
+.facts > summary::before,
+.history summary::before,
+.reading > summary::before,
+.correct > summary::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-top: -0.15rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  flex: none;
+}
+
+.finding[open] > summary::before,
+.facts[open] > summary::before,
+.history details[open] > summary::before,
+.reading[open] > summary::before,
+.correct[open] > summary::before {
+  margin-top: 0.15rem;
+  transform: rotate(45deg);
+}
+
+.facts summary h2 { margin: 0; }
+
+.finding summary h3 { margin: 0; font-size: 1rem; }
+
+.check-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.85rem 0 0;
+}
+
+.check-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.35rem 0.15rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: white;
+  color: inherit;
+  text-decoration: none;
+}
+
+.check-chip:hover { border-color: var(--banner); }
+
+.decision-panel { margin-top: 0.9rem; }
+
+.decision-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .claim-row {
   display: block;
   padding: 0.9rem 1.1rem;
@@ -222,20 +303,28 @@ button:disabled {
 .error { color: var(--fail); }
 
 .files { list-style: none; padding: 0; margin: 0; }
-.files li { margin: 0.35rem 0; }
+.files li { margin: 0.55rem 0; }
+
+.reading { margin: 0.2rem 0 0; }
+.reading > summary { color: var(--banner); width: fit-content; }
 
 .history { list-style: none; padding: 0; margin: 0; }
 .history li { padding: 0.45rem 0; border-top: 1px solid var(--line); }
 .history li:first-child { border-top: 0; }
 
-.fact {
-  margin: 0.8rem 0 0;
-  padding-top: 0.8rem;
-  border-top: 1px solid var(--line);
+.file-group {
+  margin: 0.9rem 0 0;
+  font-size: 0.95rem;
 }
 
-.fact h3 { margin: 0; font-size: 1rem; }
-.fact p { margin: 0.25rem 0; }
+.fact {
+  margin: 0;
+  padding: 0.55rem 0 0.15rem;
+}
+
+.fact p { margin: 0.2rem 0; }
+
+.correct > summary { color: var(--banner); width: fit-content; }
 
 .decision {
   margin: 0.8rem 0 0;
@@ -247,6 +336,21 @@ button:disabled {
 
 .decision p { margin: 0.25rem 0 0; }
 .message-body { white-space: pre-wrap; }
+
+dialog {
+  width: min(36rem, calc(100vw - 2rem));
+  max-height: min(40rem, calc(100vh - 2rem));
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  padding: 1.1rem 1.2rem;
+}
+
+dialog::backdrop { background: rgb(28 36 48 / 0.4); }
+
+dialog h2 { margin-top: 0; }
 
 @media (max-width: 720px) {
   .banner, .top, main { padding-left: 1rem; padding-right: 1rem; }

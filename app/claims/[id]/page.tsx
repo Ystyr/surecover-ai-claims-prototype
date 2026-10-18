@@ -1,4 +1,6 @@
-import { correctFact, recordDecision, sendRequestMessage } from "@/app/claims/[id]/actions"
+import { correctFact } from "@/app/claims/[id]/actions"
+import { DecisionPanel } from "@/app/claims/[id]/decision-panel"
+import { Fold } from "@/app/claims/[id]/fold"
 import {
   CHECK_LABELS,
   CLAIM_ABSENT_MESSAGE,
@@ -318,7 +320,33 @@ export default async function ClaimPage({
         <p>
           Return {displayDate(claim.return_date)} · received {displayInstant(claim.received_at)}
         </p>
-        {latest ? <p className="muted">Document roles on this assessment come from the {latest.adapter} adapter.</p> : null}
+        {checks.length > 0 ? (
+          <ul className="check-row">
+            {checks.map((check) => (
+              <li key={check.check_name}>
+                <a className="check-chip" href={`#check-${check.check_name}`}>
+                  {CHECK_LABELS[check.check_name] ?? check.check_name}
+                  <span className={`outcome outcome-${check.outcome}`}>{check.outcome}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <DecisionPanel
+          actions={openDecisionActions(decisions)}
+          assessmentId={latest?.id ?? null}
+          claimId={claim.id}
+          finished={finishedDecision(decisions)}
+          message={query.decision ? DECISION_MESSAGES[query.decision] : undefined}
+          preview={requestPreview(decisions, messages, {
+            reference: claim.reference,
+            claimantName: claim.claimant_name,
+            gaps: failedCompletenessGaps(checks.find((entry) => entry.check_name === "completeness")),
+            photoGaps: clearerPhotoGaps(checks.find((entry) => entry.check_name === "completeness")),
+            dateLine: conflictingReturnSentence(checks.find((entry) => entry.check_name === "filing_deadline")),
+          })}
+          requestMessage={query.message ? MESSAGE_ERRORS[query.message] : undefined}
+        />
       </section>
 
       <section>
@@ -328,17 +356,30 @@ export default async function ClaimPage({
         ))}
       </section>
 
-      <section className="panel">
-        <h2>Facts</h2>
+      <Fold
+        className="panel facts"
+        startOpen={Boolean(query.correction && CORRECTION_MESSAGES[query.correction])}
+        summary={
+          <span className="finding-head">
+            <h2>Facts</h2>
+            <span className="muted">{facts.length === 0 ? "None stored" : facts.length}</span>
+          </span>
+        }
+      >
         <p className="muted">A correction keeps the original quote and recomputes the checks. It does not change the file.</p>
         {query.correction && CORRECTION_MESSAGES[query.correction] ? (
           <p className="error">{CORRECTION_MESSAGES[query.correction]}</p>
         ) : null}
         {facts.length === 0 ? <p>No parsed facts are stored for this claim.</p> : null}
-        {facts.map((fact) => (
-          <FactForm claimId={claim.id} corrections={corrections} fact={fact} key={fact.id} />
+        {factGroups(facts).map((group) => (
+          <div key={group.file}>
+            <h3 className="file-group">{group.file}</h3>
+            {group.facts.map((fact) => (
+              <FactForm claimId={claim.id} corrections={corrections} fact={fact} key={fact.id} />
+            ))}
+          </div>
         ))}
-      </section>
+      </Fold>
 
       <section className="panel">
         <h2>Files</h2>
@@ -353,31 +394,43 @@ export default async function ClaimPage({
             const fileSpans = ["delay_reason_span", "delay_duration_span"].flatMap((question) =>
               spans.filter((row) => row.document_id === document.id && row.question === question),
             )
+            const role = fixture
+              ? (ROLE_LABELS[fixture.label] ?? fixture.label)
+              : jev
+                ? (ROLE_LABELS[jev.label] ?? jev.label)
+                : null
+            const hasReading = Boolean(fixture || jev || fileJudgments.length > 0 || fileSpans.length > 0)
             return (
               <li key={document.id}>
                 <a href={`/claims/${claim.id}/files/${document.id}`}>{document.source_file}</a>
-                {fixture ? <p className="muted">Fixture · {ROLE_LABELS[fixture.label] ?? fixture.label}</p> : null}
-                {jev ? (
-                  <p className="muted">
-                    Jev · {ROLE_LABELS[jev.label] ?? jev.label} · {jev.probability} · {jev.model} · {jev.question_set}
-                    {established ? null : " · the label is not established"}
-                  </p>
+                {role ? <span className="muted"> · {role}</span> : null}
+                {hasReading ? (
+                  <details className="reading">
+                    <summary>Reading</summary>
+                    {fixture ? <p className="muted">Fixture · {ROLE_LABELS[fixture.label] ?? fixture.label}</p> : null}
+                    {jev ? (
+                      <p className="muted">
+                        Jev · {ROLE_LABELS[jev.label] ?? jev.label} · {jev.probability} · {jev.model} · {jev.question_set}
+                        {established ? null : " · the label is not established"}
+                      </p>
+                    ) : null}
+                    {fileJudgments.map((row) => (
+                      <p className="muted" key={row.id}>
+                        Jev · {JUDGMENT_LABELS[row.question] ?? row.question} · {row.noul} · {judgmentReading(Number(row.noul))}
+                      </p>
+                    ))}
+                    {fileSpans.map((row) => {
+                      const spanReady = spanEstablished(row.choice, Number(row.probability), row.quote)
+                      return (
+                        <p className="muted" key={row.id}>
+                          Jev · {SPAN_LABELS[row.question] ?? row.question}
+                          {spanReady ? ` · ${row.quote}` : ""} · {row.probability}
+                          {spanReady ? "" : " · the span is not established"}
+                        </p>
+                      )
+                    })}
+                  </details>
                 ) : null}
-                {fileJudgments.map((row) => (
-                  <p className="muted" key={row.id}>
-                    Jev · {JUDGMENT_LABELS[row.question] ?? row.question} · {row.noul} · {judgmentReading(Number(row.noul))}
-                  </p>
-                ))}
-                {fileSpans.map((row) => {
-                  const established = spanEstablished(row.choice, Number(row.probability), row.quote)
-                  return (
-                    <p className="muted" key={row.id}>
-                      Jev · {SPAN_LABELS[row.question] ?? row.question}
-                      {established ? ` · ${row.quote}` : ""} · {row.probability}
-                      {established ? "" : " · the span is not established"}
-                    </p>
-                  )
-                })}
               </li>
             )
           })}
@@ -392,30 +445,35 @@ export default async function ClaimPage({
               return (
                 <li key={event.item.id}>
                   <strong>{displayInstant(event.item.created_at)}</strong>
-                  <span> · {ACTION_LABELS[event.item.action]}</span>
-                  <div>{event.item.rationale}</div>
+                  <span> · {ACTION_LABELS[event.item.action]} · {event.item.rationale}</span>
                 </li>
               )
             }
             if (event.kind === "reply") {
               return (
                 <li key={event.item.id}>
-                  <strong>{displayInstant(event.item.created_at)}</strong>
-                  <span> · Reply</span>
-                  <div>{event.item.subject}</div>
-                  <p className="muted">From {event.item.from_address} · {event.item.provider}</p>
-                  {event.item.body ? <div className="message-body">{event.item.body}</div> : null}
+                  <details>
+                    <summary>
+                      <strong>{displayInstant(event.item.created_at)}</strong>
+                      <span> · Reply · {event.item.subject}</span>
+                    </summary>
+                    <p className="muted">From {event.item.from_address} · {event.item.provider}</p>
+                    {event.item.body ? <div className="message-body">{event.item.body}</div> : null}
+                  </details>
                 </li>
               )
             }
             if (event.kind === "message") {
               return (
                 <li key={event.item.id}>
-                  <strong>{displayInstant(event.item.created_at)}</strong>
-                  <span> · Message</span>
-                  <div>{event.item.subject}</div>
-                  <p className="muted">To {event.item.to_address} · {event.item.provider} · {event.item.status}</p>
-                  <div className="message-body">{event.item.body}</div>
+                  <details>
+                    <summary>
+                      <strong>{displayInstant(event.item.created_at)}</strong>
+                      <span> · Message · {event.item.subject}</span>
+                    </summary>
+                    <p className="muted">To {event.item.to_address} · {event.item.provider} · {event.item.status}</p>
+                    <div className="message-body">{event.item.body}</div>
+                  </details>
                 </li>
               )
             }
@@ -436,25 +494,54 @@ export default async function ClaimPage({
           })}
         </ul>
       </section>
-
-      <section className="panel">
-        <h2>Available actions</h2>
-        <DecisionActions
-          assessmentId={latest?.id ?? null}
-          claimId={claim.id}
-          claimantName={claim.claimant_name}
-          decisions={decisions}
-          dateLine={conflictingReturnSentence(checks.find((entry) => entry.check_name === "filing_deadline"))}
-          gaps={failedCompletenessGaps(checks.find((entry) => entry.check_name === "completeness"))}
-          photoGaps={clearerPhotoGaps(checks.find((entry) => entry.check_name === "completeness"))}
-          message={query.decision ? DECISION_MESSAGES[query.decision] : undefined}
-          messages={messages}
-          reference={claim.reference}
-          requestMessage={query.message ? MESSAGE_ERRORS[query.message] : undefined}
-        />
-      </section>
     </article>
   )
+}
+
+function openDecisionActions(decisions: DecisionRow[]): Array<(typeof DECISION_ACTIONS)[number]> {
+  if (decisions.some((decision) => decision.action === "approve" || decision.action === "reject")) return []
+  if (decisions.some((decision) => decision.action === "request")) return ["approve", "reject"]
+  return [...DECISION_ACTIONS]
+}
+
+function finishedDecision(decisions: DecisionRow[]) {
+  const finished = decisions.find((decision) => decision.action === "approve" || decision.action === "reject")
+  if (!finished) return null
+  return { label: ACTION_LABELS[finished.action], rationale: finished.rationale }
+}
+
+function requestPreview(
+  decisions: DecisionRow[],
+  messages: MessageRow[],
+  input: {
+    reference: string
+    claimantName: string
+    gaps: string[]
+    photoGaps: string[]
+    dateLine: string | null
+  },
+) {
+  const request = decisions.find((decision) => decision.action === "request")
+  if (!request || messages.some((row) => row.decision_id === request.id)) return null
+  const preview = requestMessageText({
+    reference: input.reference,
+    claimantName: input.claimantName,
+    rationale: request.rationale,
+    gaps: input.gaps,
+    photoGaps: input.photoGaps,
+    dateLine: input.dateLine,
+  })
+  return { subject: preview.subject, body: preview.body, decisionId: request.id }
+}
+
+function factGroups(facts: FactRow[]) {
+  const groups: { file: string; facts: FactRow[] }[] = []
+  for (const fact of facts) {
+    const last = groups.at(-1)
+    if (!last || last.file !== fact.source_file) groups.push({ file: fact.source_file, facts: [fact] })
+    else last.facts.push(fact)
+  }
+  return groups
 }
 
 function FactForm({ claimId, fact, corrections }: { claimId: string; fact: FactRow; corrections: CorrectionRow[] }) {
@@ -462,110 +549,39 @@ function FactForm({ claimId, fact, corrections }: { claimId: string; fact: FactR
   const effective = latest?.corrected_value ?? fact.original_value
   const shown = fact.field === "departure_date" || fact.field === "return_date" ? displayDate(effective) : effective
   const fieldId = fact.fact_key.replaceAll("#", "-")
-  const place = fact.leg_index === null ? fact.source_file : `${fact.source_file} · leg ${fact.leg_index + 1}`
+  const place = fact.leg_index === null ? null : `Leg ${fact.leg_index + 1}`
   return (
-    <form action={correctFact} className="fact">
-      <h3>{FIELD_LABELS[fact.field] ?? fact.field}</h3>
-      <p className="muted">{place}</p>
+    <div className="fact">
       <p>
-        {latest ? (
-          <>
-            Original {fact.original_value} · now {effective}
-          </>
-        ) : (
-          <>Value {fact.original_value}</>
-        )}
+        <strong>{FIELD_LABELS[fact.field] ?? fact.field}</strong>
+        <span> · {shown}</span>
+        {place ? <span className="muted"> · {place}</span> : null}
       </p>
+      {latest ? (
+        <p className="muted">
+          Original {fact.original_value} · {latest.rationale}
+        </p>
+      ) : null}
       {fact.quote_text ? (
         <p>
           {fact.document_id ? <a href={`/claims/${claimId}/files/${fact.document_id}`}>{fact.quote_text}</a> : fact.quote_text}
         </p>
       ) : null}
-      {latest ? <p className="muted">Latest rationale: {latest.rationale}</p> : null}
-      <input name="claim_id" type="hidden" value={claimId} />
-      <input name="fact_key" type="hidden" value={fact.fact_key} />
-      <label htmlFor={fieldId}>New value</label>
-      <input defaultValue={shown} id={fieldId} name="value" required />
-      <label htmlFor={`${fieldId}-why`}>Rationale</label>
-      <input id={`${fieldId}-why`} name="rationale" required />
-      <p>
-        <button type="submit">Correct</button>
-      </p>
-    </form>
-  )
-}
-
-function DecisionActions({
-  claimId,
-  assessmentId,
-  claimantName,
-  dateLine,
-  decisions,
-  gaps,
-  message,
-  messages,
-  photoGaps,
-  reference,
-  requestMessage,
-}: {
-  claimId: string
-  assessmentId: string | null
-  claimantName: string
-  dateLine: string | null
-  decisions: DecisionRow[]
-  gaps: string[]
-  message?: string
-  messages: MessageRow[]
-  photoGaps: string[]
-  reference: string
-  requestMessage?: string
-}) {
-  const finished = decisions.find((decision) => decision.action === "approve" || decision.action === "reject")
-  const request = decisions.find((decision) => decision.action === "request")
-  const pendingRequest = request && !messages.some((row) => row.decision_id === request.id) ? request : null
-  const preview = pendingRequest
-    ? requestMessageText({ reference, claimantName, rationale: pendingRequest.rationale, gaps, photoGaps, dateLine })
-    : null
-  const openActions = finished
-    ? []
-    : decisions.some((decision) => decision.action === "request")
-      ? (["approve", "reject"] as const)
-      : DECISION_ACTIONS
-  return (
-    <>
-      {message ? <p className="error">{message}</p> : null}
-      {requestMessage ? <p className="error">{requestMessage}</p> : null}
-      {preview && pendingRequest ? (
-        <form action={sendRequestMessage} className="decision">
-          <p>{preview.subject}</p>
-          <p className="message-body">{preview.body}</p>
+      <details className="correct">
+        <summary>Correct</summary>
+        <form action={correctFact}>
           <input name="claim_id" type="hidden" value={claimId} />
-          <input name="decision_id" type="hidden" value={pendingRequest.id} />
+          <input name="fact_key" type="hidden" value={fact.fact_key} />
+          <label htmlFor={fieldId}>New value</label>
+          <input defaultValue={shown} id={fieldId} name="value" required />
+          <label htmlFor={`${fieldId}-why`}>Rationale</label>
+          <input id={`${fieldId}-why`} name="rationale" required />
           <p>
-            <button type="submit">Send request</button>
+            <button type="submit">Correct</button>
           </p>
         </form>
-      ) : null}
-      {finished ? (
-        <p>
-          {ACTION_LABELS[finished.action]} · {finished.rationale}
-        </p>
-      ) : null}
-      {assessmentId
-        ? openActions.map((action) => (
-            <form action={recordDecision} className="decision" key={action}>
-              <input name="claim_id" type="hidden" value={claimId} />
-              <input name="action" type="hidden" value={action} />
-              <input name="assessment_id" type="hidden" value={assessmentId} />
-              <label htmlFor={`decision-${action}-why`}>{ACTION_LABELS[action]} rationale</label>
-              <input id={`decision-${action}-why`} name="rationale" required />
-              <p>
-                <button type="submit">{ACTION_LABELS[action]}</button>
-              </p>
-            </form>
-          ))
-        : null}
-    </>
+      </details>
+    </div>
   )
 }
 
@@ -592,11 +608,17 @@ function Finding({
 }) {
   const quotes = findingQuotes(check)
   return (
-    <section className="finding">
-      <div className="finding-head">
-        <h3>{CHECK_LABELS[check.check_name] ?? check.check_name}</h3>
-        <span className={`outcome outcome-${check.outcome}`}>{check.outcome}</span>
-      </div>
+    <Fold
+      className="finding"
+      id={`check-${check.check_name}`}
+      startOpen={check.outcome !== "pass"}
+      summary={
+        <span className="finding-head">
+          <h3>{CHECK_LABELS[check.check_name] ?? check.check_name}</h3>
+          <span className={`outcome outcome-${check.outcome}`}>{check.outcome}</span>
+        </span>
+      }
+    >
       <p>{findingSummary(check)}</p>
       {quotes.length > 0 ? (
         <ul className="quotes">
@@ -616,6 +638,6 @@ function Finding({
           })}
         </ul>
       ) : null}
-    </section>
+    </Fold>
   )
 }

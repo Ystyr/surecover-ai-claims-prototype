@@ -14,14 +14,32 @@
 
 * { box-sizing: border-box; }
 
+html { scrollbar-color: var(--line) var(--paper); }
+
+::selection {
+  background: #d5e0f0;
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
 body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 16px/1.5 "Segoe UI", sans-serif;
+  font: 16px/1.45 "Segoe UI", sans-serif;
 }
 
 a { color: var(--banner); }
+
+h2 {
+  margin: 0.15rem 0 0.85rem;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
 
 .banner {
   margin: 0;
@@ -41,7 +59,8 @@ a { color: var(--banner); }
 
 .top h1 {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
 }
 
 .top h1 a {
@@ -55,10 +74,29 @@ a { color: var(--banner); }
   gap: 1rem;
 }
 
+.session a {
+  padding: 0.35rem 0.1rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.session a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
 .session form {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin: 0;
+}
+
+.session .muted {
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 main {
@@ -83,14 +121,20 @@ main {
   color: inherit;
 }
 
-.claim-row:hover { border-color: var(--banner); }
+.claim-row:hover { border-color: var(--banner); background: #fffaf2; }
+
+.claim-row p { margin: 0.15rem 0 0; }
+
+.row-head h2 { margin: 0; }
 
 .row-head, .finding-head, .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem 1rem;
-  align-items: baseline;
+  gap: 0.45rem 0.75rem;
+  align-items: center;
 }
+
+.status { color: var(--muted); font-size: 0.92rem; }
 
 .muted { color: var(--muted); }
 
@@ -104,20 +148,22 @@ main {
 }
 
 .outcome-pass { color: var(--pass); background: #e7f4ec; }
-.outcome-fail { color: var(--fail); background: #f8e8e8; }
+.outcome-fail, .failed { color: var(--fail); background: #f8e8e8; }
 .outcome-unknown { color: var(--unknown); background: #f8efdc; }
 .needed { color: var(--banner); background: #e7eef8; }
-.urgent { color: var(--unknown); background: #f8efdc; }
+.urgent { color: var(--unknown); background: #f8efdc; font-weight: 650; }
 
 label { display: block; margin: 0.8rem 0 0.25rem; }
 
 input {
   width: min(100%, 28rem);
+  min-height: 2.5rem;
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--line);
   border-radius: 6px;
   font: inherit;
   background: white;
+  caret-color: var(--banner);
 }
 
 button, .actions span {
@@ -127,10 +173,41 @@ button, .actions span {
 }
 
 button {
+  min-height: 2.5rem;
   border: 1px solid var(--banner);
   background: var(--banner);
   color: white;
   cursor: pointer;
+}
+
+button:hover { background: #0f274a; }
+
+button:active { background: #0c1e3a; }
+
+button:focus-visible {
+  outline-color: #f3efe4;
+  box-shadow: 0 0 0 4px var(--focus);
+}
+
+button.quiet {
+  background: transparent;
+  color: var(--banner);
+}
+
+button.quiet:hover { background: #e7eef8; }
+
+button.quiet:active { background: #d5e0f0; }
+
+button.quiet:focus-visible {
+  outline-color: var(--focus);
+  box-shadow: none;
+}
+
+button:disabled {
+  background: var(--line);
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: not-allowed;
 }
 
 .actions span {
@@ -170,3 +247,20 @@ button {
 
 .decision p { margin: 0.25rem 0 0; }
 .message-body { white-space: pre-wrap; }
+
+@media (max-width: 720px) {
+  .banner, .top, main { padding-left: 1rem; padding-right: 1rem; }
+
+  .top {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .session {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    row-gap: 0.35rem;
+  }
+}

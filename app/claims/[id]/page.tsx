@@ -308,7 +308,7 @@ export default async function ClaimPage({
       <section className="panel">
         <div className="row-head">
           <h2>{claim.reference}</h2>
-          <span>{claim.status}</span>
+          <span className="status">{claim.status}</span>
           {claimUrgent(replies.map((reply) => reply.urgency_noul)) ? <span className="urgent">Urgent</span> : null}
           {claim.status === "needs review" ? <span className="needed">Action needed</span> : null}
         </div>

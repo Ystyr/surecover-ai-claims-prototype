@@ -50,10 +50,10 @@ export default async function QueuePage() {
         <a className="claim-row" href={`/claims/${claim.id}`} key={claim.id}>
           <div className="row-head">
             <strong>{claim.reference}</strong>
-            <span>{claim.status}</span>
+            <span className="status">{claim.status}</span>
             {urgent.has(claim.id) ? <span className="urgent">Urgent</span> : null}
             {claim.status === "needs review" ? <span className="needed">Action needed</span> : null}
-            {attention.has(claim.id) ? <span className="needed">Check failed</span> : null}
+            {attention.has(claim.id) ? <span className="failed">Check failed</span> : null}
           </div>
           <p>
             {claim.claimant_name} · return {displayDate(claim.return_date)}

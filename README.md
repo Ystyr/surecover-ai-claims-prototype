@@ -2,6 +2,8 @@
 
 A one-week interview prototype for an AI-assisted airline flight-delay claims workflow for SureCover Travel Insurance (StarBridge Telecom).
 
+Travelers and officers: [Using SureCover](Documents/Guide.md).
+
 ## Project goals
 
 Build an officer-centered workbench that turns traveler emails with a PDF claim form and supporting documents into review-ready flight-delay claims. The prototype uses Resend for inbound traveler email and deterministic acknowledgments, status updates, and specific information requests; local simulation remains available. It demonstrates context management, security, evidence-linked findings, deterministic workflow, and human decisions; it is not a production claims system.

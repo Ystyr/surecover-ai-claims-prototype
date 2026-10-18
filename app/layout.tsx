@@ -23,10 +23,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <a href="/">SureCover claims</a>
           </h1>
           {data.user ? (
-            <form action={signOut}>
-              <span className="muted">{data.user.email}</span>{" "}
-              <button type="submit">Sign out</button>
-            </form>
+            <div className="session">
+              <a href="/unmatched">Unmatched mail</a>
+              <form action={signOut}>
+                <span className="muted">{data.user.email}</span>{" "}
+                <button type="submit">Sign out</button>
+              </form>
+            </div>
           ) : null}
         </header>
         <main>{children}</main>

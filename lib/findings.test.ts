@@ -20,6 +20,8 @@ import {
   clearerPhotoSentence,
   conflictingReturnSentence,
   documentUnavailable,
+  documentsToSendText,
+  noulSupported,
   unavailableDocumentGaps,
   unavailableDocumentSentence,
   unavailableUpdateText,
@@ -440,6 +442,30 @@ test("an unavailable document keeps the claim with the officer", () => {
   )
   assert.equal(message.body.includes("is not on file."), false)
   assert.equal(message.body.includes("clearer photo"), false)
+})
+
+test("a documents question names the required files", () => {
+  assert.equal(noulSupported(0.75), true)
+  assert.equal(noulSupported(0.74), false)
+  assert.equal(noulSupported(null), false)
+  const message = documentsToSendText({ claimantName: "Jamie Lee" })
+  assert.equal(message.subject, "Documents to send")
+  assert.equal(
+    message.body,
+    [
+      "Hello Jamie Lee,",
+      "",
+      "Send these documents for a flight-delay claim:",
+      "The claim form.",
+      "The scheduled itinerary.",
+      "The revised itinerary.",
+      "The delay letter.",
+      "A boarding pass for each flight.",
+      "",
+      "Fictional demonstration data. Not a SureCover policy document.",
+    ].join("\n"),
+  )
+  assert.equal(documentsToSendText({ claimantName: null }).body.startsWith("Hello,"), true)
 })
 
 test("an acknowledgment names the received claim", () => {

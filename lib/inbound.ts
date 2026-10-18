@@ -1,5 +1,12 @@
 import { parseDisplayDate } from "../checks/assess.mjs"
 
+export function senderName(from: string) {
+  const named = from.trim().match(/^([^<]+)</)
+  const name = named?.[1]?.trim().replace(/^["']|["']$/g, "") ?? ""
+  if (!name || name.includes("@")) return null
+  return name
+}
+
 export function emailAddress(from: string) {
   const trimmed = from.trim()
   const wrapped = trimmed.match(/<([^<>\s]+@[^<>\s]+)>/)

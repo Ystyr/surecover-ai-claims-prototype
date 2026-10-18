@@ -1,7 +1,13 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { claimFormIdentity, claimReferenceInSubject, emailAddress, isDemoReference, liveClaimReference } from "./inbound.ts"
+import { claimFormIdentity, claimReferenceInSubject, emailAddress, isDemoReference, liveClaimReference, senderName } from "./inbound.ts"
+
+test("a sender name is kept when the address names a person", () => {
+  assert.equal(senderName("Jamie Lee <jamie.lee@example.com>"), "Jamie Lee")
+  assert.equal(senderName("jamie.lee@example.com"), null)
+  assert.equal(senderName("<jamie.lee@example.com>"), null)
+})
 
 test("a sender address is read from a bare address or a named address", () => {
   assert.equal(emailAddress("jamie.lee@example.com"), "jamie.lee@example.com")

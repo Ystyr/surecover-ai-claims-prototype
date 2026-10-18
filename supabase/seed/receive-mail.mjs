@@ -10,8 +10,8 @@ import { createClient } from "@supabase/supabase-js"
 
 import { assessClaim, quotableItems } from "../../checks/assess.mjs"
 import { sendResendEmail } from "../../lib/email.ts"
-import { acknowledgmentText, documentUnavailable, unavailableDocumentGaps, unavailableUpdateText } from "../../lib/findings.ts"
-import { claimFormIdentity, claimReferenceInSubject, emailAddress, isDemoReference, liveClaimReference } from "../../lib/inbound.ts"
+import { acknowledgmentText, documentUnavailable, documentsToSendText, noulSupported, unavailableDocumentGaps, unavailableUpdateText } from "../../lib/findings.ts"
+import { claimFormIdentity, claimReferenceInSubject, emailAddress, isDemoReference, liveClaimReference, senderName } from "../../lib/inbound.ts"
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -19,6 +19,7 @@ const KEPT = ["CLM-DEMO-1001", "CLM-DEMO-1002", "CLM-DEMO-1003", "CLM-DEMO-1004"
 const POLICY_VERSION = "demo-2026.1"
 const MODEL = "jev-1.13.0"
 const UNAVAILABLE_QUESTION = "Does the traveler say a requested document is missing or cannot be obtained?"
+const DOCUMENTS_QUESTION = "Is the traveler asking which documents to send?"
 
 function projectEnv() {
   let raw
@@ -269,12 +270,7 @@ async function storeAssessment(db, claimId, receivedAt) {
   return assessment
 }
 
-async function recordNotice(db, claim, notice, env) {
-  const existing = await db.from("claim_messages").select("id").eq("claim_id", claim.id).eq("subject", notice.subject).maybeSingle()
-  if (existing.error) throw existing.error
-  if (existing.data) return "recorded"
-  const officer = await db.from("officers").select("id").eq("email", "officer-a@example.com").single()
-  if (officer.error) throw officer.error
+async function deliverNotice(notice, to, env) {
   let provider = "simulated"
   let status = "recorded"
   let providerMessageId = `simulated-${randomUUID()}`
@@ -283,7 +279,7 @@ async function recordNotice(db, claim, notice, env) {
       providerMessageId = await sendResendEmail({
         apiKey: env.resendKey,
         from: env.resendFrom,
-        to: claim.travelerEmail,
+        to,
         subject: notice.subject,
         text: notice.body,
       })
@@ -295,6 +291,19 @@ async function recordNotice(db, claim, notice, env) {
       providerMessageId = `simulated-${randomUUID()}`
     }
   }
+  return { provider, status, providerMessageId }
+}
+
+async function recordNotice(db, claim, notice, env) {
+  const existing = await db.from("claim_messages").select("id").eq("claim_id", claim.id).eq("subject", notice.subject).maybeSingle()
+  if (existing.error) throw existing.error
+  if (existing.data) return "recorded"
+  const officer = await db.from("officers").select("id").eq("email", "officer-a@example.com").single()
+  if (officer.error) throw officer.error
+  const sent = await deliverNotice(notice, claim.travelerEmail, env)
+  const provider = sent.provider
+  const status = sent.status
+  const providerMessageId = sent.providerMessageId
   const message = await db.from("claim_messages").insert({
     claim_id: claim.id,
     decision_id: null,
@@ -336,6 +345,66 @@ async function requestedGaps(db, claimId) {
   return unavailableDocumentGaps(check.data ?? undefined)
 }
 
+async function judgeDocuments(apiKey, message, subject) {
+  const response = await fetch("https://api.typesafe.ai/v1/systemone", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      state: { message, subject },
+      model: MODEL,
+      questions: { documents_to_send: { type: "noul", instructions: DOCUMENTS_QUESTION } },
+    }),
+  })
+  if (!response.ok) throw new Error(`Jev returned ${response.status}`)
+  const body = await response.json()
+  const answer = body.answers?.documents_to_send
+  if (!answer || answer.type !== "noul" || typeof answer.noul !== "number") throw new Error("Jev did not return a noul")
+  return answer.noul
+}
+
+async function answerDocuments(db, row, env) {
+  if (row.documents_reply_subject) return `${row.provider_email_id} already lists the documents`
+  const message = typeof row.body === "string" ? row.body.trim() : ""
+  let noul = row.documents_noul
+  if (message && noul == null && env.typesafeKey) {
+    try {
+      noul = await judgeDocuments(env.typesafeKey, message, row.subject)
+      const saved = await db
+        .from("inbound_messages")
+        .update({ documents_noul: noul })
+        .eq("id", row.id)
+        .is("documents_noul", null)
+        .select("documents_noul")
+        .single()
+      if (saved.error) throw saved.error
+      noul = saved.data.documents_noul
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : "Jev did not return a noul")
+      noul = null
+    }
+  }
+  if (!noulSupported(noul)) return `${row.provider_email_id} stays unmatched`
+  const travelerEmail = emailAddress(row.from_address)
+  if (!travelerEmail) throw new Error(`${row.provider_email_id} sender address is missing`)
+  const notice = documentsToSendText({ claimantName: senderName(row.from_address) })
+  const sent = await deliverNotice(notice, travelerEmail, env)
+  const recorded = await db
+    .from("inbound_messages")
+    .update({
+      documents_reply_subject: notice.subject,
+      documents_reply_body: notice.body,
+      documents_reply_provider: sent.provider,
+      documents_reply_status: sent.status,
+      documents_reply_provider_message_id: sent.providerMessageId,
+    })
+    .eq("id", row.id)
+    .is("documents_reply_subject", null)
+    .select("id")
+  if (recorded.error) throw recorded.error
+  if (!recorded.data?.length) return `${row.provider_email_id} already lists the documents`
+  return `documents listed for ${row.provider_email_id}`
+}
+
 async function judgeUnavailable(apiKey, message, gaps) {
   const response = await fetch("https://api.typesafe.ai/v1/systemone", {
     method: "POST",
@@ -362,7 +431,7 @@ async function linkMail(db, inboundId, claimId) {
 async function processInbound(db, inboundId, env) {
   const row = await db
     .from("inbound_messages")
-    .select("id, provider, provider_email_id, from_address, subject, body, unavailable_noul, claim_id, created_at")
+    .select("id, provider, provider_email_id, from_address, subject, body, unavailable_noul, documents_noul, documents_reply_subject, claim_id, created_at")
     .eq("id", inboundId)
     .maybeSingle()
   if (row.error) throw row.error
@@ -422,8 +491,8 @@ async function processInbound(db, inboundId, env) {
   }
 
   const files = await storedFiles(db, row.data.provider_email_id)
-  if (files.length === 0) throw new Error(`${row.data.provider_email_id} has no stored files`)
   const form = files.find((file) => file.filename.toLowerCase() === "claim-form.pdf")
+  if (!form) return answerDocuments(db, row.data, env)
   const identity = form ? claimFormIdentity(form.parse.items ?? []) : null
   if (!identity) throw new Error(`${row.data.provider_email_id} claim form is not on file`)
   const travelerEmail = emailAddress(row.data.from_address)

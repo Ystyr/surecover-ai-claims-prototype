@@ -16,6 +16,7 @@
     "request:conflict": "node supabase/seed/request-conflicting-date.mjs",
     "reply:missing": "node supabase/seed/reply-missing-pass.mjs",
     "reply:unavailable": "node --experimental-strip-types supabase/seed/reply-unavailable.mjs",
+    "ask:documents": "node --experimental-strip-types supabase/seed/ask-documents.mjs",
     "reply:photo": "node supabase/seed/reply-clearer-photo.mjs",
     "reply:conflict": "node supabase/seed/reply-conflicting-date.mjs",
     "approve:missing": "node supabase/seed/approve-missing-pass.mjs",

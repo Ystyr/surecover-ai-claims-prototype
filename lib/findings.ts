@@ -303,8 +303,31 @@ export function unavailableDocumentGaps(check: CheckRow | undefined) {
   return clearerPhotoGaps(check)
 }
 
-export function documentUnavailable(noul: number | null | undefined) {
+export function noulSupported(noul: number | null | undefined) {
   return typeof noul === "number" && noul >= NOUL_SUPPORT
+}
+
+export function documentUnavailable(noul: number | null | undefined) {
+  return noulSupported(noul)
+}
+
+export function documentsToSendText(input: { claimantName: string | null }) {
+  const greeting = input.claimantName ? `Hello ${input.claimantName},` : "Hello,"
+  return {
+    subject: "Documents to send",
+    body: [
+      greeting,
+      "",
+      "Send these documents for a flight-delay claim:",
+      "The claim form.",
+      "The scheduled itinerary.",
+      "The revised itinerary.",
+      "The delay letter.",
+      "A boarding pass for each flight.",
+      "",
+      "Fictional demonstration data. Not a SureCover policy document.",
+    ].join("\n"),
+  }
 }
 
 export function unavailableUpdateText(input: { reference: string; claimantName: string; gaps: string[] }) {

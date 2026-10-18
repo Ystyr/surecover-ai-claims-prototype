@@ -49,6 +49,18 @@ a { color: var(--banner); }
   text-decoration: none;
 }
 
+.session {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.session form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 main {
   max-width: 920px;
   margin: 0 auto;

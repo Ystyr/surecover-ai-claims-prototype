@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { createHmac } from "node:crypto"
 import test from "node:test"
 
-import { acceptedAttachment, listReceivedAttachments, sendResendEmail, verifyResendSignature } from "./email.ts"
+import { acceptedAttachment, fetchReceivedEmailText, listReceivedAttachments, receivedEmailText, sendResendEmail, verifyResendSignature } from "./email.ts"
 
 const secret = `whsec_${Buffer.from("test-secret-key-32-bytes-long!!").toString("base64")}`
 
@@ -59,6 +59,18 @@ test("a Resend send returns the provider id and does not send without a success"
     }),
     /resend send failed/,
   )
+})
+
+test("a received email keeps its plain text", async () => {
+  assert.equal(receivedEmailText({ text: "I do not have the boarding pass." }), "I do not have the boarding pass.")
+  assert.equal(receivedEmailText({ text: "  " }), null)
+  assert.equal(receivedEmailText({ html: "<p>Hello</p>" }), null)
+  const text = await fetchReceivedEmailText({
+    apiKey: "test-key",
+    emailId: "email-1",
+    fetchImpl: async () => new Response(JSON.stringify({ text: "I do not have the boarding pass." }), { status: 200 }),
+  })
+  assert.equal(text, "I do not have the boarding pass.")
 })
 
 test("attachment listing keeps only accepted files with a download url", async () => {

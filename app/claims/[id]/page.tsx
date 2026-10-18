@@ -96,6 +96,7 @@ type ReplyRow = {
   id: string
   from_address: string
   subject: string
+  body: string | null
   provider: string
   created_at: string
 }
@@ -239,7 +240,7 @@ export default async function ClaimPage({
       .order("id", { ascending: false }),
     supabase
       .from("inbound_messages")
-      .select("id, from_address, subject, provider, created_at")
+      .select("id, from_address, subject, body, provider, created_at")
       .eq("claim_id", claim.id)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false }),
@@ -400,6 +401,7 @@ export default async function ClaimPage({
                   <span> · Reply</span>
                   <div>{event.item.subject}</div>
                   <p className="muted">From {event.item.from_address} · {event.item.provider}</p>
+                  {event.item.body ? <div className="message-body">{event.item.body}</div> : null}
                 </li>
               )
             }

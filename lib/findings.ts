@@ -293,6 +293,28 @@ export function clearerPhotoSentence(gap: string) {
   return `Please send a clearer photo of the boarding pass for ${gap}.`
 }
 
+export function unavailableDocumentSentence(gap: string) {
+  return `If the boarding pass for ${gap} is not available, you do not need to send it. The claim stays with the officer.`
+}
+
+export function unavailableDocumentGaps(check: CheckRow | undefined) {
+  const failed = failedCompletenessGaps(check)
+  if (failed.length > 0) return failed
+  return clearerPhotoGaps(check)
+}
+
+export function documentUnavailable(noul: number | null | undefined) {
+  return typeof noul === "number" && noul >= NOUL_SUPPORT
+}
+
+export function unavailableUpdateText(input: { reference: string; claimantName: string; gaps: string[] }) {
+  const lines = input.gaps.filter((gap) => gap.trim().length > 0).map((gap) => unavailableDocumentSentence(gap))
+  return {
+    subject: `Update for ${input.reference}`,
+    body: [`Hello ${input.claimantName},`, "", ...lines, "", "Fictional demonstration data. Not a SureCover policy document."].join("\n"),
+  }
+}
+
 export function conflictingReturnSentence(check: CheckRow | undefined) {
   if (!check || check.outcome !== "unknown" || "deadline" in check.detail) return null
   const returned = displayDate(text(check.detail, "return_date"))

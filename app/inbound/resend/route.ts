@@ -3,7 +3,7 @@ import { spawn } from "node:child_process"
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse, type NextRequest } from "next/server"
 
-import { listReceivedAttachments, MAX_ATTACHMENT_BYTES, verifyResendSignature } from "@/lib/email"
+import { fetchReceivedEmailText, listReceivedAttachments, MAX_ATTACHMENT_BYTES, verifyResendSignature } from "@/lib/email"
 
 const INBOUND_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -55,7 +55,13 @@ export async function POST(request: NextRequest) {
   if (existing.data) return new NextResponse("ok", { status: 200 })
 
   const apiKey = process.env.RESEND_API_KEY
+  let emailBody: string | null = null
   if (apiKey) {
+    try {
+      emailBody = await fetchReceivedEmailText({ apiKey, emailId })
+    } catch {
+      emailBody = null
+    }
     try {
       const files = await listReceivedAttachments({ apiKey, emailId })
       for (const file of files) {
@@ -81,6 +87,7 @@ export async function POST(request: NextRequest) {
       provider_email_id: emailId,
       from_address: from,
       subject,
+      body: emailBody,
     })
     .select("id")
     .single()

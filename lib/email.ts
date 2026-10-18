@@ -77,6 +77,22 @@ export async function sendResendEmail(input: {
   return body.id
 }
 
+export function receivedEmailText(body: unknown) {
+  if (!body || typeof body !== "object") return null
+  const text = (body as { text?: unknown }).text
+  if (typeof text !== "string" || text.trim().length === 0) return null
+  return text
+}
+
+export async function fetchReceivedEmailText(input: { apiKey: string; emailId: string; fetchImpl?: typeof fetch }) {
+  const fetchImpl = input.fetchImpl ?? fetch
+  const response = await fetchImpl(`https://api.resend.com/emails/receiving/${encodeURIComponent(input.emailId)}`, {
+    headers: { Authorization: `Bearer ${input.apiKey}` },
+  })
+  if (!response.ok) throw new Error("resend email failed")
+  return receivedEmailText(await response.json())
+}
+
 export async function listReceivedAttachments(input: { apiKey: string; emailId: string; fetchImpl?: typeof fetch }) {
   const fetchImpl = input.fetchImpl ?? fetch
   const response = await fetchImpl(`https://api.resend.com/emails/receiving/${encodeURIComponent(input.emailId)}/attachments`, {

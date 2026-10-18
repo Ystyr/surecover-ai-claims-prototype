@@ -19,6 +19,10 @@ import {
   clearerPhotoGaps,
   clearerPhotoSentence,
   conflictingReturnSentence,
+  documentUnavailable,
+  unavailableDocumentGaps,
+  unavailableDocumentSentence,
+  unavailableUpdateText,
   failedCompletenessGaps,
   requestMessageText,
   timelineNewestFirst,
@@ -403,6 +407,39 @@ test("the request message greets the claimant and keeps the rationale", () => {
       "Fictional demonstration data. Not a SureCover policy document.",
     ].join("\n"),
   )
+})
+
+test("an unavailable document keeps the claim with the officer", () => {
+  const gap = "SC202 on 7 August 2026 from NRT to SIN"
+  assert.equal(documentUnavailable(0.75), true)
+  assert.equal(documentUnavailable(0.74), false)
+  assert.equal(documentUnavailable(null), false)
+  assert.deepEqual(unavailableDocumentGaps(check("completeness", "fail", { gaps: [gap] })), [gap])
+  assert.deepEqual(
+    unavailableDocumentGaps(
+      check("completeness", "unknown", {
+        gaps: [gap],
+        unclassified: true,
+        reason: "A file is present but its document type is not established.",
+      }),
+    ),
+    [gap],
+  )
+  assert.deepEqual(unavailableDocumentGaps(check("completeness", "pass", { gaps: [] })), [])
+  const message = unavailableUpdateText({ reference: "CLM-LIVE-UNAVAILABLER", claimantName: "Jamie Lee", gaps: [gap] })
+  assert.equal(message.subject, "Update for CLM-LIVE-UNAVAILABLER")
+  assert.equal(
+    message.body,
+    [
+      "Hello Jamie Lee,",
+      "",
+      unavailableDocumentSentence(gap),
+      "",
+      "Fictional demonstration data. Not a SureCover policy document.",
+    ].join("\n"),
+  )
+  assert.equal(message.body.includes("is not on file."), false)
+  assert.equal(message.body.includes("clearer photo"), false)
 })
 
 test("an acknowledgment names the received claim", () => {

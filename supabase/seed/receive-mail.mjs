@@ -10,13 +10,15 @@ import { createClient } from "@supabase/supabase-js"
 
 import { assessClaim, quotableItems } from "../../checks/assess.mjs"
 import { sendResendEmail } from "../../lib/email.ts"
-import { acknowledgmentText } from "../../lib/findings.ts"
+import { acknowledgmentText, documentUnavailable, unavailableDocumentGaps, unavailableUpdateText } from "../../lib/findings.ts"
 import { claimFormIdentity, claimReferenceInSubject, emailAddress, isDemoReference, liveClaimReference } from "../../lib/inbound.ts"
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const KEPT = ["CLM-DEMO-1001", "CLM-DEMO-1002", "CLM-DEMO-1003", "CLM-DEMO-1004", "CLM-DEMO-1005"]
 const POLICY_VERSION = "demo-2026.1"
+const MODEL = "jev-1.13.0"
+const UNAVAILABLE_QUESTION = "Does the traveler say a requested document is missing or cannot be obtained?"
 
 function projectEnv() {
   let raw
@@ -36,7 +38,13 @@ function projectEnv() {
   const url = env.SUPABASE_URL
   const serviceRole = env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !serviceRole) throw new Error(".env must set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY")
-  return { url, serviceRole, resendKey: env.RESEND_API_KEY, resendFrom: env.RESEND_FROM }
+  return {
+    url,
+    serviceRole,
+    resendKey: env.RESEND_API_KEY,
+    resendFrom: env.RESEND_FROM,
+    typesafeKey: env.TYPESAFE_API_KEY,
+  }
 }
 
 function walkFiles(directory, found = []) {
@@ -261,13 +269,12 @@ async function storeAssessment(db, claimId, receivedAt) {
   return assessment
 }
 
-async function acknowledge(db, claim, env) {
-  const existing = await db.from("claim_messages").select("id").eq("claim_id", claim.id)
+async function recordNotice(db, claim, notice, env) {
+  const existing = await db.from("claim_messages").select("id").eq("claim_id", claim.id).eq("subject", notice.subject).maybeSingle()
   if (existing.error) throw existing.error
-  if (existing.data.length > 0) return "recorded"
+  if (existing.data) return "recorded"
   const officer = await db.from("officers").select("id").eq("email", "officer-a@example.com").single()
   if (officer.error) throw officer.error
-  const notice = acknowledgmentText({ reference: claim.reference, claimantName: claim.claimantName })
   let provider = "simulated"
   let status = "recorded"
   let providerMessageId = `simulated-${randomUUID()}`
@@ -303,6 +310,49 @@ async function acknowledge(db, claim, env) {
   return status
 }
 
+async function acknowledge(db, claim, env) {
+  const notice = acknowledgmentText({ reference: claim.reference, claimantName: claim.claimantName })
+  return recordNotice(db, claim, notice, env)
+}
+
+async function requestedGaps(db, claimId) {
+  const assessments = await db
+    .from("assessments")
+    .select("id")
+    .eq("claim_id", claimId)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(1)
+  if (assessments.error) throw assessments.error
+  const latest = assessments.data[0]
+  if (!latest) return []
+  const check = await db
+    .from("policy_checks")
+    .select("check_name, outcome, detail")
+    .eq("assessment_id", latest.id)
+    .eq("check_name", "completeness")
+    .maybeSingle()
+  if (check.error) throw check.error
+  return unavailableDocumentGaps(check.data ?? undefined)
+}
+
+async function judgeUnavailable(apiKey, message, gaps) {
+  const response = await fetch("https://api.typesafe.ai/v1/systemone", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      state: { message, requested: gaps },
+      model: MODEL,
+      questions: { document_unavailable: { type: "noul", instructions: UNAVAILABLE_QUESTION } },
+    }),
+  })
+  if (!response.ok) throw new Error(`Jev returned ${response.status}`)
+  const body = await response.json()
+  const answer = body.answers?.document_unavailable
+  if (!answer || answer.type !== "noul" || typeof answer.noul !== "number") throw new Error("Jev did not return a noul")
+  return answer.noul
+}
+
 async function linkMail(db, inboundId, claimId) {
   const linked = await db.from("inbound_messages").update({ claim_id: claimId }).eq("id", inboundId).is("claim_id", null).select("id")
   if (linked.error) throw linked.error
@@ -312,7 +362,7 @@ async function linkMail(db, inboundId, claimId) {
 async function processInbound(db, inboundId, env) {
   const row = await db
     .from("inbound_messages")
-    .select("id, provider, provider_email_id, from_address, subject, claim_id, created_at")
+    .select("id, provider, provider_email_id, from_address, subject, body, unavailable_noul, claim_id, created_at")
     .eq("id", inboundId)
     .maybeSingle()
   if (row.error) throw row.error
@@ -323,12 +373,45 @@ async function processInbound(db, inboundId, env) {
   const named = claimReferenceInSubject(row.data.subject)
   if (named && isDemoReference(named)) return `${named} stays unchanged`
   if (named) {
-    const claim = await db.from("claims").select("id, reference, status, received_at").eq("reference", named).maybeSingle()
+    const claim = await db
+      .from("claims")
+      .select("id, reference, status, received_at, claimant_name, traveler_email")
+      .eq("reference", named)
+      .maybeSingle()
     if (claim.error) throw claim.error
     if (!claim.data) return `${named} is not stored`
     if (!named.startsWith("CLM-LIVE-")) return `${named} stays unchanged`
-    if (claim.data.status !== "information requested") return `${named} is ${claim.data.status}`
     const files = await storedFiles(db, row.data.provider_email_id)
+    const gaps = await requestedGaps(db, claim.data.id)
+    const message = typeof row.data.body === "string" ? row.data.body.trim() : ""
+    let noul = row.data.unavailable_noul
+    if (claim.data.status === "information requested" && message && gaps.length > 0 && noul == null && env.typesafeKey) {
+      try {
+        noul = await judgeUnavailable(env.typesafeKey, message, gaps)
+        const saved = await db
+          .from("inbound_messages")
+          .update({ unavailable_noul: noul })
+          .eq("id", row.data.id)
+          .is("unavailable_noul", null)
+          .select("unavailable_noul")
+          .single()
+        if (saved.error) throw saved.error
+        noul = saved.data.unavailable_noul
+      } catch (error) {
+        console.error(error instanceof Error ? error.message : "Jev did not return a noul")
+        noul = null
+      }
+    }
+    if (documentUnavailable(noul) && gaps.length > 0 && (claim.data.status === "information requested" || claim.data.status === "needs review")) {
+      for (const file of files) await storeFile(db, claim.data.id, file)
+      const notice = unavailableUpdateText({ reference: claim.data.reference, claimantName: claim.data.claimant_name, gaps })
+      await recordNotice(db, { id: claim.data.id, travelerEmail: claim.data.traveler_email }, notice, env)
+      const updated = await db.from("claims").update({ status: "needs review" }).eq("id", claim.data.id).eq("status", "information requested")
+      if (updated.error) throw updated.error
+      await linkMail(db, row.data.id, claim.data.id)
+      return `unavailable reply stored on ${named}`
+    }
+    if (claim.data.status !== "information requested") return `${named} is ${claim.data.status}`
     if (files.length === 0) throw new Error(`${row.data.provider_email_id} has no stored files`)
     for (const file of files) await storeFile(db, claim.data.id, file)
     await storeAssessment(db, claim.data.id, claim.data.received_at)
